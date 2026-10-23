@@ -98,3 +98,17 @@
 /* The editor uses the exact same display area, scale and clipping as the collection. */
 .photo-editor .preview-card .headshot .player-photo{object-fit:cover!important}
 @media(max-width:500px){.player-card .card-top{padding:6px 7px 0}.player-card .headshot .edit-photo{left:7px}}
+
+/* Card archive v0.5: badges, close button, and export action. Gallery grid size unchanged. */
+.player-card .badge-row{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px}
+.player-card .badge-row .metal-label{display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:64px;height:20px;padding:0 4px;font-size:9px;line-height:1;min-width:64px}
+.player-card .badge-row .season-label{color:#a8dfbc!important;border-color:#71ad90!important}
+.player-card .card-mid{min-height:70px;height:70px;flex:0 0 70px;align-items:end;padding-top:4px;padding-bottom:8px}
+.player-card .ovrnum{margin-top:0}
+.dialog-close{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;line-height:1!important;vertical-align:middle}
+.stat-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;min-height:25px}
+.stat-heading .mini-title{margin:0}
+.card-download{flex:0 0 auto;font-size:11px;font-weight:850;color:#d2f2ff;background:#19374c;border:1px solid #5aabc4;border-radius:7px;padding:5px 10px;min-height:29px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2}
+.card-download:hover{background:#265672;color:#fff}
+.card-download:disabled{opacity:.65;cursor:progress}
+@media(max-width:460px){.stat-heading{align-items:start;flex-direction:column}.card-download{margin-left:auto}}
