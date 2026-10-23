@@ -19,7 +19,7 @@ const base64bytes=bytes=>{let s='';for(let i=0;i<bytes.length;i+=16384){s+=Strin
 const decode64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,'')),c=>c.charCodeAt(0)));
 const encode64=s=>base64bytes(new TextEncoder().encode(s));
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
-const imgSrc=(path)=>{if(!path)return '';const safe=path.split('/').map(encodeURIComponent).join('/');return new URL('./'+safe,location.href).href};
+const imgSrc=(path)=>{if(!path)return '';const safe=path.split('/').map(encodeURIComponent).join('/');return new URL('./'+safe,document.baseURI).href};
 const teamLogo=team=>imgSrc('assets/teams/'+team+(team==='NC'?'.png':'.svg'));
 const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],KIW:['#6a1e3f','#e6b6c8']};
 const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},플래티넘:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
