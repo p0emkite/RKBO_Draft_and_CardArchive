@@ -244,5 +244,50 @@ function initAdmin(){if(!EDIT_MODE)return;
  overlay.addEventListener('click',e=>{if(e.target===overlay)closeEditor()});
  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeEditor)closeEditor()});
 }
+// For the admin-only historical importer. The token never leaves this closure.
+async function publishGitBatch(entries,message,onProgress){
+ if(!authorized||!token)throw Error('관리자 GitHub 인증이 필요합니다.');
+ if(!Array.isArray(entries)||!entries.length||entries.length>240)throw Error('업로드 파일 수 범위 오류');
+ const API_BASE=`https://api.github.com/repos/${OWNER}/${REPO}`;
+ async function api(path,method='GET',body=null){
+  let last;
+  for(let retry=0;retry<3;retry++){
+   const options={method,headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'}};
+   if(body!==null){options.headers['Content-Type']='application/json';options.body=JSON.stringify(body)}
+   let response,payload;try{response=await fetch(API_BASE+path,options);payload=await response.json()}catch(e){last=e;if(retry<2){await new Promise(r=>setTimeout(r,600*(retry+1)));continue}throw e}
+   if(response.ok)return payload;
+   last=Error(`GitHub ${response.status}: ${payload?.message||response.statusText}`);
+   if(response.status===403){if(/rate limit/i.test(payload?.message||'')&&retry<2){await new Promise(r=>setTimeout(r,1000*(retry+1)));continue}throw Error('저장소 쓰기 권한 부족(403). GitHub Fine-grained Token에 RKBO_Draft_and_CardArchive 저장소와 Contents: Read and write 권한이 필요합니다.')}
+   if(![429,502,503,504].includes(response.status)||retry===2)throw last;
+   await new Promise(r=>setTimeout(r,900*(retry+1)));
+  }
+  throw last;
+ }
+ const start=await api('/git/ref/heads/main');const parent=start.object.sha;
+ const base=await api('/git/commits/'+parent);const baseTree=base.tree.sha;
+ const paths=new Set();for(const file of entries){
+  if(!file||typeof file.path!=='string'||!/^[a-zA-Z0-9가-힣_./-]+$/.test(file.path)||file.path.startsWith('/')||file.path.includes('..')||paths.has(file.path))throw Error('안전하지 않거나 중복된 GitHub 파일 경로: '+file?.path);
+  if(typeof file.content!=='string')throw Error(file.path+': UTF-8 텍스트가 아닙니다.');paths.add(file.path);
+ }
+ let finished=0;const total=entries.length+3,blobs=[];
+ const concurrency=Math.min(3,entries.length),state={index:0};
+ async function worker(){while(state.index<entries.length){
+  const i=state.index++,file=entries[i];
+  const blob=await api('/git/blobs','POST',{content:file.content,encoding:'utf-8'});
+  blobs[i]={path:file.path,mode:'100644',type:'blob',sha:blob.sha};
+  onProgress?.({completed:++finished,total,message:'업로드: '+file.path});
+ }}
+ await Promise.all(Array.from({length:concurrency},worker));
+ const tree=await api('/git/trees','POST',{base_tree:baseTree,tree:blobs});onProgress?.({completed:++finished,total,message:'시즌 목록과 원본 파일 묶는 중…'});
+ const commit=await api('/git/commits','POST',{message,tree:tree.sha,parents:[parent]});onProgress?.({completed:++finished,total,message:'GitHub 커밋 완료, 브랜치에 적용 중…'});
+ await api('/git/refs/heads/main','PATCH',{sha:commit.sha,force:false});onProgress?.({completed:++finished,total,message:'GitHub main 브랜치 적용 완료'});
+ return commit.sha;
+}
+window.RKBOAdminBridge={
+ isAuthorized:()=>authorized&&!!token,
+ readJson:(path)=>{if(!authorized)throw Error('GitHub 인증 필요');return readJson(path)},
+ publishBatch:publishGitBatch
+};
+
 document.addEventListener('DOMContentLoaded',()=>{initAdmin();loadPublished()});
 })();
