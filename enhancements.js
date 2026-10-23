@@ -94,10 +94,27 @@ function startEdit(id){if(!authorized)return;const p=JSON.parse(q('data').textCo
  q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';q('editor-title').textContent=p.name+' · 카드 사진';q('photo-file').value='';renderEditor()}
 function editorImageSource(e){return e.url||(e.entry.path?imgSrc(e.entry.path)+(e.entry.rev?'?rev='+encodeURIComponent(e.entry.rev):''):'')}
 function updateEditorTransform(){const e=activeEditor;if(!e)return;const stage=q('editor-stage'),img=stage?.querySelector('.headshot .player-photo');if(img){img.style.setProperty('--photo-x',clamp(Number(e.entry.x)||0,-150,150)+'%');img.style.setProperty('--photo-y',clamp(Number(e.entry.y)||0,-150,150)+'%');img.style.setProperty('--photo-zoom',clamp(Number(e.entry.zoom)||1,.3,5));}q('editor-zoom').value=clamp(Number(e.entry.zoom)||1,.3,5);q('editor-scale-label').textContent=Math.round(Number(q('editor-zoom').value)*100)+'%';}
+function collectionCardWidth(){
+ // Match the actual rendered collection card, not a fixed-size editor template.
+ const card=q('cards')?.querySelector('.player-card');
+ if(card){const w=card.getBoundingClientRect().width;if(Number.isFinite(w)&&w>0)return w;}
+ const grid=q('cards');
+ if(grid){const w=grid.getBoundingClientRect().width,cols=getComputedStyle(grid).gridTemplateColumns.split(' ').length;return Math.max(180,(w-(cols-1)*20)/cols);}
+ return 280;
+}
 function renderEditor(){const e=activeEditor;if(!e)return;const src=editorImageSource(e),stage=q('editor-stage');
  if(!window.RKBOCardView?.render){q('editor-photo-status').textContent='카드 렌더링 기능을 불러오지 못했습니다.';return}
  stage.innerHTML='<div class="editor-card-wrap">'+window.RKBOCardView.render(e.p)+'</div>';
- const preview=stage.querySelector('.player-card');preview?.classList.add('preview-card');preview?.removeAttribute('role');preview?.removeAttribute('tabindex');
+ const preview=stage.querySelector('.player-card');
+ if(preview){
+  preview.classList.add('preview-card');preview.removeAttribute('role');preview.removeAttribute('tabindex');
+  // Exact gallery width, so object-fit: cover and percentage-based placement match.
+  const width=collectionCardWidth();
+  preview.style.setProperty('width',width+'px','important');
+  preview.style.setProperty('flex','0 0 '+width+'px','important');
+  preview.style.setProperty('min-width',width+'px','important');
+  preview.style.setProperty('max-width','none','important');
+ }
  if(src){const head=stage.querySelector('.headshot'),old=head?.querySelector('.player-photo,.player-pose');if(old){const img=document.createElement('img');img.className='player-photo';img.src=src;img.alt='선수 사진 카드 미리보기';img.draggable=false;old.replaceWith(img)}}
  updateEditorTransform();
  q('editor-photo-status').textContent=e.blob?'새 이미지 선택됨 · 도감에 적용하거나 GitHub에 저장할 수 있습니다.':src?'실제 카드 배치를 편집하고 있습니다.':'기본 실루엣을 표시 중입니다.';
