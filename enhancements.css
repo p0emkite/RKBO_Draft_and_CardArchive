@@ -112,3 +112,4 @@
 .card-download:hover{background:#265672;color:#fff}
 .card-download:disabled{opacity:.65;cursor:progress}
 @media(max-width:460px){.stat-heading{align-items:start;flex-direction:column}.card-download{margin-left:auto}}
+.admin-drawer input[type=number]{max-width:100%;width:100%;background:#091727;color:#ecf4ff;border:1px solid #405b74;padding:10px;border-radius:8px;font-size:12px}

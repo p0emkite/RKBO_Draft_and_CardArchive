@@ -98,7 +98,7 @@ async function save(player,button){
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-export-player]');if(!button)return;
  event.preventDefault();event.stopPropagation();
- const all=JSON.parse(document.getElementById('data')?.textContent||'[]');
+ const all=window.RKBOSeason?.players?.()||JSON.parse(document.getElementById('data')?.textContent||'[]');
  const player=all.find(p=>p.id===button.dataset.exportPlayer);
  if(player)save(player,button);
 });

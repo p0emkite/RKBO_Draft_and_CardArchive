@@ -76,6 +76,7 @@ async function syncAll(show=false){
  if(files.data&&Array.isArray(files.data.files))imported=files.data;
  metaSha=imgs.sha;importSha=files.sha;for(const k of Object.keys(previewCache)){if(previewCache[k]?.url?.startsWith('blob:'))URL.revokeObjectURL(previewCache[k].url)}previewCache={};renderImports();renderImageList();refresh();
  if(show)setStatus('✓ GitHub의 카드 이미지 설정 및 파일 목록을 동기화했습니다.');
+ await window.RKBOSeason?.reload?.().catch(e=>setStatus('시즌 목록 새로고침 실패: '+e.message));renderRegisteredSeasons();
 }
 function renderImageList(){const el=q('admin-image-list'),count=q('admin-image-count');const entries=Object.entries(imgConfig.images||{});if(count)count.textContent=entries.length+'명 등록';if(!el)return;el.innerHTML=entries.length?entries.map(([id,v])=>`<div style="padding:4px 0;border-bottom:1px solid #2d4358">${h(id)} · ${h(v.path||'미등록')}</div>`).join(''):'아직 GitHub에 저장된 선수 이미지가 없습니다.';}
 function renderImports(){const container=q('admin-file-list');if(!container)return;container.innerHTML=imported.files.length?imported.files.slice().reverse().map(x=>`<div style="padding:5px 0;border-bottom:1px solid #253b50">${h(x.name)} · ${(x.size/1024/1024).toFixed(2)} MB · ${h(x.kind)} · ${x.chunks?.length||0}개 조각</div>`).join(''):'저장된 추가 원본 파일이 없습니다.'}
@@ -89,7 +90,7 @@ async function imageToWebp(file){if(!file.type.startsWith('image/'))throw Error(
  return blob;
 }
 function imgUrlFromBlob(blob){return URL.createObjectURL(blob)}
-function startEdit(id){if(!authorized)return;const p=JSON.parse(q('data').textContent).find(x=>x.id===id);if(!p)return;
+function startEdit(id){if(!authorized)return;const p=window.RKBOSeason?.players()?.find(x=>x.id===id);if(!p)return;
  const pending=previewCache[id];activeEditor={p,blob:pending?.blob||null,url:pending?.url||null,entry:{x:0,y:0,zoom:1,...(imgConfig.images[id]||{}),...(pending||{})}};
  q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';q('editor-title').textContent=p.name+' · 카드 사진';q('photo-file').value='';renderEditor()}
 function editorImageSource(e){return e.url||(e.entry.path?imgSrc(e.entry.path)+(e.entry.rev?'?rev='+encodeURIComponent(e.entry.rev):''):'')}
@@ -169,12 +170,51 @@ async function importFiles(){if(!authorized||busy)return;const fileList=Array.fr
  }catch(e){setStatus('업로드 실패: '+e.message+'\n중단된 업로드 조각은 GitHub에서 정리해야 할 수 있습니다.')}
  finally{busy=false;q('upload-import').disabled=false}
 }
+
+function renderRegisteredSeasons(){
+ const box=q('admin-season-list');if(!box)return;
+ const seasons=window.RKBOSeason?.seasons?.()||[];
+ box.textContent=seasons.map(s=>s.season+'차 ('+(s.count||'?')+'장'+(s.season===60?' · 기본':'')+')').join(' / ')||'등록된 시즌 없음';
+}
+async function registerSeasonCards(){
+ if(!authorized||busy)return;
+ const season=Number(q('season-register-number')?.value);
+ const file=q('season-register-file')?.files?.[0];
+ if(!Number.isInteger(season)||season<1||season>999||season===60){setStatus('시즌 번호는 1~999 중 60차를 제외하고 입력하세요. 60차는 기본 제공됩니다.');return}
+ if(!file){setStatus('새 시즌 카드 JSON 파일을 선택해 주세요.');return}
+ if(file.size>4*1024*1024){setStatus('한 시즌 JSON은 4MB 이하여야 합니다.');return}
+ busy=true;q('season-register').disabled=true;
+ try{
+  setStatus(season+'차 카드 데이터 확인 중…');
+  const json=JSON.parse(await file.text());
+  const players=window.RKBOSeason?.validate?.(json,season);
+  if(!Array.isArray(players)||!players.length)throw Error('시즌 검증 기능을 불러오지 못했습니다.');
+  const path='data/seasons/'+season+'.json';
+  const before=await readJson(path);
+  await putJson(path,{season,players},before.sha);
+  // Only publish in the selector after the real card file was successfully uploaded.
+  const current=await readJson('data/seasons.json');
+  const manifest=current.data||{version:1,seasons:[{season:60,file:null,count:211,source:'embedded'}]};
+  manifest.version=1;manifest.seasons=Array.isArray(manifest.seasons)?manifest.seasons:[];
+  const item={season,file:path,count:players.length,label:season+'차 시즌',source:'admin'};
+  const index=manifest.seasons.findIndex(x=>Number(x.season)===season);
+  if(index>=0)manifest.seasons[index]=item;else manifest.seasons.push(item);
+  if(!manifest.seasons.some(x=>Number(x.season)===60))manifest.seasons.push({season:60,file:null,count:211,source:'embedded'});
+  manifest.seasons.sort((a,b)=>Number(b.season)-Number(a.season));
+  await putJson('data/seasons.json',manifest,current.sha);
+  await window.RKBOSeason.reload();renderRegisteredSeasons();
+  q('season-register-file').value='';
+  setStatus('✓ '+season+'차 시즌 '+players.length+'장 등록 완료! 이제 상단 시즌 선택창에 표시됩니다. (카드 파일 및 시즌 목록 GitHub 동기화 완료)');
+ }catch(error){setStatus('시즌 등록 실패: '+error.message+' (파일/스탯을 확인하세요)')}
+ finally{busy=false;q('season-register').disabled=false}
+}
+
 function initAdmin(){if(!EDIT_MODE)return;
  const b=document.createElement('button');b.id='admin-open';b.className='admin-open';b.type='button';b.textContent='⚙ 제작자 모드';document.querySelector('.nav-right')?.append(b);
  const drawer=document.createElement('aside');drawer.id='admin-drawer';drawer.className='admin-drawer';drawer.hidden=true;drawer.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚙ RKBO 카드 도감 관리자</h2><button type="button" id="admin-close">닫기 ×</button></div>
  <p>선수 카드 이미지, 이미지 배치 설정, HHRecord·시즌 원본 파일을 GitHub에 저장합니다.</p>
  <div id="admin-login"><label for="admin-token">GitHub Fine-grained Personal Access Token</label><input id="admin-token" type="password" autocomplete="off" placeholder="github_pat_…"><div class="admin-actions"><button type="button" class="primary" id="admin-connect">GitHub 연결</button></div><div class="warning">토큰은 현재 열린 페이지의 메모리에서만 사용하며 저장하지 않습니다. ${OWNER}/${REPO} 저장소 Contents 읽기·쓰기 권한이 필요합니다.</div></div>
- <div id="admin-controls" hidden><div class="admin-actions"><button id="admin-sync" type="button">↻ GitHub 전체 동기화</button><button id="admin-logout" type="button">연결 해제</button></div><hr><h2>선수 카드 이미지 저장소 <span id="admin-image-count">0명 등록</span></h2><p>사진은 카드의 ✎ 편집에서 업로드하고, 배치를 적용한 후 GitHub에 저장합니다. 아래 목록과 도감은 같은 이미지 데이터를 사용합니다.</p><div id="admin-image-list" class="admin-file-list"></div><div class="admin-actions"><button type="button" id="admin-image-sync">↻ 카드 이미지 동기화</button></div><hr><h2>시즌·HHRecord 자료 첨부</h2><p>확장자 .html/.htm/.xls/.xlsx/.csv/.zip/.json 등. 선택한 자료는 GitHub에 원본 보관만 되며, 선수 카드 데이터 자동 반영은 다음 단계입니다.</p><label for="import-kind">자료 종류</label><select id="import-kind"><option value="season">다른 시즌 개인 성적</option><option value="hhrecord">HHRecord</option><option value="other">기타 데이터</option></select><label for="import-files">추가 파일 선택</label><input type="file" id="import-files" multiple accept=".html,.htm,.xls,.xlsx,.csv,.zip,.json,.txt"><div class="admin-actions"><button class="primary" id="upload-import" type="button">선택 파일 GitHub 저장</button></div><div class="warning">주의: 공개 GitHub 저장소이므로 업로드한 자료도 공개될 수 있습니다. 저작권·개인정보를 확인하세요.</div><h2 style="margin-top:15px">업로드 내역</h2><div id="admin-file-list" class="admin-file-list"></div><div class="warning" style="margin-top:10px">선수 사진은 <code>assets/cards/</code>, 이미지 배치 정보는 <code>data/card-images.json</code>에 저장되어 함께 연동됩니다.</div></div><hr><div class="admin-status" id="admin-status">토큰으로 제작자 인증한 후 편집할 수 있습니다.</div>`;
+ <div id="admin-controls" hidden><div class="admin-actions"><button id="admin-sync" type="button">↻ GitHub 전체 동기화</button><button id="admin-logout" type="button">연결 해제</button></div><hr><h2>시즌 카드 등록·공개</h2><p>원본 HTML·XLS·HHRecord 보관과 달리, 이 메뉴는 <b>선수별 카드 스탯·OVR이 포함된 JSON</b>을 검증해 시즌을 실제 도감에 등록합니다. 등록된 시즌만 공개 선택 목록에 나타납니다.</p><label for="season-register-number">등록할 시즌</label><input type="number" id="season-register-number" min="1" max="999" step="1" value="59" placeholder="예: 59"><label for="season-register-file">시즌 카드 JSON 파일</label><input type="file" id="season-register-file" accept=".json,application/json"><div class="admin-actions"><button id="season-register" type="button" class="primary">새 시즌 카드 등록 · GitHub 저장</button></div><p class="warning">파일 형식: {season:59,players:[...]} 또는 카드 배열. 선수마다 시즌별 고유 ID·구단·포지션·스탯·OVR·능력치가 필요합니다. HTML/XLS/HHRecord를 업로드하는 것만으로는 카드가 자동 생성되지 않습니다.</p><div id="admin-season-list" class="admin-file-list"></div><hr><h2>선수 카드 이미지 저장소 <span id="admin-image-count">0명 등록</span></h2><p>사진은 카드의 ✎ 편집에서 업로드하고, 배치를 적용한 후 GitHub에 저장합니다. 아래 목록과 도감은 같은 이미지 데이터를 사용합니다.</p><div id="admin-image-list" class="admin-file-list"></div><div class="admin-actions"><button type="button" id="admin-image-sync">↻ 카드 이미지 동기화</button></div><hr><h2>시즌·HHRecord 자료 첨부</h2><p>확장자 .html/.htm/.xls/.xlsx/.csv/.zip/.json 등. 선택한 자료는 GitHub에 원본 보관만 되며, 선수 카드 데이터 자동 반영은 다음 단계입니다.</p><label for="import-kind">자료 종류</label><select id="import-kind"><option value="season">다른 시즌 개인 성적</option><option value="hhrecord">HHRecord</option><option value="other">기타 데이터</option></select><label for="import-files">추가 파일 선택</label><input type="file" id="import-files" multiple accept=".html,.htm,.xls,.xlsx,.csv,.zip,.json,.txt"><div class="admin-actions"><button class="primary" id="upload-import" type="button">선택 파일 GitHub 저장</button></div><div class="warning">주의: 공개 GitHub 저장소이므로 업로드한 자료도 공개될 수 있습니다. 저작권·개인정보를 확인하세요.</div><h2 style="margin-top:15px">업로드 내역</h2><div id="admin-file-list" class="admin-file-list"></div><div class="warning" style="margin-top:10px">선수 사진은 <code>assets/cards/</code>, 이미지 배치 정보는 <code>data/card-images.json</code>에 저장되어 함께 연동됩니다.</div></div><hr><div class="admin-status" id="admin-status">토큰으로 제작자 인증한 후 편집할 수 있습니다.</div>`;
  document.body.append(drawer);
  const overlay=document.createElement('div');overlay.id='photo-editor-bg';overlay.className='photo-editor-bg';overlay.hidden=true;
  overlay.innerHTML=`<div class="photo-editor" role="dialog" aria-modal="true" aria-label="선수 카드 사진 편집"><div class="editor-head"><h2 id="editor-title">카드 사진 편집</h2><button id="editor-close" type="button">닫기 ×</button></div><p>사진 업로드 → 실제 카드 미리보기에서 위치·확대 조절 → 적용 후 GitHub 저장. PNG 출력은 750 × 1050px(5:7)로 생성됩니다.</p><input id="photo-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif"><div class="editor-stage" id="editor-stage"></div><div class="editor-row"><label for="editor-zoom">크기 <span id="editor-scale-label">100%</span></label><input type="range" id="editor-zoom" min="0.3" max="5" value="1" step="0.01"></div><div class="editor-actions"><button id="editor-center" type="button">위치·크기 초기화</button><button id="editor-apply" type="button">도감에 즉시 적용</button><button id="editor-reset" type="button">사진 삭제(기본 실루엣)</button><button class="primary" id="editor-save" type="button">GitHub에 사진·위치 저장</button></div><p id="editor-photo-status" aria-live="polite">등록 이미지 없음</p></div>`;
@@ -185,6 +225,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  q('admin-image-sync').addEventListener('click',()=>syncAll(true).catch(e=>setStatus('이미지 동기화 실패: '+e.message)));
  q('admin-logout').addEventListener('click',()=>{token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 해제 완료. 새로 로그인해야 편집할 수 있습니다.');refresh()});
  q('upload-import').addEventListener('click',importFiles);
+ q('season-register').addEventListener('click',registerSeasonCards);renderRegisteredSeasons();
  q('editor-close').addEventListener('click',closeEditor);
  q('editor-apply').addEventListener('click',applyPreview);
  q('editor-save').addEventListener('click',()=>saveImage(false));
