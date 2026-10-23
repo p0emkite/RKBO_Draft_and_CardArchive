@@ -65,7 +65,7 @@ async function publish(){if(locked)return;if(!evaluated){notify('먼저 파일 �
   catch{importsData={version:1,files:[]}}
   const entries=[],past=[...seasons.entries()].filter(([k])=>k!==60).sort((a,b)=>b[0]-a[0]);
   const metadata={source:'RKBO(1).xls',method:'RKBO historical season auto-import',generatedAt:new Date().toISOString(),defense:'not_available_without_per-season_fielding_data'};
-  for(const [season,players] of past){entries.push({path:`data/seasons/${season}.json`,content:JSON.stringify({season,players,metadata})})}
+  for(const [season,players] of past){entries.push({path:`data/seasons/${season}.json`,content:JSON.stringify({season,players:RKBOSeasonEngine.pack(players),metadata})})}
   const existing=Array.isArray(manifestData.seasons)?manifestData.seasons.slice():[];
   const registered=new Map(existing.map(x=>[Number(x.season),x]));
   if(!registered.has(60))registered.set(60,{season:60,file:null,label:'60차 시즌',count:211,source:'embedded'});
