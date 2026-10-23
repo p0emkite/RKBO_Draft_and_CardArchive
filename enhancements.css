@@ -1,0 +1,29 @@
+.headshot .abstract-player{display:none}
+.headshot .player-pose{position:absolute;z-index:0;width:200px;height:185px;bottom:-16px;left:50%;transform:translateX(-50%);object-fit:contain;filter:drop-shadow(0 5px 10px #0009);pointer-events:none;opacity:.98}
+.headshot .player-photo{position:absolute;left:50%;top:50%;width:100%;height:100%;object-fit:contain;transform:translate(-50%,-50%) translate(var(--photo-x,0%),var(--photo-y,0%)) scale(var(--photo-zoom,1));pointer-events:none;user-select:none;z-index:1;max-width:none;max-height:none}
+.headshot:has(.player-pose) .emblem,.headshot:has(.player-photo) .emblem{position:absolute;z-index:2;right:21px;bottom:7px;transform:none;font-size:23px;opacity:.85;text-shadow:0 2px 6px #020917,0 0 14px #020917}
+.headshot .edit-photo{position:absolute;top:4px;left:15px;z-index:4;border:1px solid #85dbef;background:#071323ec;color:#b7f3ff;border-radius:8px;font-size:11px;font-weight:800;padding:6px 9px}
+.admin-open{font-size:11px;font-weight:800;color:#e2c67c;background:#17273b;border:1px solid #75643e;border-radius:8px;padding:7px 10px}
+.admin-drawer[hidden],.photo-editor-bg[hidden]{display:none!important}
+.admin-drawer{position:fixed;z-index:1100;right:18px;top:82px;width:min(460px,calc(100vw - 24px));max-height:calc(100vh - 95px);overflow:auto;background:#101e2e;border:1px solid #64809e;border-radius:16px;box-shadow:0 20px 95px #000c;padding:20px;color:#edf4fa}
+.admin-drawer h2{font-size:17px;margin:0 0 8px}.admin-drawer p{font-size:12px;color:#a7bed2;line-height:1.7;margin:7px 0 14px}
+.admin-drawer label{font-size:12px;font-weight:750;color:#d5e5f4;display:block;margin:10px 0 5px}
+.admin-drawer input[type=password],.admin-drawer input[type=text],.admin-drawer select,.admin-drawer input[type=file]{max-width:100%;width:100%;background:#091727;color:#ecf4ff;border:1px solid #405b74;padding:10px;border-radius:8px;font-size:12px}
+.admin-drawer input[type=file]{padding:7px}
+.admin-drawer button,.photo-editor button{background:#263f59;border:1px solid #4a708d;color:#edf6ff;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:780;cursor:pointer}
+.admin-drawer button:disabled,.photo-editor button:disabled{opacity:.45;cursor:not-allowed}
+.admin-drawer button.primary,.photo-editor button.primary{background:#2d687b;border-color:#70bfc9}
+.admin-drawer .admin-actions,.photo-editor .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0}
+.admin-status{white-space:pre-wrap;font-size:11px;padding:9px;background:#071323;border:1px solid #30495f;border-radius:7px;color:#b8d5ea;max-height:120px;overflow:auto}
+.admin-drawer hr{border:0;border-top:1px solid #34465a;margin:20px 0}
+.admin-drawer .warning{color:#e8c089;font-size:11px}.admin-drawer .admin-file-list{font-size:11px;color:#b0c5d8;max-height:135px;overflow:auto;word-break:break-word}
+.photo-editor-bg{position:fixed;inset:0;background:#02060bd9;z-index:1300;display:flex;align-items:center;justify-content:center;padding:15px;backdrop-filter:blur(5px)}
+.photo-editor{background:#112137;border:1px solid #5b8ca2;box-shadow:0 20px 80px #000b;border-radius:18px;padding:20px;width:min(730px,100%);max-height:95vh;overflow-y:auto;color:#eaf4fa}
+.photo-editor .editor-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}.photo-editor h2{font-size:17px;margin:0}.photo-editor p{font-size:12px;color:#b0c6d9;line-height:1.6;margin:8px 0}
+.photo-editor .editor-stage{height:370px;max-height:52vh;position:relative;overflow:hidden;border:1px dashed #5d879b;border-radius:12px;background:radial-gradient(ellipse at top,#2d4663,#091321);touch-action:none;cursor:grab}
+.photo-editor .editor-stage:active{cursor:grabbing}
+.photo-editor .editor-stage img{position:absolute;top:50%;left:50%;width:100%;height:100%;object-fit:contain;max-width:none;max-height:none;pointer-events:none;user-select:none;transform:translate(-50%,-50%) translate(var(--photo-x,0%),var(--photo-y,0%)) scale(var(--photo-zoom,1))}
+.photo-editor .editor-stage .editor-placeholder{display:grid;place-content:center;text-align:center;height:100%;color:#8bb3cf;font-weight:750;pointer-events:none}
+.photo-editor input[type=file]{width:100%;padding:10px;border-radius:8px;border:1px solid #415c75;background:#091726;color:#dcecff;font-size:12px}
+.photo-editor input[type=range]{width:100%;accent-color:#83d8ec}.photo-editor .editor-row{display:flex;align-items:center;gap:15px;margin-top:14px}.photo-editor .editor-row label{min-width:88px;font-size:12px}
+@media(max-width:800px){.admin-drawer{top:69px;right:8px}.photo-editor .editor-stage{height:290px}.admin-open{font-size:10px;padding:6px}}
