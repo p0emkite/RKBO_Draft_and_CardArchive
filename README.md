@@ -8,7 +8,7 @@
 - GitHub Pages: Settings → Pages → Build and deployment: **Deploy from a branch** → **main** / **/(root)** → Save
 
 ## 포함된 기능
-- 브론즈·실버·골드·플래티넘·다이아몬드 카드
+- 브론즈·실버·골드·코랄·다이아몬드 카드
 - 8개 구단·타자/투수·포지션·등급별 필터, 선수 이름 검색, 정렬
 - 즐겨찾기, 선수별 카드 상세 기록과 능력치
 - 타자/투수 실루엣 기본 이미지 및 선수별 업로드 이미지

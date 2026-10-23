@@ -22,7 +22,7 @@ const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 const imgSrc=(path)=>{if(!path)return '';const safe=path.split('/').map(encodeURIComponent).join('/');return new URL('./'+safe,document.baseURI).href};
 const teamLogo=team=>imgSrc('assets/teams/'+team+(team==='NC'?'.png':'.svg'));
 const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],KIW:['#6a1e3f','#e6b6c8']};
-const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},플래티넘:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
+const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},코랄:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
 const styleVars=p=>{const g=gradeMeta[p.grade],tm=teamMeta[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`};
 function photoHtml(p){const temp=previewCache[p.id];const entry=temp||imgConfig.images?.[p.id];if(!entry)return '';
  const x=Number(entry.x)||0,y=Number(entry.y)||0,zoom=Number(entry.zoom)||1;
