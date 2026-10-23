@@ -50,3 +50,51 @@
 .photo-editor .preview-card .headshot .player-pose[src*="batter"]{bottom:-48px}
 #editor-apply{background:#336a57;border-color:#66b99c}
 @media(max-width:650px){.photo-editor .editor-stage{height:490px;max-height:58vh}.photo-editor .editor-card-wrap{min-height:445px}.photo-editor .preview-card{width:260px;flex-basis:260px}}
+
+/* 2026-10-23 — Full-bleed artwork, with transparent team logo and favorite on top.
+   Keep card's original total height: 49px header + 190px photo = 239px image plane. */
+.player-card .card-top{
+  position:relative;
+  z-index:6;
+  min-height:49px;
+  height:49px;
+  flex:0 0 49px;
+  padding:6px 9px 0;
+  pointer-events:none;
+}
+.player-card .card-top .fav{pointer-events:auto}
+.player-card .team-badge{
+  width:57px;
+  height:40px;
+  padding:0!important;
+  background:transparent!important;
+  border:none!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  align-items:flex-start;
+  justify-content:flex-start;
+  pointer-events:none;
+}
+.player-card .team-badge img{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:40px!important;
+  object-fit:contain!important;
+  object-position:top left;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.72));
+}
+.player-card .headshot{
+  z-index:1;
+  margin-top:-49px!important;
+  min-height:239px!important;
+  height:239px!important;
+  flex:0 0 239px!important;
+}
+.player-card .headshot .player-photo{object-fit:cover}
+/* Artwork fills the header, but never obscures the logo/favorite row. */
+.player-card .card-mid{position:relative;z-index:3}
+.player-card .headshot .edit-photo{top:50px;left:9px}
+/* The editor uses the exact same display area, scale and clipping as the collection. */
+.photo-editor .preview-card .headshot .player-photo{object-fit:cover!important}
+@media(max-width:500px){.player-card .card-top{padding:6px 7px 0}.player-card .headshot .edit-photo{left:7px}}
