@@ -145,5 +145,10 @@ async function checkSupplemental(master,teamZip,recordZip){
  }
  return report;
 }
-root.RKBOSeasonEngine={fromWorkbook:engine,parseRows:workbookRows,parseHTML:htmlPlayers,verify:checkSupplemental};
+function packSeason(players){
+ // Keep only fields used by the public card viewer, editor, and PNG renderer.
+ // Derived data is kept for the player detail stats, but calculation scratchpad is omitted.
+ return players.map(p=>({id:p.id,season:p.season,team:p.team,teamLabel:p.teamLabel,name:p.name,rawName:p.rawName,englishName:p.englishName,type:p.type,pos:p.pos,stats:p.stats,ratings:p.ratings,derived:p.derived,skillIndex:p.skillIndex,ovr:p.ovr,grade:p.grade,rank:p.rank,fieldPrimary:null}));
+}
+root.RKBOSeasonEngine={fromWorkbook:engine,parseRows:workbookRows,parseHTML:htmlPlayers,verify:checkSupplemental,pack:packSeason};
 })(typeof window==='undefined'?globalThis:window);
