@@ -1,4 +1,62 @@
 {
   "version": 1,
-  "files": []
+  "files": [
+    {
+      "id": "original-20261024-xls",
+      "kind": "xls",
+      "name": "RKBO(1).xls",
+      "originalName": "RKBO(1).xls",
+      "size": 7872000,
+      "chunks": [
+        "imports/original/xls/001.bin",
+        "imports/original/xls/002.bin",
+        "imports/original/xls/003.bin",
+        "imports/original/xls/004.bin"
+      ],
+      "format": "binary-chunks",
+      "chunkBytes": 2097152,
+      "sha256": "b76c0e0607977a8c91cbe99f93dd340970392afa36f0d309822f7d5260ba3678",
+      "mime": "application/vnd.ms-excel",
+      "uploadedAt": "2026-10-24T00:00:00+09:00",
+      "source": "User-provided original RKBO season archive"
+    },
+    {
+      "id": "original-20261024-team-html",
+      "kind": "team-html",
+      "name": "8개 구단 개인 성적.zip",
+      "originalName": "8개 구단 개인 성적.zip",
+      "size": 37828,
+      "chunks": [
+        "imports/original/team-html/001.bin"
+      ],
+      "format": "binary-chunks",
+      "chunkBytes": 2097152,
+      "sha256": "dc14e9de66235d8490d33d890e2952067b31b31c474ee83c3ce2d111beee4b60",
+      "mime": "application/zip",
+      "uploadedAt": "2026-10-24T00:00:00+09:00",
+      "source": "User-provided original RKBO season archive"
+    },
+    {
+      "id": "original-20261024-hhrecord",
+      "kind": "hhrecord",
+      "name": "HHRecord (1).zip",
+      "originalName": "HHRecord (1).zip",
+      "size": 14219716,
+      "chunks": [
+        "imports/original/hhrecord/001.bin",
+        "imports/original/hhrecord/002.bin",
+        "imports/original/hhrecord/003.bin",
+        "imports/original/hhrecord/004.bin",
+        "imports/original/hhrecord/005.bin",
+        "imports/original/hhrecord/006.bin",
+        "imports/original/hhrecord/007.bin"
+      ],
+      "format": "binary-chunks",
+      "chunkBytes": 2097152,
+      "sha256": "b43f16c99f284e8d3dbddbf8fbf62629c8e310a45cbe2f13b258f19409c04dc3",
+      "mime": "application/zip",
+      "uploadedAt": "2026-10-24T00:00:00+09:00",
+      "source": "User-provided original RKBO season archive"
+    }
+  ]
 }
