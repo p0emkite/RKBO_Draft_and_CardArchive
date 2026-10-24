@@ -10,6 +10,7 @@ const norm=x=>String(x||'').normalize('NFKC').trim().replace(/\s+/g,' ');
 const display=x=>{let m=norm(x).match(/^(.*?)\s*,\s*(.*)$/);return m?(m[2]+' '+m[1]).trim():norm(x)};
 const teamNames={DOO:'두산 베어스',HAN:'한화 이글스',KIA:'KIA 타이거즈',KT:'KT 위즈',LG:'LG 트윈스',LOT:'롯데 자이언츠',NC:'NC 다이노스',SAM:'삼성 라이온즈',SSG:'SSG 랜더스',KIW:'키움 히어로즈'};
 const headerKey=x=>String(x||'').trim().toUpperCase();
+const eligibleCard=p=>Number.isInteger(Number(p?.stats?.G))&&Number(p.stats.G)>=(p.type==='타자'?50:p.type==='투수'?25:Infinity);
 function workbookRows(book){
  const x=book?.sheets;if(!Array.isArray(x))throw Error('엑셀 워크북에서 시트를 읽지 못했습니다.');
  const byType={타자:[],투수:[]};
@@ -120,7 +121,7 @@ function engine(book){
    groups.get(row.season).push(rowToPlayer(row,index));
   }
  }
- const out=new Map();for(const [season,players] of groups){out.set(season,scoreSeason(players))}
+ const out=new Map();for(const [season,players] of groups){out.set(season,scoreSeason(players).filter(eligibleCard))}
  return out;
 }
 function htmlPlayers(html,team){

@@ -25,7 +25,7 @@ async function analyze(){if(locked)return;setDisabled(true);evaluated=null;
   const seasons=RKBOSeasonEngine.fromWorkbook(work);
   const count=[...seasons.values()].reduce((a,x)=>a+x.length,0);
   const sixty=seasons.get(60)||[];
-  if(sixty.length!==211)throw Error('60차 원본 선수는 211명이어야 합니다. 현재 '+sixty.length+'명이 확인되어 파일을 검증할 수 없습니다.');
+  if(sixty.length<100)throw Error('60차에서 출장 경기 기준(타자 50경기 / 투수 25경기) 충족 선수가 비정상적으로 적습니다: '+sixty.length+'명');
   if(seasons.size<2)throw Error('통합 엑셀에서 다른 시즌 기록을 찾지 못했습니다.');
   const supplement={};
   if(files.team||files.hh){notify('개인 성적 TXT/HTML과 HHRecord ZIP 구조를 검사하는 중…');
@@ -46,7 +46,7 @@ async function analyze(){if(locked)return;setDisabled(true);evaluated=null;
   const counts=extra.reduce((r,s)=>(r.total+=seasons.get(s).length,r),{total:0});
   let summary=`분석 완료: ${seasons.size}개 시즌 · 기록 ${count.toLocaleString()}행\n`+
    `자동 등록 대상: ${extra.length}개 시즌(60차 제외) · 선수 카드 ${counts.total.toLocaleString()}장\n`+
-   `60차 211장은 기존 검증 데이터 그대로 유지\n`+
+   `60차는 출전 기준 충족 카드만 유지하며 기존 평가값을 보존\n`+
    `엑셀: ${files.xls.name} (${toMB(files.xls.size)})\n`+
    (files.team?`8구단 개인 성적: ${supplement.teamHtml.files}개 파일 · 타자 ${supplement.teamHtml.batters}명 / 투수 ${supplement.teamHtml.pitchers}명 · 이름 불일치 ${supplement.teamHtml.mismatch}건\n`:'8구단 HTML: 미선택 (60차 교차검증 생략)\n')+
    (files.hh?`HHRecord: 상세 페이지 ${supplement.hhRecord.pages}개 · 포지션별 수비표 ${supplement.hhRecord.fieldingPages}개\n`:'HHRecord: 미선택 (원본 보관 생략)\n')+
@@ -74,7 +74,7 @@ async function publish(){if(locked)return;if(!evaluated){notify('먼저 파일 �
   // Previously verified identities must survive later XLS imports.
   const protectedSeasons=new Set((manifestData.seasons||[]).filter(v=>v.identityVerified).map(v=>Number(v.season)));
   const entries=[],past=[...seasons.entries()].filter(([k])=>k!==60&&!protectedSeasons.has(k)).sort((a,b)=>b[0]-a[0]);
-  const metadata={source:'RKBO(1).xls',method:'RKBO historical season auto-import',generatedAt:new Date().toISOString(),defense:'not_available_without_per-season_fielding_data'};
+  const metadata={source:'RKBO(1).xls',method:'RKBO historical season auto-import',generatedAt:new Date().toISOString(),defense:'not_available_without_per-season_fielding_data',eligibilityRule:{batters:50,pitchers:25},eligibilityFiltered:true};
   for(const [season,players] of past){entries.push({path:`data/seasons/${season}.json`,content:JSON.stringify({season,players:RKBOSeasonEngine.pack(players),metadata})})}
   const existing=Array.isArray(manifestData.seasons)?manifestData.seasons.slice():[];
   const registered=new Map(existing.map(x=>[Number(x.season),x]));

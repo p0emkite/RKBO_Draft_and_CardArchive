@@ -4,49 +4,49 @@
     {
       "season": 60,
       "file": null,
-      "count": 211,
+      "count": 181,
       "label": "60차 시즌",
       "source": "embedded"
     },
     {
       "season": 59,
       "file": "data/seasons/59.json",
-      "count": 217,
+      "count": 180,
       "label": "59차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 58,
       "file": "data/seasons/58.json",
-      "count": 210,
+      "count": 175,
       "label": "58차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 57,
       "file": "data/seasons/57.json",
-      "count": 214,
+      "count": 185,
       "label": "57차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 56,
       "file": "data/seasons/56.json",
-      "count": 213,
+      "count": 181,
       "label": "56차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 55,
       "file": "data/seasons/55.json",
-      "count": 210,
+      "count": 179,
       "label": "55차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 54,
       "file": "data/seasons/54.json",
-      "count": 208,
+      "count": 182,
       "label": "54차 시즌",
       "source": "rkbo-xls",
       "identityVerified": true,
@@ -56,371 +56,371 @@
     {
       "season": 53,
       "file": "data/seasons/53.json",
-      "count": 215,
+      "count": 179,
       "label": "53차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 52,
       "file": "data/seasons/52.json",
-      "count": 212,
+      "count": 178,
       "label": "52차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 51,
       "file": "data/seasons/51.json",
-      "count": 272,
+      "count": 235,
       "label": "51차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 50,
       "file": "data/seasons/50.json",
-      "count": 264,
+      "count": 237,
       "label": "50차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 49,
       "file": "data/seasons/49.json",
-      "count": 270,
+      "count": 233,
       "label": "49차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 48,
       "file": "data/seasons/48.json",
-      "count": 269,
+      "count": 232,
       "label": "48차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 47,
       "file": "data/seasons/47.json",
-      "count": 266,
+      "count": 235,
       "label": "47차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 46,
       "file": "data/seasons/46.json",
-      "count": 267,
+      "count": 231,
       "label": "46차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 45,
       "file": "data/seasons/45.json",
-      "count": 266,
+      "count": 236,
       "label": "45차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 44,
       "file": "data/seasons/44.json",
-      "count": 273,
+      "count": 234,
       "label": "44차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 43,
       "file": "data/seasons/43.json",
-      "count": 272,
+      "count": 240,
       "label": "43차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 42,
       "file": "data/seasons/42.json",
-      "count": 271,
+      "count": 230,
       "label": "42차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 41,
       "file": "data/seasons/41.json",
-      "count": 271,
+      "count": 232,
       "label": "41차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 40,
       "file": "data/seasons/40.json",
-      "count": 270,
+      "count": 235,
       "label": "40차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 39,
       "file": "data/seasons/39.json",
-      "count": 271,
+      "count": 229,
       "label": "39차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 38,
       "file": "data/seasons/38.json",
-      "count": 269,
+      "count": 231,
       "label": "38차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 37,
       "file": "data/seasons/37.json",
-      "count": 274,
+      "count": 234,
       "label": "37차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 36,
       "file": "data/seasons/36.json",
-      "count": 266,
+      "count": 235,
       "label": "36차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 35,
       "file": "data/seasons/35.json",
-      "count": 271,
+      "count": 232,
       "label": "35차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 34,
       "file": "data/seasons/34.json",
-      "count": 279,
+      "count": 237,
       "label": "34차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 33,
       "file": "data/seasons/33.json",
-      "count": 269,
+      "count": 235,
       "label": "33차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 32,
       "file": "data/seasons/32.json",
-      "count": 268,
+      "count": 237,
       "label": "32차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 31,
       "file": "data/seasons/31.json",
-      "count": 276,
+      "count": 234,
       "label": "31차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 30,
       "file": "data/seasons/30.json",
-      "count": 279,
+      "count": 231,
       "label": "30차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 29,
       "file": "data/seasons/29.json",
-      "count": 274,
+      "count": 232,
       "label": "29차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 28,
       "file": "data/seasons/28.json",
-      "count": 283,
+      "count": 238,
       "label": "28차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 27,
       "file": "data/seasons/27.json",
-      "count": 289,
+      "count": 237,
       "label": "27차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 26,
       "file": "data/seasons/26.json",
-      "count": 280,
+      "count": 228,
       "label": "26차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 25,
       "file": "data/seasons/25.json",
-      "count": 269,
+      "count": 237,
       "label": "25차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 24,
       "file": "data/seasons/24.json",
-      "count": 280,
+      "count": 237,
       "label": "24차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 23,
       "file": "data/seasons/23.json",
-      "count": 273,
+      "count": 224,
       "label": "23차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 22,
       "file": "data/seasons/22.json",
-      "count": 277,
+      "count": 229,
       "label": "22차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 21,
       "file": "data/seasons/21.json",
-      "count": 275,
+      "count": 219,
       "label": "21차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 20,
       "file": "data/seasons/20.json",
-      "count": 276,
+      "count": 227,
       "label": "20차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 19,
       "file": "data/seasons/19.json",
-      "count": 271,
+      "count": 228,
       "label": "19차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 18,
       "file": "data/seasons/18.json",
-      "count": 275,
+      "count": 230,
       "label": "18차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 17,
       "file": "data/seasons/17.json",
-      "count": 261,
+      "count": 227,
       "label": "17차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 16,
       "file": "data/seasons/16.json",
-      "count": 274,
+      "count": 234,
       "label": "16차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 15,
       "file": "data/seasons/15.json",
-      "count": 287,
+      "count": 234,
       "label": "15차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 14,
       "file": "data/seasons/14.json",
-      "count": 287,
+      "count": 237,
       "label": "14차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 13,
       "file": "data/seasons/13.json",
-      "count": 281,
+      "count": 241,
       "label": "13차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 12,
       "file": "data/seasons/12.json",
-      "count": 222,
+      "count": 173,
       "label": "12차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 11,
       "file": "data/seasons/11.json",
-      "count": 234,
+      "count": 161,
       "label": "11차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 10,
       "file": "data/seasons/10.json",
-      "count": 226,
+      "count": 160,
       "label": "10차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 9,
       "file": "data/seasons/9.json",
-      "count": 230,
+      "count": 169,
       "label": "9차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 8,
       "file": "data/seasons/8.json",
-      "count": 226,
+      "count": 169,
       "label": "8차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 7,
       "file": "data/seasons/7.json",
-      "count": 224,
+      "count": 166,
       "label": "7차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 6,
       "file": "data/seasons/6.json",
-      "count": 231,
+      "count": 162,
       "label": "6차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 5,
       "file": "data/seasons/5.json",
-      "count": 222,
+      "count": 166,
       "label": "5차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 4,
       "file": "data/seasons/4.json",
-      "count": 200,
+      "count": 166,
       "label": "4차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 3,
       "file": "data/seasons/3.json",
-      "count": 193,
+      "count": 164,
       "label": "3차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 2,
       "file": "data/seasons/2.json",
-      "count": 191,
+      "count": 167,
       "label": "2차 시즌",
       "source": "rkbo-xls"
     },
     {
       "season": 1,
       "file": "data/seasons/1.json",
-      "count": 181,
+      "count": 138,
       "label": "1차 시즌",
       "source": "rkbo-xls"
     }
