@@ -39,13 +39,16 @@ function selectName(p,byEnglish){
   for(const r of byEnglish.get(key(original))||[])candidates.push(r);
  }
  if(!candidates.length)return null;
- const unique=new Set(candidates.map(r=>key(r.KoreanName)));
- if(unique.size===1)return candidates[0].KoreanName;
  const teams=(teamAliases[p.team]||[p.team]).map(key);
- const matching=candidates.filter(r=>Number(r.Season)===Number(p.season)
+ const matching=candidates.filter(r=>String(r.Season||'').trim()!=='' && Number(r.Season)===Number(p.season)
    && (!r.Team||teams.includes(key(r.Team))));
  const names=new Set(matching.map(r=>key(r.KoreanName)));
- return names.size===1?matching[0].KoreanName:null;
+ if(names.size===1)return matching[0].KoreanName;
+ const global=candidates.filter(r=>!String(r.Season||'').trim());
+ const globalNames=new Set(global.map(r=>key(r.KoreanName)));
+ if(globalNames.size===1)return global[0].KoreanName;
+ const unique=new Set(candidates.map(r=>key(r.KoreanName)));
+ return unique.size===1?candidates[0].KoreanName:null;
 }
 async function apply(players,dataElement){
  const report={total:players.length,matched:0,unmatched:[],source:'data/player_db.csv'};
@@ -53,6 +56,16 @@ async function apply(players,dataElement){
   const response=await fetch('./data/player_db.csv',{cache:'no-store'});
   if(!response.ok)throw Error('HTTP '+response.status);
   const records=parseCSV(await response.text()),byEnglish=new Map();
+  // Historical names must be keyed to the season + club + exact card, never retroactively global.
+  let historic=[];
+  try{
+   const history=await fetch('./data/season-nicknames.csv',{cache:'no-store'});
+   if(history.ok)historic=parseCSV(await history.text());
+   else console.warn('[RKBO] Historic nickname file unavailable:',history.status);
+  }catch(error){console.warn('[RKBO] Historic nickname file unavailable',error)}
+  const byCard=new Map();
+  for(const row of historic){if(row.CardId&&row.Season&&row.Team&&!byCard.has(row.CardId))byCard.set(row.CardId,row)}
+
   for(const r of records){
    if(!r.Name||!r.KoreanName)continue;
    for(const alias of englishVariants(r.Name)){
@@ -62,9 +75,18 @@ async function apply(players,dataElement){
   }
   for(const p of players){
    p.englishName=p.englishName||p.name;
-   const korean=selectName(p,byEnglish);
+   const row=byCard.get(p.id);
+   const seasonNickname=row&&Number(row.Season)===Number(p.season)
+     && key(row.Team)===key(p.team)
+     && (!row.CurrentRawName||key(row.CurrentRawName)===key(p.rawName))?row:null;
+   p.historicalEnglishName=seasonNickname?.HistoricEnglish
+     ?(seasonNickname.HistoricEnglish.includes(',')?seasonNickname.HistoricEnglish.split(',').reverse().map(v=>v.trim()).join(' '):seasonNickname.HistoricEnglish)
+     :null;
+   const korean=seasonNickname?.HistoricKorean||selectName(p,byEnglish);
    p.koreanName=korean||null;
-   if(korean){p.name=korean;report.matched++}
+   if(seasonNickname&&(seasonNickname.HistoricKorean||seasonNickname.HistoricEnglish)){
+    p.name=seasonNickname.HistoricKorean||p.historicalEnglishName;report.matched++;
+   }else if(korean){p.name=korean;report.matched++}
    else report.unmatched.push({id:p.id,english:p.englishName,rawName:p.rawName,team:p.team});
   }
   if(dataElement)dataElement.textContent=JSON.stringify(players).replace(/</g,'\\u003c');
