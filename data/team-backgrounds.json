@@ -50,6 +50,16 @@
       "commit": "e55dc6590b577103fa57650bfa462e045453945f",
       "blobSha": "8ce6f12f32b59953c56ac252a8f861d4e111f157",
       "rev": "mvmhq243"
+    },
+    "HAN": {
+      "path": "assets/team-backgrounds/HAN.webp",
+      "x": 0,
+      "y": 0,
+      "zoom": 1.16,
+      "overlay": 50,
+      "commit": "914e32cfa26eab5fc364af7b1585393359f526fa",
+      "blobSha": "315d27d62e8d355f1dcb356dcd0942cb02db9efe",
+      "rev": "mvmhtmjn"
     }
   }
 }
