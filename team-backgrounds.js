@@ -38,7 +38,7 @@ function render(player){
  if(!entry)return '';
  const tx=clamp(entry.x,-100,100),ty=clamp(entry.y,-100,100),zoom=clamp(entry.zoom||1,.35,3.5);
  const fallback=entry.url?.startsWith('blob:')?'':pagesURL(entry);
- return '<img class="team-background-photo" src="'+esc(entry.url)+'" alt="" role="presentation" draggable="false" loading="lazy" data-team-bg-blob="'+esc(entry.blobSha||'')+'" data-team-bg-fallback="'+esc(fallback)+'" style="--team-bg-x:'+tx+'%;--team-bg-y:'+ty+'%;--team-bg-zoom:'+zoom+'">';
+ return '<img class="team-background-photo" src="'+esc(entry.url)+'" alt="" role="presentation" draggable="false" loading="lazy" data-team-bg-blob="'+esc(entry.blobSha||'')+'" data-team-bg-fallback="'+esc(fallback)+'" style="--team-bg-x:'+tx+'%;--team-bg-y:'+ty+'%;--team-bg-zoom:'+zoom+'"><span class="team-background-shade" aria-hidden="true" style="--team-bg-overlay:'+clamp(entry.overlay,0,100)/100+'"></span>';
 }
 function redraw(){root.RKBOArt?.refresh?.()}
 async function fetchPublic(){
@@ -131,7 +131,7 @@ function makeDraft(){
 function resetForm(){
  retireDraft();
  const entry=cfg.teams?.[selected]||{};
- for(const [field,value] of [['team-bg-x',entry.x??0],['team-bg-y',entry.y??0],['team-bg-zoom',entry.zoom??1]]){if(q(field))q(field).value=value}
+ for(const [field,value] of [['team-bg-x',entry.x??0],['team-bg-y',entry.y??0],['team-bg-zoom',entry.zoom??1],['team-bg-overlay',entry.overlay??0]]){if(q(field))q(field).value=value}
  if(q('team-bg-file'))q('team-bg-file').value='';
  updatePreview();
  redraw();
@@ -156,13 +156,15 @@ function updatePreview(){
    img.hidden=false;
   }else{img.removeAttribute('src');img.hidden=true}
  }
- if(q('team-bg-zoom-value'))q('team-bg-zoom-value').textContent=Math.round(Number(q('team-bg-zoom')?.value||1)*100)+'%';
+ const shade=q('team-bg-preview-shade');if(shade)shade.style.setProperty('--team-bg-overlay',clamp(entry?.overlay,0,100)/100);
+  if(q('team-bg-overlay-value'))q('team-bg-overlay-value').textContent=Math.round(Number(q('team-bg-overlay')?.value||0))+'%';
+  if(q('team-bg-zoom-value'))q('team-bg-zoom-value').textContent=Math.round(Number(q('team-bg-zoom')?.value||1)*100)+'%';
  const badge=q('team-bg-count');
  if(badge)badge.textContent=Object.keys(cfg.teams||{}).length+'개 구단 등록';
 }
 function adjust(){
  const d=makeDraft();
- for(const k of ['x','y','zoom'])d.entry[k]=Number(q('team-bg-'+k)?.value|| (k==='zoom'?1:0));
+ for(const k of ['x','y','zoom','overlay'])d.entry[k]=Number(q('team-bg-'+k)?.value|| (k==='zoom'?1:0));
  d.enabled=true;
  updatePreview();redraw();
 }
@@ -174,7 +176,7 @@ async function chooseFile(){
   const entry={...(cfg.teams?.[selected]||{}),x:0,y:0,zoom:1};
   retireDraft();
   draft={team:selected,entry,blob,url:URL.createObjectURL(blob),ownedUrl:true,enabled:true};
-  for(const [k,v] of [['x',0],['y',0],['zoom',1]])q('team-bg-'+k).value=v;
+  for(const [k,v] of [['x',0],['y',0],['zoom',1],['overlay',entry.overlay??0]])q('team-bg-'+k).value=v;
   updatePreview();redraw();
   status('✓ '+(names[selected]||selected)+' 배경을 미리보기에 적용했습니다. GitHub에 저장하면 모든 시즌의 해당 구단 카드에 반영됩니다.');
  }catch(error){status('배경 사진 오류: '+error.message)}
@@ -211,6 +213,7 @@ async function saveBackground(remove=false){
     path:'assets/team-backgrounds/'+code+'.webp',
     x:clamp(placement.x,-100,100),y:clamp(placement.y,-100,100),
     zoom:clamp(placement.zoom||1,.35,3.5),
+     overlay:clamp(placement.overlay,0,100),
     ...(uploaded?{commit:uploaded.commit.sha,blobSha:uploaded.content.sha,rev:Date.now().toString(36)}
       :{commit:existing.commit||'',blobSha:existing.blobSha||'',rev:existing.rev||''})
    };
@@ -250,11 +253,14 @@ function makePanel(){
  '<input id="team-bg-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif">'+
  '<div id="team-bg-preview" class="team-bg-preview" aria-label="구단 배경 실시간 미리보기">'+
  '<img id="team-bg-preview-image" alt="" hidden>'+
+  '<span class="team-bg-preview-shade" id="team-bg-preview-shade" aria-hidden="true"></span>'+
  '<span id="team-bg-selection" class="team-bg-preview-note"></span></div>'+
  '<label for="team-bg-zoom">배경 크기 <span id="team-bg-zoom-value">100%</span></label>'+
  '<input id="team-bg-zoom" type="range" min=".35" max="3.5" step=".01" value="1">'+
  '<label for="team-bg-x">가로 위치</label><input id="team-bg-x" type="range" min="-100" max="100" step="1" value="0">'+
  '<label for="team-bg-y">세로 위치</label><input id="team-bg-y" type="range" min="-100" max="100" step="1" value="0">'+
+  '<label for="team-bg-overlay">검은색 오버레이 <span id="team-bg-overlay-value">0%</span></label>'+
+  '<input id="team-bg-overlay" type="range" min="0" max="100" step="1" value="0" aria-label="배경 검은색 오버레이 농도">'+
  '<div class="team-bg-actions"><button type="button" id="team-bg-apply">도감에 즉시 적용</button>'+
  '<button type="button" class="primary" id="team-bg-save">GitHub에 구단 배경 저장</button>'+
  '<button type="button" id="team-bg-remove">구단 배경 삭제</button></div>'+
@@ -262,7 +268,7 @@ function makePanel(){
  parent.append(section);
  q('team-bg-team').addEventListener('change',e=>handleTeamChange(e.target.value));
  q('team-bg-file').addEventListener('change',chooseFile);
- for(const f of ['x','y','zoom'])q('team-bg-'+f).addEventListener('input',adjust);
+ for(const f of ['x','y','zoom','overlay'])q('team-bg-'+f).addEventListener('input',adjust);
  q('team-bg-apply').addEventListener('click',()=>{makeDraft().enabled=true;updatePreview();redraw();status('✓ 도감 미리보기에 적용했습니다. 다른 방문자에게도 보이려면 GitHub 저장을 누르세요.')});
  q('team-bg-save').addEventListener('click',()=>saveBackground(false));
  q('team-bg-remove').addEventListener('click',()=>{

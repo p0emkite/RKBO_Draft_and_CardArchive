@@ -214,3 +214,36 @@
  background:#07111dbc;color:#e9f4ff;border-bottom-right-radius:8px}
 #rkbo-team-backgrounds .team-bg-status{font-size:11px;white-space:pre-wrap;color:#b8cfdf;line-height:1.55;word-break:break-word}
 @media(max-width:570px){.player-card .card-name h3{font-size:19px}.player-card .card-position{font-size:17px}}
+
+/* RKBO preview/PNG parity: identical artwork aspect ratio at every width. */
+.player-card .headshot{
+ width:100%;min-height:0!important;height:auto!important;
+ aspect-ratio:288 / 243;flex:0 0 auto!important;
+}
+.player-card .headshot .player-photo{
+ filter:drop-shadow(0 0 11px rgba(255,255,255,.34))
+        drop-shadow(0 0 23px rgba(255,255,255,.23));
+}
+.player-card .headshot .team-background-shade{
+ position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:rgba(0,0,0,var(--team-bg-overlay,0));
+}
+#rkbo-team-backgrounds .team-bg-preview-shade{
+ position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:rgba(0,0,0,var(--team-bg-overlay,0));
+}
+.modal-cols{grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:22px;align-items:stretch}
+.detail-card-wrap{display:flex;min-width:0;align-items:flex-start;justify-content:center}
+.detail-card-wrap .detail-card{
+ width:100%;max-width:300px;min-height:0;height:auto;align-self:flex-start;
+ aspect-ratio:5/7;transform:none!important;cursor:default;pointer-events:none;
+}
+.detail-card-wrap .detail-card:hover{transform:none!important}
+.detail-card-wrap .edit-photo{display:none!important}
+.detail-stats{min-width:0;display:flex;flex-direction:column}
+.detail-stats .stat-table{flex:1;grid-auto-rows:minmax(57px,1fr)}
+@media(max-width:800px){
+ .modal-cols{grid-template-columns:1fr}
+ .detail-card-wrap{justify-content:center}
+ .detail-stats .stat-table{grid-auto-rows:auto}
+}

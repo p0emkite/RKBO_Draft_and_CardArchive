@@ -11,6 +11,7 @@ const grades={
  '다이아몬드':{metal:'#90ecff',dark:'#417baa'}
 };
 const teams={DOO:'#202f6c',HAN:'#d97521',KIA:'#bd3445',KT:'#222222',LG:'#aa3053',LOT:'#659cbb',NC:'#b79c64',SAM:'#407acb',SSG:'#ffb81c',SK:'#cf292f',KIW:'#6a1e3f'};
+const ratingColor=v=>v==null||!Number.isFinite(Number(v))?'#fff':Number(v)>=90?grades['다이아몬드'].metal:Number(v)>=85?grades['코랄'].metal:Number(v)>=80?grades['골드'].metal:Number(v)>=70?grades['실버'].metal:'#fff';
 const clamp=(v,l,h)=>Math.min(h,Math.max(l,v));
 function rgb(hex,alpha){const raw=hex.replace('#','');const nums=[0,2,4].map(i=>parseInt(raw.slice(i,i+2),16));return 'rgba('+nums.join(',')+','+alpha+')'}
 function round(ctx,x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
@@ -54,6 +55,9 @@ async function make(player){
   const ty=clamp(Number(teamBg.y)||0,-100,100)*243/100;
   const w=background.naturalWidth*ratio*zoom,h=background.naturalHeight*ratio*zoom;
   ctx.drawImage(background,150+tx-w/2,127.5+ty-h/2,w,h);
+   // Shade the stadium only, beneath player art and team logo.
+   const shade=clamp(Number(teamBg.overlay)||0,0,100)/100;
+   if(shade){ctx.fillStyle='rgba(0,0,0,'+shade+')';ctx.fillRect(6,6,288,243)}
  }
  label(ctx,brand,150,163,'1000 90px system-ui, sans-serif','rgba(255,255,255,.07)','center');
  ctx.beginPath();ctx.arc(150,150,94,0,2*Math.PI);ctx.lineWidth=.8;ctx.strokeStyle=grade.metal;ctx.stroke();
@@ -62,7 +66,12 @@ async function make(player){
   const mode=photo.fit==='cover'?'cover':'contain';
   const fit=mode==='cover'?Math.max(288/image.naturalWidth,243/image.naturalHeight):Math.min(288/image.naturalWidth,243/image.naturalHeight);
   const w=image.naturalWidth*fit*zx,h=image.naturalHeight*fit*zx;
-  ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
+  // Two-pass alpha-aware soft outer glow, plus the original sharp photo.
+   ctx.save();ctx.shadowColor='rgba(255,255,255,.23)';ctx.shadowBlur=23*SCALE;
+   ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
+   ctx.shadowColor='rgba(255,255,255,.34)';ctx.shadowBlur=11*SCALE;
+   ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
+   ctx.restore();ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
  }else if(silhouette){
   ctx.drawImage(silhouette,20,player.type==='투수'?45:38,260,260);
  }
@@ -88,7 +97,7 @@ async function make(player){
  metrics.forEach((stat,i)=>{
   const x=6+i*57.6,n=player.ratings?.[stat];
   if(i){ctx.beginPath();ctx.moveTo(x,378);ctx.lineTo(x,409);ctx.strokeStyle='#344355';ctx.lineWidth=.6;ctx.stroke()}
-  label(ctx,n??'—',x+28.8,389,'850 16px system-ui, sans-serif',Number(n)>=90?'#f1c877':'#f4f7fc','center');
+  label(ctx,n??'—',x+28.8,389,'850 16px system-ui, sans-serif',ratingColor(n),'center');
   label(ctx,short[stat]||stat,x+28.8,403,'800 9px system-ui, sans-serif','#91a9be','center');
  });
  ctx.restore();round(ctx,6,6,288,408,13);ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=.8;ctx.stroke();
