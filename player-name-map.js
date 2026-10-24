@@ -82,11 +82,20 @@ async function apply(players,dataElement){
    p.historicalEnglishName=seasonNickname?.HistoricEnglish
      ?(seasonNickname.HistoricEnglish.includes(',')?seasonNickname.HistoricEnglish.split(',').reverse().map(v=>v.trim()).join(' '):seasonNickname.HistoricEnglish)
      :null;
-   const korean=seasonNickname?.HistoricKorean||selectName(p,byEnglish);
+   // The season's personal stat sheet is authoritative for historical display names.
+   // Modern unified Excel names remain in rawName for linking/stats, not display.
+   const originalInSeason=p.seasonRecordedName&&key(p.seasonRecordedName)!==key(p.rawName);
+   const parsedOriginal=originalInSeason
+     ?(p.seasonRecordedName.includes(',')?p.seasonRecordedName.split(',').reverse().map(x=>x.trim()).join(' '):p.seasonRecordedName)
+     :null;
+   const sourceName=originalInSeason?selectName({...p,rawName:p.seasonRecordedName,englishName:parsedOriginal,aliases:[]},byEnglish):null;
+   if(!p.historicalEnglishName&&parsedOriginal)p.historicalEnglishName=parsedOriginal;
+   const korean=seasonNickname?.HistoricKorean||sourceName||(!originalInSeason?selectName(p,byEnglish):null);
    p.koreanName=korean||null;
    if(seasonNickname&&(seasonNickname.HistoricKorean||seasonNickname.HistoricEnglish)){
     p.name=seasonNickname.HistoricKorean||p.historicalEnglishName;report.matched++;
-   }else if(korean){p.name=korean;report.matched++}
+   }else if(originalInSeason){p.name=korean||parsedOriginal;report.matched++}
+   else if(korean){p.name=korean;report.matched++}
    else report.unmatched.push({id:p.id,english:p.englishName,rawName:p.rawName,team:p.team});
   }
   if(dataElement)dataElement.textContent=JSON.stringify(players).replace(/</g,'\\u003c');
