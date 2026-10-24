@@ -90,6 +90,16 @@
       "commit": "b2afffef3f372918a617c0714f747619eba8bdb7",
       "blobSha": "d2316b0506fd5da4ea89469ffce2e67559491b84",
       "rev": "mvmhxwhc"
+    },
+    "SSG": {
+      "path": "assets/team-backgrounds/SSG.webp",
+      "x": 3,
+      "y": 4,
+      "zoom": 1.13,
+      "overlay": 50,
+      "commit": "23c401642d222d4fbdedb8812134f6bf89a05e34",
+      "blobSha": "9f16cc880714529aa4e6e220b52ac903f6349946",
+      "rev": "mvmhzz4c"
     }
   }
 }
