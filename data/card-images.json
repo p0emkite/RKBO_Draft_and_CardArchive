@@ -140,6 +140,16 @@
       "rev": "mvmjtrgz",
       "commit": "70f77936bcbd379dc1c483d32238730c131267e1",
       "blobSha": "7360437a02b48c0dd7d1e8d464c45538b88b6f77"
+    },
+    "60-LOT-투-007": {
+      "path": "assets/cards/60-LOT-투-007.webp",
+      "x": -4.923076923076923,
+      "y": 44.52554744525548,
+      "zoom": 1.9671513572895665,
+      "fit": "contain",
+      "rev": "mvmjui25",
+      "commit": "f3bb14368f22b77a1c16163e3a4072eb1e9402b0",
+      "blobSha": "811d4af157c46b2948eedd41ec536bf3e97a2943"
     }
   }
 }
