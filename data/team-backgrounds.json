@@ -3,12 +3,12 @@
   "teams": {
     "SAM": {
       "path": "assets/team-backgrounds/SAM.webp",
-      "x": 0,
-      "y": 4,
+      "x": 4,
+      "y": 5,
       "zoom": 1.5,
-      "commit": "4463d24e787fd5e2001223fa7d41c4790fdda989",
+      "commit": "9d496bba9d9b053f55a16576ff90195e3a5a68b1",
       "blobSha": "e9b83f4a78c70b6dcae75a66eeb77686ff3428ec",
-      "rev": "mvm4k0gb"
+      "rev": "mvm4ocpg"
     }
   }
 }
