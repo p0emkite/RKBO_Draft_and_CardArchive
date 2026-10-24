@@ -9,6 +9,15 @@
       "fit": "contain",
       "rev": "mvm2clgc",
       "commit": "9829c489362c1279208578fe519c7275a2a1a8a0"
+    },
+    "60-SAM-타-013": {
+      "path": "assets/cards/60-SAM-타-013.webp",
+      "x": 6.153846153846154,
+      "y": 19.246861924686193,
+      "zoom": 3.2656909447258915,
+      "fit": "contain",
+      "rev": "mvm30cra",
+      "commit": "b612267c930652baf253ea76e8122d196da8c4e5"
     }
   }
 }
