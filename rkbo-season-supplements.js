@@ -212,6 +212,7 @@ async function save(){
        ...(work.finalResult?{defenseModel:"fielding-83-17-v2"}:{})}},null,2)+"\n"});
   }
   const item={season,file:season===60?null:"data/seasons/"+season+".json",label:season+"차 시즌",count:work.cards.length,
+    ...(work.finalResult?{defenseVerified:true}:{}),
     source:work.created?"season-team-personal-stats":(manifest.seasons.find(x=>Number(x.season)===season)?.source||"embedded"),
     ...(work.identity?.matched?{identityVerified:work.identity.matched>=Math.ceil(work.cards.length*.95)&&!work.identity.ambiguous.length&&!work.identity.duplicates.length,
       identitySource:"season-team-personal-stats",identityMatched:work.identity.matched}:{})};

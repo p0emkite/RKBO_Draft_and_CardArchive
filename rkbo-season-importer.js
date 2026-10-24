@@ -72,13 +72,27 @@ async function publish(){if(locked)return;if(!evaluated){notify('먼저 파일 �
   try{importsData=(await bridge.readJson('data/imports.json')).data||{version:1,files:[]}}
   catch{importsData={version:1,files:[]}}
   // Previously verified identities must survive later XLS imports.
-  const protectedSeasons=new Set((manifestData.seasons||[]).filter(v=>v.identityVerified).map(v=>Number(v.season)));
+  const protectedSeasons=new Set((manifestData.seasons||[]).filter(v=>v.identityVerified||v.defenseVerified).map(v=>Number(v.season)));
   const entries=[],past=[...seasons.entries()].filter(([k])=>k!==60&&!protectedSeasons.has(k)).sort((a,b)=>b[0]-a[0]);
   const metadata={source:'RKBO(1).xls',method:'RKBO historical season auto-import',generatedAt:new Date().toISOString(),defense:'not_available_without_per-season_fielding_data',eligibilityRule:{batters:50,pitchers:25},eligibilityFiltered:true};
-  for(const [season,players] of past){entries.push({path:`data/seasons/${season}.json`,content:JSON.stringify({season,players:RKBOSeasonEngine.pack(players),metadata})})}
+  for(const [season,players] of past){
+   const path='data/seasons/'+season+'.json',packed=RKBOSeasonEngine.pack(players);
+   try{
+    const oldFile=await bridge.readJson(path);
+    const old=oldFile?.data?.players||[];
+    const overrides=new Map(old.filter(p=>p.manualName||p.positionManual===true).map(p=>[p.id,p]));
+    for(const p of packed){
+     const o=overrides.get(p.id);if(!o)continue;
+     if(o.manualName){p.manualName=o.manualName;p.name=o.manualName;p.manualNameUpdatedAt=o.manualNameUpdatedAt}
+     if(o.positionManual===true){p.pos=o.pos;p.positionManual=true;p.positionUpdatedAt=o.positionUpdatedAt}
+    }
+    window.RKBORoles?.apply(packed,season);
+   }catch(error){throw Error(season+'차 수동 수정 보존용 기존 선수 데이터 조회 실패: '+error.message)}
+   entries.push({path,content:JSON.stringify({season,players:packed,metadata})});
+  }
   const existing=Array.isArray(manifestData.seasons)?manifestData.seasons.slice():[];
   const registered=new Map(existing.map(x=>[Number(x.season),x]));
-  if(!registered.has(60))registered.set(60,{season:60,file:null,label:'60차 시즌',count:211,source:'embedded'});
+  if(!registered.has(60))registered.set(60,{season:60,file:null,label:'60차 시즌',count:window.RKBOSeason?.builtin?.().length||181,source:'embedded'});
   for(const [season,players] of past)registered.set(season,{season,file:`data/seasons/${season}.json`,count:players.length,label:`${season}차 시즌`,source:'rkbo-xls'});
   const manifest={version:1,seasons:[...registered.values()].sort((a,b)=>b.season-a.season)};
   entries.push({path:'data/seasons.json',content:JSON.stringify(manifest,null,2)+'\n'});
