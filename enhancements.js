@@ -54,6 +54,24 @@ async function loadPublished(){
  if(response.ok){const data=await response.json();if(data&&typeof data.images==='object'){imgConfig=data;refresh()}}
  }catch(e){/* remain on default SVG silhouettes when offline */}
 }
+// Owner repo permissions do not prove that this specific PAT has Contents: write.
+// An unreferenced Git blob confirms the grant without modifying main or player data.
+async function verifyTokenCanWrite(raw){
+ const response=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`,{
+  method:'POST',
+  headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+raw,'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
+  body:JSON.stringify({content:'RKBO Card Archive token write permission check',encoding:'utf-8'})
+ });
+ let body={};try{body=await response.json()}catch{}
+ if(response.ok&&body.sha)return true;
+ if(response.status===401)throw Error('토큰이 만료되었거나 유효하지 않습니다. 새 토큰을 발급해 주세요.');
+ const msg=String(body.message||response.statusText||'').slice(0,260);
+ if(response.status===403||response.status===404){
+  if(/rate limit/i.test(msg)||response.headers.get('x-ratelimit-remaining')==='0')throw Error('GitHub API 요청 제한에 걸렸습니다. 잠시 후 다시 시도해 주세요. ('+msg+')');
+  throw Error('이 토큰에는 해당 저장소의 실제 쓰기 권한이 없습니다 (HTTP '+response.status+'). GitHub 토큰 설정에서 RKBO_Draft_and_CardArchive 저장소를 선택하고 Contents → Read and write를 허용한 새 토큰으로 다시 연결해 주세요. GitHub 응답: '+msg);
+ }
+ throw Error('쓰기 권한 검사 실패 (HTTP '+response.status+'): '+msg);
+}
 async function connect(){
  const raw=q('admin-token').value.trim();if(!raw){setStatus('토큰을 입력하세요.');return}
  setStatus('GitHub 계정과 저장소 쓰기 권한을 확인하고 있습니다…');
@@ -63,11 +81,13 @@ async function connect(){
  const user=await response.json();if(String(user.login).toLowerCase()!==OWNER.toLowerCase())throw Error('제작자 계정('+OWNER+')만 관리자 모드를 사용할 수 있습니다.');
  const check=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,{headers:{'Authorization':'Bearer '+raw,'Accept':'application/vnd.github+json'}});
  if(!check.ok)throw Error('저장소 접근 거부 ('+check.status+'). 토큰의 저장소 범위를 확인하세요.');
- const repo=await check.json();if(!repo.permissions?.push)throw Error('저장소 Contents: Read and write 권한이 필요합니다.');
+ const repo=await check.json();if(!repo.permissions?.push)throw Error('GitHub 계정에 해당 저장소의 쓰기 권한이 없습니다.');
+ setStatus('GitHub 토큰의 실제 Contents 쓰기 권한을 검사하고 있습니다…');
+ await verifyTokenCanWrite(raw);
  token=raw;q('admin-token').value='';authorized=true;
  await syncAll(true);q('admin-controls').hidden=false;q('admin-login').hidden=true;refresh();
- setStatus(`✓ ${user.login} 연결 완료. 카드 사진과 자료를 새 카드 도감 저장소의 GitHub main에 저장할 수 있습니다.`)
- }catch(e){token='';authorized=false;setStatus('연결 실패: '+e.message)}
+ setStatus(`✓ ${user.login} 연결 완료. GitHub Contents 쓰기 권한까지 확인했습니다. 카드 사진과 자료를 main에 저장할 수 있습니다.`)
+ }catch(e){token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 실패: '+e.message)}
 }
 async function syncAll(show=false){
  if(!token)return;
@@ -213,7 +233,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  const b=document.createElement('button');b.id='admin-open';b.className='admin-open';b.type='button';b.textContent='⚙ 제작자 모드';document.querySelector('.nav-right')?.append(b);
  const drawer=document.createElement('aside');drawer.id='admin-drawer';drawer.className='admin-drawer';drawer.hidden=true;drawer.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚙ RKBO 카드 도감 관리자</h2><button type="button" id="admin-close">닫기 ×</button></div>
  <p>선수 카드 이미지, 이미지 배치 설정, HHRecord·시즌 원본 파일을 GitHub에 저장합니다.</p>
- <div id="admin-login"><label for="admin-token">GitHub Fine-grained Personal Access Token</label><input id="admin-token" type="password" autocomplete="off" placeholder="github_pat_…"><div class="admin-actions"><button type="button" class="primary" id="admin-connect">GitHub 연결</button></div><div class="warning">토큰은 현재 열린 페이지의 메모리에서만 사용하며 저장하지 않습니다. ${OWNER}/${REPO} 저장소 Contents 읽기·쓰기 권한이 필요합니다.</div></div>
+ <div id="admin-login"><label for="admin-token">GitHub Fine-grained Personal Access Token</label><input id="admin-token" type="password" autocomplete="off" placeholder="github_pat_…"><div class="admin-actions"><button type="button" class="primary" id="admin-connect">GitHub 연결</button></div><div class="warning">토큰은 현재 열린 페이지의 메모리에서만 사용하며 저장하지 않습니다. ${OWNER}/${REPO} 저장소의 <b>Contents → Read and write</b> 권한이 필요합니다.<div style="margin-top:8px"><a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer">GitHub 토큰 설정 열기 ↗</a> · Repository access: <b>Only select repositories</b> → <b>RKBO_Draft_and_CardArchive</b> → Repository permissions: <b>Contents: Read and write</b></div></div></div>
  <div id="admin-controls" hidden><div class="admin-actions"><button id="admin-sync" type="button">↻ GitHub 전체 동기화</button><button id="admin-logout" type="button">연결 해제</button></div><hr><h2>시즌 카드 등록·공개</h2><p>원본 HTML·XLS·HHRecord 보관과 달리, 이 메뉴는 <b>선수별 카드 스탯·OVR이 포함된 JSON</b>을 검증해 시즌을 실제 도감에 등록합니다. 등록된 시즌만 공개 선택 목록에 나타납니다.</p><label for="season-register-number">등록할 시즌</label><input type="number" id="season-register-number" min="1" max="999" step="1" value="59" placeholder="예: 59"><label for="season-register-file">시즌 카드 JSON 파일</label><input type="file" id="season-register-file" accept=".json,application/json"><div class="admin-actions"><button id="season-register" type="button" class="primary">새 시즌 카드 등록 · GitHub 저장</button></div><p class="warning">파일 형식: {season:59,players:[...]} 또는 카드 배열. 선수마다 시즌별 고유 ID·구단·포지션·스탯·OVR·능력치가 필요합니다. HTML/XLS/HHRecord를 업로드하는 것만으로는 카드가 자동 생성되지 않습니다.</p><div id="admin-season-list" class="admin-file-list"></div><hr><h2>선수 카드 이미지 저장소 <span id="admin-image-count">0명 등록</span></h2><p>사진은 카드의 ✎ 편집에서 업로드하고, 배치를 적용한 후 GitHub에 저장합니다. 아래 목록과 도감은 같은 이미지 데이터를 사용합니다.</p><div id="admin-image-list" class="admin-file-list"></div><div class="admin-actions"><button type="button" id="admin-image-sync">↻ 카드 이미지 동기화</button></div><hr><h2>시즌·HHRecord 자료 첨부</h2><p>확장자 .html/.htm/.xls/.xlsx/.csv/.zip/.json 등. 선택한 자료는 GitHub에 원본 보관만 되며, 선수 카드 데이터 자동 반영은 다음 단계입니다.</p><label for="import-kind">자료 종류</label><select id="import-kind"><option value="season">다른 시즌 개인 성적</option><option value="hhrecord">HHRecord</option><option value="other">기타 데이터</option></select><label for="import-files">추가 파일 선택</label><input type="file" id="import-files" multiple accept=".html,.htm,.xls,.xlsx,.csv,.zip,.json,.txt"><div class="admin-actions"><button class="primary" id="upload-import" type="button">선택 파일 GitHub 저장</button></div><div class="warning">주의: 공개 GitHub 저장소이므로 업로드한 자료도 공개될 수 있습니다. 저작권·개인정보를 확인하세요.</div><h2 style="margin-top:15px">업로드 내역</h2><div id="admin-file-list" class="admin-file-list"></div><div class="warning" style="margin-top:10px">선수 사진은 <code>assets/cards/</code>, 이미지 배치 정보는 <code>data/card-images.json</code>에 저장되어 함께 연동됩니다.</div></div><hr><div class="admin-status" id="admin-status">토큰으로 제작자 인증한 후 편집할 수 있습니다.</div>`;
  document.body.append(drawer);
  const overlay=document.createElement('div');overlay.id='photo-editor-bg';overlay.className='photo-editor-bg';overlay.hidden=true;
@@ -257,7 +277,7 @@ async function publishGitBatch(entries,message,onProgress){
    let response,payload;try{response=await fetch(API_BASE+path,options);payload=await response.json()}catch(e){last=e;if(retry<2){await new Promise(r=>setTimeout(r,600*(retry+1)));continue}throw e}
    if(response.ok)return payload;
    last=Error(`GitHub ${response.status}: ${payload?.message||response.statusText}`);
-   if(response.status===403){if(/rate limit/i.test(payload?.message||'')&&retry<2){await new Promise(r=>setTimeout(r,1000*(retry+1)));continue}throw Error('저장소 쓰기 권한 부족(403). GitHub Fine-grained Token에 RKBO_Draft_and_CardArchive 저장소와 Contents: Read and write 권한이 필요합니다.')}
+   if(response.status===403){if(/rate limit/i.test(payload?.message||'')&&retry<2){await new Promise(r=>setTimeout(r,1000*(retry+1)));continue}throw Error('GitHub 403 ('+method+' '+path+'): '+String(payload?.message||'접근 거부').slice(0,220)+'\n토큰의 저장소 선택 범위와 Contents: Read and write 권한을 확인하고, 관리자 화면에서 연결 해제 → 새 토큰 연결을 해주세요.')}
    if(![429,502,503,504].includes(response.status)||retry===2)throw last;
    await new Promise(r=>setTimeout(r,900*(retry+1)));
   }
