@@ -53,13 +53,11 @@ async function make(player){
   if(silhouette)ctx.drawImage(silhouette,20,player.type==='투수'?45:38,260,260);
  }
  ctx.restore();
- // Top-layer club symbol and favorite emblem remain visible over photography.
+ // Club symbol remains; the interactive favorite button is excluded from exported PNGs.
  if(logo){
   const width=logo.naturalWidth,height=logo.naturalHeight;
   if(width>0&&height>0){const f=Math.min(56/width,43/height);ctx.drawImage(logo,13,11,width*f,height*f)}
  }else label(ctx,player.team,15,39,'italic 900 27px system-ui, sans-serif',grade.metal);
- ctx.beginPath();ctx.arc(274,26,14,0,2*Math.PI);ctx.fillStyle='rgba(6,15,26,.8)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.2)';ctx.stroke();
- label(ctx,'☆',274,33,'21px system-ui, sans-serif','#adbed0','center');
  ctx.fillStyle='#0c1828';ctx.fillRect(6,249,288,64);
  const shade=ctx.createLinearGradient(0,228,0,253);shade.addColorStop(0,'rgba(9,19,33,0)');shade.addColorStop(1,'rgba(9,19,33,.9)');ctx.fillStyle=shade;ctx.fillRect(6,228,288,25);
  label(ctx,player.ovr,21,302,'1000 57px system-ui, sans-serif',grade.metal);
