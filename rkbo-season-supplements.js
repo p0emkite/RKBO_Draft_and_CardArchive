@@ -86,7 +86,7 @@ async function analyze(){
    if(personalSource.rows.filter(x=>x.type==="타자").length<20||personalSource.rows.filter(x=>x.type==="투수").length<20)throw Error("개인 성적 ZIP에 타자/투수 1군 기록이 충분하지 않습니다.");
    if(cards){
     const pre=root.RKBOSeasonIdentity.compareSeason(cards,personalSource,season);
-    if(!pre.matched)throw Error("기존 카드와 핵심 개인 기록이 일치하는 선수를 찾지 못했습니다. 시즌이 맞는지 확인해 주세요.");
+    if(pre.matched<Math.ceil(cards.length*.6))throw Error("기존 카드와 개인 성적의 핵심 기록이 "+pre.matched+"/"+cards.length+"명만 일치합니다. 잘못된 시즌 파일이 아닌지 확인해 주세요 (최소 60% 일치 필요).");
     identity={matched:pre.matched,unmatched:pre.unmatched,ambiguous:pre.ambiguous,duplicates:pre.duplicates,
       teamsChanged:pre.teamChanges,namesChanged:pre.nameChanges,unlisted:pre.unlistedCards};
     cards=pre.players;
@@ -132,7 +132,8 @@ async function analyze(){
    ...(hhReport?.notes||[]),
    "원본 파일은 GitHub에 보관하고, 수비가 재산정되면 타자 OVR·등급·순위까지 함께 갱신합니다.",
    "통합 엑셀은 필요하지 않습니다. 미확인 선수 기록이나 투수 원점수는 임의로 변경하지 않습니다.",
-   "오른쪽의 [GitHub에 적용]을 눌러야 실제로 반영됩니다."
+   finalResult?.changes?.length?"변경 예시: "+finalResult.changes.filter(x=>x.previousDefense!==x.defense||x.previousOVR!==x.ovr).slice(0,8).map(x=>x.name+" 수비 "+(x.previousDefense??"—")+"→"+(x.defense??"—")+" / OVR "+x.previousOVR+"→"+x.ovr).join(" · "):"",
+   "미리보기를 확인한 뒤 [GitHub에 적용]을 눌러야 실제로 반영됩니다."
   ].filter(Boolean).join("\n");
   prepared={inputs,existing,created,cards,identity,fielding,finalResult,hhReport,personalSource};
   info(report);q("rkbo-supp-save").hidden=false;
@@ -170,12 +171,7 @@ async function save(){
      chunks:paths,chunkBytes:CHUNK,format:"base64-chunks",uploadedAt:now,source:"season-supplement-evidence"});
   }
   if(work.fielding){
-   const headers=work.fielding.columns,rows=work.fielding.rows;
-   const text=rows.map(r=>headers.map(h=>{
-    const key=h==="PLAYER"?"Player":h==="TEAM"?"Team":h;
-    return r[key]===undefined?"":r[key];
-   }).join("\t"));
-   // Preserve exact, validated final source text when possible, normalized as UTF-8.
+   // Preserve the source as UTF-8; raw uploaded bytes are archived separately.
    batch.push({path:"data/season-fielding/"+season+".tsv",content:await fileText(defense)});
    if(season===60)batch.push({path:"data/season60-fielding.tsv",content:await fileText(defense)});
   }
@@ -195,6 +191,19 @@ async function save(){
    const embedded=JSON.stringify(work.cards);
    const changed=curr.original.slice(0,curr.i+curr.open.length)+embedded+curr.original.slice(curr.j);
    batch.push({path:"index.html",content:changed});
+   if(work.finalResult){
+    const d=work.finalResult;
+    batch.push({path:"data/season60-defense-audit.json",content:JSON.stringify({version:3,summary:{
+      season:60,source:"User-uploaded final fielding via RKBO season supplement",
+      cardCount:work.cards.length,batters:d.report.batters,sourceRows:d.report.sourceRows,
+      matched:d.report.matched,updated:d.report.updated,zeroFielding50:d.report.zeroFielding50,
+      defenseChanged:d.report.defenseChanged,ovrChanged:d.report.ovrChanged,gradeChanged:d.report.gradeChanged,
+      scorer:"83/17 fielding score; 140 chances; 600 innings; zero fielding G = 50"
+    },players:d.changes},null,2)+"\n"});
+    const csv=["id,name,team,old_defense,new_defense,old_OVR,new_OVR,old_grade,new_grade",
+      ...d.changes.map(x=>[x.id,x.name,x.team,x.previousDefense??"",x.defense??"",x.previousOVR,x.ovr,x.previousGrade,x.grade].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(","))].join("\n")+"\n";
+    batch.push({path:"data/season60-defense-changes.csv",content:csv});
+   }
   }else{
    const previous=curr?.original||{};
    batch.push({path:"data/seasons/"+season+".json",content:JSON.stringify({...previous,season,players:work.cards,
@@ -203,7 +212,7 @@ async function save(){
   }
   const item={season,file:season===60?null:"data/seasons/"+season+".json",label:season+"차 시즌",count:work.cards.length,
     source:work.created?"season-team-personal-stats":(manifest.seasons.find(x=>Number(x.season)===season)?.source||"embedded"),
-    ...(work.identity?.matched?{identityVerified:!work.identity.ambiguous.length&&!work.identity.duplicates.length,
+    ...(work.identity?.matched?{identityVerified:work.identity.matched>=Math.ceil(work.cards.length*.95)&&!work.identity.ambiguous.length&&!work.identity.duplicates.length,
       identitySource:"season-team-personal-stats",identityMatched:work.identity.matched}:{})};
   const k=manifest.seasons.findIndex(x=>Number(x.season)===season);
   if(k>=0)manifest.seasons[k]={...manifest.seasons[k],...item};
