@@ -30,6 +30,16 @@
       "commit": "c5dd0ffffc3f5223b9e83487842025b3b101d0bb",
       "blobSha": "d81cf24dbd1c52194a0fd684c11b253e7d7f52a6",
       "rev": "mvmheczb"
+    },
+    "KIA": {
+      "path": "assets/team-backgrounds/KIA.webp",
+      "x": 2,
+      "y": 5,
+      "zoom": 1.17,
+      "overlay": 60,
+      "commit": "cc3f78a9a5001e92c6e90ca1d572f89bc110628d",
+      "blobSha": "d22f968b174ffed4f3ed8d4ca3e7cf8040c3fda5",
+      "rev": "mvmhorue"
     }
   }
 }
