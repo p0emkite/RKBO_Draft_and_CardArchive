@@ -180,7 +180,7 @@ async function connect(){
  setStatus('GitHub 토큰의 실제 Contents 쓰기 권한을 검사하고 있습니다…');
  await verifyTokenCanWrite(raw);
  token=raw;q('admin-token').value='';authorized=true;
- await syncAll(true);q('admin-controls').hidden=false;q('admin-login').hidden=true;refresh();
+ await syncAll(true);q('admin-controls').hidden=false;q('admin-login').hidden=true;refresh();window.dispatchEvent(new Event('rkbo-admin-connected'));
  setStatus(`✓ ${user.login} 연결 완료. GitHub Contents 쓰기 권한까지 확인했습니다. 카드 사진과 자료를 main에 저장할 수 있습니다.`)
  }catch(e){token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 실패: '+e.message)}
 }
@@ -199,6 +199,7 @@ for(const [id,item] of Object.entries(previewCache)){
 }
 previewCache=preserved;renderImports();renderImageList();refresh();
  if(show)setStatus('✓ GitHub의 카드 이미지 설정 및 파일 목록을 동기화했습니다.');
+ await window.RKBOTeamBackground?.reload?.().catch(error=>console.warn('[RKBO team background sync]',error));
  await window.RKBOSeason?.reload?.().catch(e=>setStatus('시즌 목록 새로고침 실패: '+e.message));renderRegisteredSeasons();
 }
 function renderImageList(){const el=q('admin-image-list'),count=q('admin-image-count');const entries=Object.entries(imgConfig.images||{});if(count)count.textContent=entries.length+'명 등록';if(!el)return;el.innerHTML=entries.length?entries.map(([id,v])=>`<div style="padding:4px 0;border-bottom:1px solid #2d4358">${h(id)} · ${h(v.path||'미등록')}</div>`).join(''):'아직 GitHub에 저장된 선수 이미지가 없습니다.';}
@@ -438,6 +439,15 @@ async function publishGitBatch(entries,message,onProgress){
 window.RKBOAdminBridge={
  isAuthorized:()=>authorized&&!!token,
  readJson:(path)=>{if(!authorized)throw Error('GitHub 인증 필요');return readJson(path)},
+ writeJson:(path,data,sha)=>{if(!authorized)throw Error('GitHub 인증 필요');return putJson(path,data,sha)},
+ uploadBinary:async(path,blob)=>{
+  if(!authorized||!token)throw Error('GitHub 인증 필요');
+  if(!/^assets\/team-backgrounds\/[A-Z]{2,3}\.webp$/.test(path))throw Error('구단 배경 이미지 경로만 허용합니다.');
+  const before=await gh(path);
+  const data=new Uint8Array(await blob.arrayBuffer());
+  if(data.byteLength>3*1024*1024)throw Error('구단 배경 이미지 용량이 3MB를 초과했습니다.');
+  return gh(path,'PUT',base64bytes(data),before?.sha||null);
+ },
  publishBatch:publishGitBatch
 };
 

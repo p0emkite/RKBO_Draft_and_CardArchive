@@ -157,3 +157,60 @@
   outline:2px solid #8de0f2;
   outline-offset:2px;
 }
+
+
+/* RKBO archive card v0.7 — left-aligned name / right-aligned position */
+.player-card .card-name{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:0 17px;min-height:73px;
+}
+.player-card .card-name h3{
+ margin:0;min-width:0;flex:1 1 auto;white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis;font-size:clamp(19px,1.55vw,23px);
+ line-height:1.22;font-weight:950;letter-spacing:-.035em;
+}
+.player-card .card-position{
+ display:inline-block;flex:0 0 auto;min-width:36px;max-width:72px;
+ font-size:clamp(17px,1.45vw,21px);font-weight:950;
+ letter-spacing:.01em;text-align:right;color:#d0e0f1;
+ white-space:nowrap;line-height:1.25;
+}
+
+/* Separate club artwork is behind the athlete photo/silhouette.
+   The watermark and badge remain part of the original card. */
+.player-card .headshot .team-background-photo{
+ position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;
+ max-width:none;max-height:none;object-fit:cover;object-position:center;
+ transform:translate(var(--team-bg-x,0%),var(--team-bg-y,0%)) scale(var(--team-bg-zoom,1));
+ transform-origin:center;pointer-events:none;user-select:none;
+}
+.player-card .headshot .team-ghost{position:absolute;z-index:1;pointer-events:none}
+.player-card .headshot::before{z-index:1;pointer-events:none}
+.player-card .headshot .player-pose{z-index:2}
+.player-card .headshot .player-photo{z-index:3}
+.player-card .headshot .edit-photo{z-index:5}
+.player-card .card-top{z-index:6}
+
+/* Team-wide background management panel (available only after admin sign-in). */
+#rkbo-team-backgrounds{margin-top:15px;padding-top:9px}
+#rkbo-team-backgrounds .team-bg-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#rkbo-team-backgrounds .team-bg-actions button{flex:1;min-width:125px}
+#rkbo-team-backgrounds input[type="range"]{width:100%;accent-color:#8fd9eb}
+#rkbo-team-backgrounds .team-bg-preview{
+ position:relative;width:min(100%,330px);aspect-ratio:288 / 243;
+ overflow:hidden;isolation:isolate;touch-action:none;cursor:grab;
+ border:1px solid #537b91;border-radius:12px;
+ background:radial-gradient(circle at 40% 30%,#385473,#091727 80%);
+}
+#rkbo-team-backgrounds .team-bg-preview:active{cursor:grabbing}
+#rkbo-team-backgrounds .team-bg-preview img{
+ position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+ object-position:center;
+ transform:translate(var(--team-bg-x,0%),var(--team-bg-y,0%)) scale(var(--team-bg-zoom,1));
+ pointer-events:none;
+}
+#rkbo-team-backgrounds .team-bg-preview-note{position:relative;z-index:1;pointer-events:none;
+ padding:10px;font-size:11px;font-weight:850;display:inline-block;
+ background:#07111dbc;color:#e9f4ff;border-bottom-right-radius:8px}
+#rkbo-team-backgrounds .team-bg-status{font-size:11px;white-space:pre-wrap;color:#b8cfdf;line-height:1.55;word-break:break-word}
+@media(max-width:570px){.player-card .card-name h3{font-size:19px}.player-card .card-position{font-size:17px}}

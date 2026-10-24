@@ -28,11 +28,13 @@ async function make(player){
  const ctx=canvas.getContext('2d');ctx.scale(SCALE,SCALE);
  const grade=grades[player.grade]||grades.실버,brand=window.RKBOTeamBrand?.code(player)||player.team,team=teams[brand]||'#243e61';
  const photo=window.RKBOArt?.imageState?.(player)||{};
+ const teamBg=window.RKBOTeamBackground?.imageState?.(player)||{};
  const photoSrc=photo.url||'';
- const [image,logo,silhouette]=await Promise.all([
+ const [image,logo,silhouette,background]=await Promise.all([
   load(photoSrc),
   load(window.RKBOTeamBrand?.logo(player)||('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg'))),
-  photoSrc?Promise.resolve(null):load('assets/default-'+(player.type==='투수'?'pitcher':'batter')+'.png')
+  photoSrc?Promise.resolve(null):load('assets/default-'+(player.type==='투수'?'pitcher':'batter')+'.png'),
+  load(teamBg.url||'')
  ]);
  // Fixed 300 × 420 logical card, rasterized 2.5×; layout always keeps a 5:7 ratio.
  round(ctx,1,1,298,418,17);ctx.fillStyle='#0d1827';ctx.fill();ctx.strokeStyle=grade.metal;ctx.lineWidth=1.6;ctx.stroke();
@@ -44,6 +46,15 @@ async function make(player){
  const bg=ctx.createRadialGradient(120,8,0,140,135,250);
  bg.addColorStop(0,rgb(team,.65));bg.addColorStop(.55,'#1a2b40');bg.addColorStop(1,'#0c1625');
  ctx.fillStyle=bg;ctx.fillRect(6,6,288,243);
+ // Club-wide photo is behind individual athlete artwork, not a replacement.
+ if(background&&background.naturalWidth&&background.naturalHeight){
+  const ratio=Math.max(288/background.naturalWidth,243/background.naturalHeight);
+  const zoom=clamp(Number(teamBg.zoom)||1,.35,3.5);
+  const tx=clamp(Number(teamBg.x)||0,-100,100)*288/100;
+  const ty=clamp(Number(teamBg.y)||0,-100,100)*243/100;
+  const w=background.naturalWidth*ratio*zoom,h=background.naturalHeight*ratio*zoom;
+  ctx.drawImage(background,150+tx-w/2,127.5+ty-h/2,w,h);
+ }
  label(ctx,brand,150,163,'1000 90px system-ui, sans-serif','rgba(255,255,255,.07)','center');
  ctx.beginPath();ctx.arc(150,150,94,0,2*Math.PI);ctx.lineWidth=.8;ctx.strokeStyle=grade.metal;ctx.stroke();
  if(image){
@@ -68,8 +79,9 @@ async function make(player){
  badge(ctx,player.grade==='플래티넘'?'코랄':player.grade,283,grade.metal);
  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(6,313);ctx.lineTo(294,313);ctx.stroke();
  const ng=ctx.createLinearGradient(0,314,0,370);ng.addColorStop(0,'#0e1a2c');ng.addColorStop(1,'#091421');ctx.fillStyle=ng;ctx.fillRect(6,314,288,56);
- label(ctx,player.name,20,337,'850 17px system-ui, sans-serif','#eef3fa','left',268);
- label(ctx,player.teamLabel+' · '+player.pos+' · '+player.type,20,356,'750 10px system-ui, sans-serif','#9fb2c8','left',270);
+ // One-line name + position layout, matching the gallery card.
+ label(ctx,player.name,20,351,'950 21px system-ui, sans-serif','#eef3fa','left',212);
+ label(ctx,player.pos,280,351,'950 20px system-ui, sans-serif','#cddff0','right',56);
  ctx.fillStyle='#091320';ctx.fillRect(6,370,288,44);
  const metrics=player.type==='타자'?['정확','파워','선구','주루','수비']:['구위','제구','피안타 억제','피홈런 억제','체력'];
  const short={'피안타 억제':'피안','피홈런 억제':'피홈'};
