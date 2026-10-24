@@ -16,7 +16,14 @@ function apply(players,season,options={}){
  for(const team of teams){
   const pitchers=players.filter(p=>p.type==='투수'&&p.team===team);
   const locked=manual?pitchers.filter(p=>p.positionManual===true):[];
-  const manualCloser=locked.some(p=>p.pos==='CP');
+  const manualCPs=locked.filter(p=>p.pos==='CP');
+  // If the admin manually appoints a new closer, that most recent choice
+  // supersedes earlier manual appointments on the same club.
+  if(manualCPs.length>1){
+   manualCPs.sort((a,b)=>String(b.positionUpdatedAt||'').localeCompare(String(a.positionUpdatedAt||''))||a.id.localeCompare(b.id));
+   for(const previous of manualCPs.slice(1)){previous.pos='RP';relegated.push(previous.id)}
+  }
+  const manualCloser=manualCPs.length>0;
   const pool=pitchers.filter(p=>['RP','CP'].includes(p.pos)&&(!manual||p.positionManual!==true));
   const top=pool.filter(p=>n(p.stats?.S)>0).sort((a,b)=>n(b.stats.S)-n(a.stats.S)||IP(b)-IP(a)||n(b.stats?.G)-n(a.stats?.G)||a.id.localeCompare(b.id))[0]||null;
   // 60th-season explicit user selections override a save-count tie.
