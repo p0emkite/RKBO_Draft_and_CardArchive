@@ -224,10 +224,10 @@ async function saveHistorical(){
 function init(){
  const controls=q('admin-controls');if(!controls||q('rkbo-auto-import'))return;
  const holder=document.createElement('section');holder.id='rkbo-auto-import';
- holder.innerHTML=`<hr><h2>원본 3종 자동 분석 · 시즌 카드 일괄 등록</h2><p>통합 엑셀(1~60차)을 기준으로 시즌별 선수 카드와 OVR을 계산하고, 8개 구단 개인성적·HHRecord ZIP을 검증 자료로 보관한 뒤 <b>GitHub와 시즌 선택 목록에 자동 반영</b>합니다.</p>
- <label for="rkbo-master-xls">① RKBO 통합 성적 엑셀 (.xls) <b>필수</b></label><input type="file" id="rkbo-master-xls" accept=".xls,application/vnd.ms-excel">
- <label for="rkbo-team-html">② 8개 구단 개인 성적 ZIP (TXT/HTML 지원)</label><input type="file" id="rkbo-team-html" accept=".zip,application/zip">
- <label for="rkbo-hhrecord">③ HHRecord ZIP (원본 및 수비 기록 자료)</label><input type="file" id="rkbo-hhrecord" accept=".zip,application/zip">
+ holder.innerHTML=`<hr><h2>별도 기능 · 통합 성적 XLS로 전체 시즌 일괄 재생성</h2><p><b>이 메뉴에서만</b> 통합 XLS가 필요합니다. 위의 <b>시즌별 자료 업로드</b>는 통합 XLS 없이 8개·10개 구단 개인 성적 ZIP, HHRecord ZIP, 최종 수비 TXT를 분석하고 GitHub에 등록할 수 있습니다. 여기서는 통합 엑셀로 1~59차를 한꺼번에 다시 산출합니다.</p>
+ <label for="rkbo-master-xls">전체 시즌 일괄 재생성용 RKBO 통합 성적 엑셀 (.xls) — 이 기능에서만 필수</label><input type="file" id="rkbo-master-xls" accept=".xls,application/vnd.ms-excel">
+ <label for="rkbo-team-html">보조자료 · 8개 구단 개인 성적 ZIP (10개 구단/무엑셀은 위 새 메뉴 사용)</label><input type="file" id="rkbo-team-html" accept=".zip,application/zip">
+ <label for="rkbo-hhrecord">보조자료 · HHRecord ZIP (최종 수비 TXT는 위 새 메뉴 사용)</label><input type="file" id="rkbo-hhrecord" accept=".zip,application/zip">
  <hr><h2>당시 개인 성적표로 닉네임·소속팀 정정</h2>
  <p>선수 스탯과 OVR은 기존 RKBO 엑셀을 유지합니다. 각 시즌의 <b>1군 개인 성적 TXT/HTML(또는 ZIP)</b>에서 경기 기록이 일치하는 선수를 찾고 <b>당시 이름·소속 구단을 우선</b> 적용합니다. HHRecord는 보조 검증 자료로 별도 보관할 수 있습니다.</p>
  <label for="rkbo-history-season">해당 시즌</label><input type="number" min="1" max="59" id="rkbo-history-season" value="54" inputmode="numeric">
@@ -237,7 +237,7 @@ function init(){
  <div class="admin-actions"><button type="button" class="primary" id="rkbo-auto-analyze">세 파일 분석 · 시즌별 능력치 산출</button><button type="button" id="rkbo-auto-publish" hidden>분석한 시즌 전체 GitHub에 등록</button></div>
  <pre id="rkbo-auto-status" class="rkbo-auto-report" aria-live="polite">엑셀 파일을 선택하면 1~60차 전체 기록에서 시즌별 카드를 자동 계산할 수 있어요.</pre>
  <p id="rkbo-auto-success" hidden class="warning">새 시즌이 드롭다운에 등록되었습니다. 시즌 변경 시 카드 이미지, 이름 매칭 및 PNG 저장도 함께 전환됩니다.</p>
- <p class="warning"><b>보존 원칙:</b> 기존 검증된 60차 211장은 덮어쓰지 않습니다. 1~59차는 동일한 표본 신뢰도·출전량 상한 규칙을 사용하며, 시즌별 수비 근거가 없는 경우 수비는 미산정(—)합니다. 저장소에는 업로드한 파일 원본을 분할 보관합니다.</p>`;
+ <p class="warning"><b>보존 원칙:</b> 이 전체 XLS 일괄 생성 메뉴는 기존 검증된 60차 데이터를 덮어쓰지 않습니다. 시즌별 수비 스탯은 위 시즌별 자료 업로드 메뉴에서 최종 수비 TXT를 제공해야 재산정됩니다. 통합 XLS 전체 재생성은 기존 시즌별 보정값을 덮어쓸 수 있으므로 주의하세요.</p>`;
  const anchor=controls.querySelector('h2'); // after action toolbar near start
  if(anchor)anchor.before(holder);else controls.prepend(holder);
  q('rkbo-auto-analyze').addEventListener('click',analyze);q('rkbo-auto-publish').addEventListener('click',publish);

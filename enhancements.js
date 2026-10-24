@@ -440,6 +440,7 @@ async function publishGitBatch(entries,message,onProgress){
 window.RKBOAdminBridge={
  isAuthorized:()=>authorized&&!!token,
  readJson:(path)=>{if(!authorized)throw Error('GitHub 인증 필요');return readJson(path)},
+ readText:async(path)=>{if(!authorized)throw Error('GitHub 인증 필요');const file=await gh(path);return {sha:file?.sha||null,content:file?.content?decode64(file.content):null}},
  writeJson:(path,data,sha)=>{if(!authorized)throw Error('GitHub 인증 필요');return putJson(path,data,sha)},
  uploadBinary:async(path,blob)=>{
   if(!authorized||!token)throw Error('GitHub 인증 필요');
