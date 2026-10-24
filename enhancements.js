@@ -19,7 +19,20 @@ const base64bytes=bytes=>{let s='';for(let i=0;i<bytes.length;i+=16384){s+=Strin
 const decode64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,'')),c=>c.charCodeAt(0)));
 const encode64=s=>base64bytes(new TextEncoder().encode(s));
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
-const imgSrc=(path)=>{if(!path)return '';const safe=path.split('/').map(encodeURIComponent).join('/');return new URL('./'+safe,document.baseURI).href};
+const safeFilePath=path=>String(path||'').split('/').map(encodeURIComponent).join('/');
+const imgSrc=path=>path?new URL('./'+safeFilePath(path),document.baseURI).href:'';
+// GitHub Pages deployments are asynchronous. Pin a card image to the GitHub
+// commit that was returned by the upload rather than loading a potentially
+// not-yet-published Pages asset.
+const photoRemoteUrl=entry=>{
+ if(!entry?.path)return '';
+ const revision=/^[0-9a-f]{40}$/i.test(String(entry.commit||''))?entry.commit:'main';
+ const url=`https://raw.githubusercontent.com/${OWNER}/${REPO}/${revision}/${safeFilePath(entry.path)}`;
+ return url+(entry.rev?'?v='+encodeURIComponent(entry.rev):'');
+};
+const photoPagesUrl=entry=>entry?.path?imgSrc(entry.path)+(entry.rev?'?v='+encodeURIComponent(entry.rev):''):'';
+const photoUrl=entry=>entry?.url||photoRemoteUrl(entry);
+
 const teamLogo=player=>imgSrc(window.RKBOTeamBrand?.logo(player)||('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg')));
 const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],SK:['#cf292f','#ffe3e2'],KIW:['#6a1e3f','#e6b6c8']};
 const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},코랄:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
@@ -27,18 +40,50 @@ const styleVars=p=>{const g=gradeMeta[p.grade],tm=teamMeta[p.displayTeamCode||p.
 const photoFit=entry=>entry?.fit==='cover'?'cover':'contain';
 function photoHtml(p){const temp=previewCache[p.id];const entry=temp||imgConfig.images?.[p.id];if(!entry)return '';
  const x=Number(entry.x)||0,y=Number(entry.y)||0,zoom=Number(entry.zoom)||1;
- const url=entry.url||(entry.path?imgSrc(entry.path)+(entry.rev?'?rev='+encodeURIComponent(entry.rev):''):'');
+ const url=photoUrl(entry);
  if(!url)return '';
- return `<img class="player-photo" src="${h(url)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)};--photo-fit:${photoFit(entry)}">`;
+ return `<img class="player-photo" src="${h(url)}" data-photo-fallback="${h(entry.url?'':photoPagesUrl(entry))}" data-photo-type="${h(p.type)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)};--photo-fit:${photoFit(entry)}">`;
 }
 function poseHtml(p){
  const file=p.type==='투수'?'assets/default-pitcher.png':'assets/default-batter.png';
  return `<img class="player-pose" src="${h(imgSrc(file))}" draggable="false" alt="${h(p.type==='투수'?'투구':'타격')} 동작 기본 실루엣">`;
 }
-const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} 사진 편집">✎ 사진 편집</button>`:''}`},refresh,imageState(p){const entry=previewCache[p.id]||imgConfig.images?.[p.id]||null;if(!entry)return null;return {...entry,url:entry.url||(entry.path?imgSrc(entry.path)+(entry.rev?'?rev='+encodeURIComponent(entry.rev):''):'')}}};
+const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} 사진 편집">✎ 사진 편집</button>`:''}`},refresh,imageState(p){const entry=previewCache[p.id]||imgConfig.images?.[p.id]||null;if(!entry)return null;return {...entry,url:photoUrl(entry)}}};
 window.RKBOArt=art;
 function refresh(){const sort=q('sort');if(sort)sort.dispatchEvent(new Event('change',{bubbles:true}));if(activeEditor)renderEditor()}
 function setStatus(s){if(q('admin-status'))q('admin-status').textContent=s}
+document.addEventListener('error',event=>{
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement)||!img.classList.contains('player-photo'))return;
+ if(img.dataset.photoRetry!=='1'&&img.dataset.photoFallback){
+  img.dataset.photoRetry='1';img.src=img.dataset.photoFallback;return;
+ }
+ const silhouette=document.createElement('img');
+ silhouette.className='player-pose';
+ silhouette.src=imgSrc(img.dataset.photoType==='투수'?'assets/default-pitcher.png':'assets/default-batter.png');
+ silhouette.alt='저장된 사진을 불러올 수 없어 기본 실루엣을 표시합니다.';
+ silhouette.draggable=false;img.replaceWith(silhouette);
+},true);
+// A newly uploaded photo stays visible as a blob until its pinned remote URL
+// actually responds with a decoded image, regardless of Pages build timing.
+function verifySavedPhoto(id,entry,localBlobUrl,attempt=0){
+ if(!localBlobUrl?.startsWith('blob:')||!entry?.path)return;
+ const probe=new Image();
+ probe.onload=()=>{
+  const pending=previewCache[id],current=imgConfig.images?.[id];
+  if(pending?.url!==localBlobUrl||current?.rev!==entry.rev||current?.path!==entry.path)return;
+  delete previewCache[id];refresh();URL.revokeObjectURL(localBlobUrl);
+  setStatus('✓ '+id+' 이미지가 GitHub에 저장되었고 공개 사진 연결도 확인했습니다.');
+ };
+ probe.onerror=()=>{
+  if(previewCache[id]?.url!==localBlobUrl)return;
+  if(attempt<5)setTimeout(()=>verifySavedPhoto(id,entry,localBlobUrl,attempt+1),Math.min(3000*(attempt+1),12000));
+  else setStatus('✓ 사진과 배치는 GitHub에 저장됐습니다. 공개 이미지 연결 확인 전까지 현재 사진을 유지합니다.');
+ };
+ probe.crossOrigin='anonymous';
+ probe.src=photoRemoteUrl(entry);
+}
+
 async function gh(path,method='GET',data=null,sha=null){
  if(!token)throw new Error('GitHub 토큰이 없습니다.');
  const url=API+path.split('/').map(encodeURIComponent).join('/');
@@ -50,10 +95,18 @@ async function gh(path,method='GET',data=null,sha=null){
 async function readJson(path){const file=await gh(path);if(!file)return {sha:null,data:null};if(!file.content)throw Error('파일 응답에 데이터가 없습니다.');return {sha:file.sha,data:JSON.parse(decode64(file.content))}}
 async function putJson(path,data,sha){return gh(path,'PUT',encode64(JSON.stringify(data,null,2)+'\n'),sha)}
 async function loadPublished(){
- try{const source=location.protocol==='file:'?`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${IMAGE_META}`:'./data/card-images.json';
- const response=await fetch(source+(source.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});
- if(response.ok){const data=await response.json();if(data&&typeof data.images==='object'){imgConfig=data;refresh()}}
- }catch(e){/* remain on default SVG silhouettes when offline */}
+ // Read newly committed image metadata without waiting for GitHub Pages build.
+ // Fallback to Pages for offline/mirror scenarios.
+ const candidates=[`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${IMAGE_META}`];
+ if(location.protocol!=='file:')candidates.push('./data/card-images.json');
+ for(const source of candidates){
+  try{
+   const response=await fetch(source+'?t='+Date.now(),{cache:'no-store'});
+   if(!response.ok)continue;
+   const data=await response.json();
+   if(data&&typeof data.images==='object'){imgConfig=data;refresh();return}
+  }catch(error){console.warn('[RKBO photo metadata]',source,error)}
+ }
 }
 // Owner repo permissions do not prove that this specific PAT has Contents: write.
 // An unreferenced Git blob confirms the grant without modifying main or player data.
@@ -95,7 +148,15 @@ async function syncAll(show=false){
  const [imgs,files]=await Promise.all([readJson(IMAGE_META),readJson(IMPORT_META)]);
  if(imgs.data&&typeof imgs.data.images==='object')imgConfig=imgs.data;
  if(files.data&&Array.isArray(files.data.files))imported=files.data;
- metaSha=imgs.sha;importSha=files.sha;for(const k of Object.keys(previewCache)){if(previewCache[k]?.url?.startsWith('blob:'))URL.revokeObjectURL(previewCache[k].url)}previewCache={};renderImports();renderImageList();refresh();
+ metaSha=imgs.sha;importSha=files.sha;
+// Preserve successful local uploads while their remote image URL is settling.
+const preserved={};
+for(const [id,item] of Object.entries(previewCache)){
+ const saved=imgConfig.images?.[id];
+ if(item?.url?.startsWith('blob:')&&saved&&item.path===saved.path&&item.rev===saved.rev)preserved[id]=item;
+ else if(item?.url?.startsWith('blob:'))URL.revokeObjectURL(item.url);
+}
+previewCache=preserved;renderImports();renderImageList();refresh();
  if(show)setStatus('✓ GitHub의 카드 이미지 설정 및 파일 목록을 동기화했습니다.');
  await window.RKBOSeason?.reload?.().catch(e=>setStatus('시즌 목록 새로고침 실패: '+e.message));renderRegisteredSeasons();
 }
@@ -114,7 +175,7 @@ function imgUrlFromBlob(blob){return URL.createObjectURL(blob)}
 function startEdit(id){if(!authorized)return;const p=window.RKBOSeason?.players()?.find(x=>x.id===id);if(!p)return;
  const pending=previewCache[id];activeEditor={p,blob:pending?.blob||null,url:pending?.url||null,entry:{x:0,y:0,zoom:1,fit:'contain',...(imgConfig.images[id]||{}),...(pending||{})}};
  q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';q('editor-title').textContent=p.name+' · 카드 사진';q('photo-file').value='';renderEditor()}
-function editorImageSource(e){return e.url||(e.entry.path?imgSrc(e.entry.path)+(e.entry.rev?'?rev='+encodeURIComponent(e.entry.rev):''):'')}
+function editorImageSource(e){return e.url||photoUrl(e.entry)}
 function updateEditorTransform(){const e=activeEditor;if(!e)return;const stage=q('editor-stage'),img=stage?.querySelector('.headshot .player-photo');if(img){img.style.setProperty('--photo-x',clamp(Number(e.entry.x)||0,-150,150)+'%');img.style.setProperty('--photo-y',clamp(Number(e.entry.y)||0,-150,150)+'%');img.style.setProperty('--photo-zoom',clamp(Number(e.entry.zoom)||1,.3,5));img.style.setProperty('--photo-fit',photoFit(e.entry));}q('editor-zoom').value=clamp(Number(e.entry.zoom)||1,.3,5);q('editor-scale-label').textContent=Math.round(Number(q('editor-zoom').value)*100)+'%';if(q('editor-fit'))q('editor-fit').value=photoFit(e.entry);}
 function collectionCardWidth(){
  // Match the actual rendered collection card, not a fixed-size editor template.
@@ -152,16 +213,42 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
  const e=activeEditor;busy=true;q('editor-save').disabled=true;q('editor-photo-status').textContent='GitHub에 저장 중…';
  try{
  let path=e.entry.path||'';let rev=e.entry.rev||'';
- if(reset){path='';rev=''}
- else if(e.blob){path='assets/cards/'+e.p.id+'.webp';const arr=new Uint8Array(await e.blob.arrayBuffer());const before=await gh(BASE+path);await gh(BASE+path,'PUT',base64bytes(arr),before?.sha||null);rev=Date.now().toString(36)}
+ let imageCommit=e.entry.commit||imgConfig.images?.[e.p.id]?.commit||'';
+ if(reset){path='';rev='';imageCommit=''}
+ else if(e.blob){
+  path='assets/cards/'+e.p.id+'.webp';
+  const arr=new Uint8Array(await e.blob.arrayBuffer());
+  const before=await gh(BASE+path);
+  const uploaded=await gh(BASE+path,'PUT',base64bytes(arr),before?.sha||null);
+  // GitHub image-content write returns the immutable commit containing the file.
+  imageCommit=uploaded?.commit?.sha||'';
+  rev=Date.now().toString(36);
+ }
  else if(!path)throw Error('먼저 이미지를 선택해 주세요.');
  // Re-read SHA to avoid overwriting an update made in another browser.
  const current=await readJson(IMAGE_META);const latest=current.data||{version:1,images:{}};
  latest.images=latest.images||{};
  if(reset)delete latest.images[e.p.id];
- else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),rev};
- await putJson(IMAGE_META,latest,current.sha);imgConfig=latest;delete previewCache[e.p.id];
- if(e.url?.startsWith('blob:'))URL.revokeObjectURL(e.url);e.url=null;refresh();closeEditor();renderImageList();setStatus('✓ '+e.p.name+' 카드 이미지와 배치를 GitHub에 저장했습니다. 공개 도감에도 연동됩니다.');
+ else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),rev,...(imageCommit?{commit:imageCommit}:{})};
+ await putJson(IMAGE_META,latest,current.sha);imgConfig=latest;
+ const id=e.p.id,localURL=e.url?.startsWith('blob:')?e.url:null;
+ const oldCache=previewCache[id];
+ if(reset){
+  delete previewCache[id];
+  if(oldCache?.url?.startsWith('blob:'))URL.revokeObjectURL(oldCache.url);
+  if(localURL&&oldCache?.url!==localURL)URL.revokeObjectURL(localURL);
+  e.url=null;
+ }else if(localURL){
+  // Do not destroy the displayed image before the GitHub CDN accepts it.
+  if(oldCache?.url?.startsWith('blob:')&&oldCache.url!==localURL)URL.revokeObjectURL(oldCache.url);
+  previewCache[id]={...latest.images[id],url:localURL,blob:e.blob||null};
+ }else{
+  delete previewCache[id];
+  if(oldCache?.url?.startsWith('blob:'))URL.revokeObjectURL(oldCache.url);
+ }
+ refresh();closeEditor();renderImageList();
+ setStatus('✓ '+e.p.name+' 사진과 배치를 GitHub에 저장했습니다. 공개 주소 연결을 확인합니다.');
+ if(localURL&&!reset)verifySavedPhoto(id,latest.images[id],localURL);
  }catch(err){q('editor-photo-status').textContent='저장 실패: '+err.message}
  finally{busy=false;q('editor-save').disabled=false}
 }
