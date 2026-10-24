@@ -80,6 +80,16 @@
       "rev": "mvmickse",
       "commit": "ed8c75f04ed1c28ad4253d0c793d0b5fb1d86013",
       "blobSha": "2d1705d5a6a107b0d14dd88ecb2b0759af98d856"
+    },
+    "60-LG-투-003": {
+      "path": "assets/cards/60-LG-투-003.webp",
+      "x": -1.8461538461538463,
+      "y": 20.802919708029197,
+      "zoom": 1.4787775367246394,
+      "fit": "contain",
+      "rev": "mvmjbvck",
+      "commit": "1b3625c09c8023b0a576d5c08fbef343d996745e",
+      "blobSha": "9b5e57de453f6bfe1a097eee464bc9e8b73a5a23"
     }
   }
 }
