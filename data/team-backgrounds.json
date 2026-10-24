@@ -80,6 +80,16 @@
       "commit": "67563a1ff387ba23125b2413d948d126f22e2e43",
       "blobSha": "d364c0363cfdb5dc8b1bb8feb8132daf56e193ce",
       "rev": "mvmhx7ud"
+    },
+    "KIW": {
+      "path": "assets/team-backgrounds/KIW.webp",
+      "x": 0,
+      "y": 0,
+      "zoom": 1.25,
+      "overlay": 50,
+      "commit": "b2afffef3f372918a617c0714f747619eba8bdb7",
+      "blobSha": "d2316b0506fd5da4ea89469ffce2e67559491b84",
+      "rev": "mvmhxwhc"
     }
   }
 }
