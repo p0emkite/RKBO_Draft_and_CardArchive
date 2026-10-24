@@ -12,7 +12,7 @@ const asNum=x=>{if(x===null||x===undefined||String(x).trim()==='')return NaN;ret
 function decodeFilename(filename){return String(filename).replace(/#U([0-9a-f]{4})/gi,(_,hex)=>String.fromCharCode(parseInt(hex,16)))}
 function sourceTeam(filename){
  const stem=decodeFilename(String(filename).split('/').pop()).replace(/\.(?:txt|html?|htm)$/i,'').toUpperCase().trim();
- const names={두산:'DOO',롯데:'LOT',삼성:'SAM',한화:'HAN',기아:'KIA',키움:'KIW',넥센:'KIW'};
+ const names={두산:'DOO',롯데:'LOT',삼성:'SAM',한화:'HAN',기아:'KIA',키움:'KIW',넥센:'KIW',SK:'SSG','SK 와이번스':'SSG'};
  if(TEAM_NAMES[stem])return stem;
  if(names[stem])return names[stem];
  for(const [name,team] of Object.entries(names))if(stem.includes(name.toUpperCase()))return team;

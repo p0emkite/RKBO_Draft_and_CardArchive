@@ -64,6 +64,7 @@
 <script src="./vendor/jszip.min.js"></script>
 <script src="./rkbo_xls_biff.js"></script>
 <script src="./rkbo-season-engine.js"></script>
+<script src="./team-branding.js"></script>
 <script src="./enhancements.js"></script>
 <script src="./rkbo-season-identity.js"></script>
 <script src="./rkbo-season-importer.js"></script>
@@ -75,24 +76,34 @@
 (async function(){'use strict';
 let roster=JSON.parse(document.getElementById('data').textContent);
 await window.RKBONameMap.apply(roster,document.getElementById('data'));
+window.RKBOTeamBrand.decorate(roster);
 const names={DOO:'두산 베어스',HAN:'한화 이글스',KIA:'KIA 타이거즈',KT:'KT 위즈',LG:'LG 트윈스',LOT:'롯데 자이언츠',NC:'NC 다이노스',SAM:'삼성 라이온즈',SSG:'SSG 랜더스',KIW:'키움 히어로즈'};
-const teams={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],KIW:['#6a1e3f','#e6b6c8']};
+const teams={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],SK:['#cf292f','#ffe3e2'],KIW:['#6a1e3f','#e6b6c8']};
 const grades={브론즈:{metal:'#d39a73',dark:'#684335',light:'#e0b49a',mark:'B',rank:0,label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',light:'#f5f8ff',mark:'S',rank:1,label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',light:'#fff1bd',mark:'G',rank:2,label:'골드'},코랄:{metal:'#F6909D',dark:'#ab5e67',light:'#ffd8df',mark:'C',rank:3,label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',light:'#effcff',mark:'D',rank:4,label:'다이아몬드'}};
 const order=['브론즈','실버','골드','코랄','다이아몬드'];
 const S={kind:'전체',team:'전체',pos:'전체',grade:'전체',sort:'ovr',query:'',favOnly:false,limit:24};
 let fav=new Set();try{fav=new Set(JSON.parse(localStorage.getItem('rkbo60-favs')||'[]'))}catch(e){}
 const q=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 const gradeLabel=g=>grades[g]?.label||g;
-const teamLogo=team=>`assets/teams/${team}.${team==='NC'?'png':'svg'}`;
-function styleFor(p){const g=grades[p.grade],tm=teams[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`}
+const teamLogo=player=>window.RKBOTeamBrand.logo(player);
+function styleFor(p){const g=grades[p.grade],tm=teams[p.displayTeamCode||p.team]||teams[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`}
 function format(v,key){if(v===null||v===undefined)return '—';if(['Avg','Obp','Slg'].includes(key))return Number(v).toFixed(3).replace(/^0/,'');if(key==='ERA')return Number(v).toFixed(2);if(key==='IP')return String(v);return v.toLocaleString('ko-KR')}
 function metricLabels(p){return p.type==='타자'?['정확','파워','선구','주루','수비']:['구위','제구','피안타 억제','피홈런 억제','체력']}
 function renderTiers(){q('tiers').innerHTML=order.map(gr=>{const g=grades[gr],num=roster.filter(p=>p.grade===gr).length;return `<button class="tier ${S.grade===gr?'active':''}" type="button" data-grade="${esc(gr)}" style="--t1:${g.light};--t2:${g.dark};--accent:${g.metal}"><span class="tier-symbol">${g.mark}</span><span style="flex:1;min-width:0"><span class="tier-name">${gradeLabel(gr)}</span><span class="tier-count" style="display:block">${num}장 수록</span><span class="tier-plug" style="display:block"></span></span></button>`}).join('')}
-function card(p){let g=grades[p.grade];return `<article class="player-card" role="button" tabindex="0" data-id="${p.id}" style="${styleFor(p)}" aria-label="${esc(p.name)} 상세 보기"><div class="card-inner"><div class="card-top"><span class="team-badge"><img src="${esc(teamLogo(p.team))}" alt="${esc(p.teamLabel)} 심볼"></span><button type="button" class="fav ${fav.has(p.id)?'on':''}" aria-label="관심 카드 ${fav.has(p.id)?'해제':'추가'}" aria-pressed="${fav.has(p.id)}" data-fav="${p.id}">${fav.has(p.id)?'★':'☆'}</button></div><div class="headshot"><div class="team-ghost">${esc(p.team)}</div>${window.RKBOArt.render(p)}</div><div class="card-mid"><div><div class="ovrnum">${p.ovr}</div></div><div class="badge-row"><span class="metal-label season-label">${p.season}차</span><span class="metal-label">${esc(gradeLabel(p.grade))}</span></div></div><div class="card-name"><h3 title="${esc(p.name)}">${esc(p.name)}</h3><p>${esc(p.teamLabel)} · ${esc(p.pos)} · ${p.type}</p></div><div class="metric-grid">${metricLabels(p).map(name=>`<div class="m"><b class="${p.ratings[name]>=90?'elite':''}">${p.ratings[name]??'—'}</b><span>${name==='피안타 억제'?'피안':name==='피홈런 억제'?'피홈':name}</span></div>`).join('')}</div></div></article>`}
+function card(p){let g=grades[p.grade];return `<article class="player-card" role="button" tabindex="0" data-id="${p.id}" style="${styleFor(p)}" aria-label="${esc(p.name)} 상세 보기"><div class="card-inner"><div class="card-top"><span class="team-badge"><img src="${esc(teamLogo(p))}" alt="${esc(p.teamLabel)} 심볼"></span><button type="button" class="fav ${fav.has(p.id)?'on':''}" aria-label="관심 카드 ${fav.has(p.id)?'해제':'추가'}" aria-pressed="${fav.has(p.id)}" data-fav="${p.id}">${fav.has(p.id)?'★':'☆'}</button></div><div class="headshot"><div class="team-ghost">${esc(p.displayTeamCode||p.team)}</div>${window.RKBOArt.render(p)}</div><div class="card-mid"><div><div class="ovrnum">${p.ovr}</div></div><div class="badge-row"><span class="metal-label season-label">${p.season}차</span><span class="metal-label">${esc(gradeLabel(p.grade))}</span></div></div><div class="card-name"><h3 title="${esc(p.name)}">${esc(p.name)}</h3><p>${esc(p.teamLabel)} · ${esc(p.pos)} · ${p.type}</p></div><div class="metric-grid">${metricLabels(p).map(name=>`<div class="m"><b class="${p.ratings[name]>=90?'elite':''}">${p.ratings[name]??'—'}</b><span>${name==='피안타 억제'?'피안':name==='피홈런 억제'?'피홈':name}</span></div>`).join('')}</div></div></article>`}
 window.RKBOCardView={render:card};
 function matches(){let lst=roster.filter(p=>(S.kind==='전체'||p.type===S.kind)&&(S.team==='전체'||p.team===S.team)&&(S.pos==='전체'||p.pos===S.pos)&&(S.grade==='전체'||p.grade===S.grade)&&(!S.favOnly||fav.has(p.id))&&(!S.query||((p.name+' '+(p.historicalEnglishName||'')+' '+(p.englishName||'')+' '+(p.rawName||'')+' '+p.teamLabel+' '+p.team+' '+p.pos).toLocaleLowerCase()).includes(S.query.toLocaleLowerCase())));
 lst.sort((a,b)=>S.sort==='low'?a.ovr-b.ovr||a.name.localeCompare(b.name,'ko'):S.sort==='name'?a.name.localeCompare(b.name,'ko'):S.sort==='grade'?grades[b.grade].rank-grades[a.grade].rank||b.ovr-a.ovr:b.ovr-a.ovr||a.name.localeCompare(b.name,'ko'));return lst}
 function draw(){renderTiers();q('all-count').textContent=roster.length;q('bat-count').textContent=roster.filter(p=>p.type==='타자').length;q('pit-count').textContent=roster.filter(p=>p.type==='투수').length;q('fav-count').textContent=roster.filter(p=>fav.has(p.id)).length;const m=matches();q('result-count').textContent=m.length;q('filter-label').textContent=S.grade==='전체'?'':`· ${gradeLabel(S.grade)}`;q('cards').innerHTML=m.length?m.slice(0,S.limit).map(card).join(''):'<div class="empty" style="grid-column:1/-1">선택한 조건의 선수가 없습니다.<br>검색어나 필터를 바꿔 주세요.</div>';q('show-more').hidden=m.length<=S.limit;q('show-more').textContent=`카드 더 보기 (${Math.min(S.limit,m.length)} / ${m.length}) ↓`;q('fav-only').classList.toggle('active',S.favOnly);q('fav-only').textContent=S.favOnly?'★ 관심 카드만':'☆ 관심 카드만';document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===S.kind))}
+function rebuildTeams(){
+ const select=q('team'),current=S.team;
+ const groups=[...new Set(roster.map(p=>p.team))].sort((a,b)=>a.localeCompare(b));
+ select.innerHTML='<option value="전체">전체 구단</option>'+groups.map(t=>{
+  const example=roster.find(p=>p.team===t);
+  return '<option value="'+esc(t)+'">'+esc(example?.teamLabel||names[t]||t)+'</option>';
+ }).join('');
+ S.team=groups.includes(current)?current:'전체';select.value=S.team;
+}
 function setPos(){const ps=['전체',...new Set(roster.filter(p=>S.kind==='전체'||p.type===S.kind).map(p=>p.pos))].sort((a,b)=>a==='전체'?-1:b==='전체'?1:a.localeCompare(b));if(!ps.includes(S.pos))S.pos='전체';q('position').innerHTML=ps.map(x=>`<option value="${x}">${x==='전체'?'전체 포지션':x}</option>`).join('');q('position').value=S.pos}
 function numberStats(p){const s=p.stats;return p.type==='타자'?[['경기',s.G],['타율',format(s.Avg,'Avg')],['출루율',format(s.Obp,'Obp')],['장타율',format(s.Slg,'Slg')],['타수',s.Ab],['안타',s.H],['2루타',s['2B']],['3루타',s['3B']],['홈런',s.Hr],['타점',s.Rbi],['득점',s.R],['볼넷',s.BB],['삼진',s.K],['도루',s.Sb],['도루 실패',s.Cs]]:[['경기',s.G],['선발',s.GS],['이닝',format(s.IP,'IP')],['평균자책',format(s.ERA,'ERA')],['승',s.W],['패',s.L],['세이브',s.S],['블론',s.BS],['완투',s.CG],['완봉',s.SHO],['탈삼진',s.K],['볼넷',s.BB],['피안타',s.H],['피홈런',s.HR],['자책점',s.ER]]}
 function showPlayer(id){const p=roster.find(v=>v.id===id);if(!p)return;const g=grades[p.grade],r=metricLabels(p),ref=p.type==='타자'?['AVG','ISO','HR/AB','BB/(AB+BB)','K/(AB+BB)','도루성공률']:['K/9','BB/9','H/9','HR/9','IP/GS','IP/G'];const derived=ref.map(key=>`<span class="pill">${esc(key)}: ${p.derived[key]===null||p.derived[key]===undefined?'—':p.derived[key]}</span>`).join('');q('modal-body').innerHTML=`<div class="dialog-hero" style="${styleFor(p)}"><button class="dialog-close" aria-label="닫기" data-close type="button">×</button><div class="dialog-topline">${p.season}차 시즌 / ${esc(gradeLabel(p.grade))}</div><div class="dialog-title">${esc(p.name)}</div><div class="dialog-sub">${esc(p.teamLabel)} · ${esc(p.pos)} · ${p.type}</div><div class="dialog-ovr">${p.ovr}<span>OVERALL</span></div></div><div class="dialog-content"><div class="modal-cols"><div><div class="mini-title">CARD ATTRIBUTES</div>${r.map(name=>`<div class="metric-line"><span>${name}</span><div class="bar-track"><div class="bar-fill" style="width:${p.ratings[name]??0}%;--metal:${g.metal}"></div></div><span class="numeric-metric">${p.ratings[name]??'—'}</span></div>`).join('')}<div class="tiny" style="margin-top:18px">능력치 가중지수 ${p.skillIndex.toFixed(2)} · 유형별 OVR 공동 ${p.rank}위</div></div><div><div class="stat-heading"><div class="mini-title">SOURCE RECORD / RAW STATS</div><button type="button" class="card-download" data-export-player="${esc(p.id)}" title="750 × 1050px PNG로 저장">↓ 카드 저장</button></div><div class="stat-table">${numberStats(p).map(([k,v])=>`<div class="stat-cell"><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div></div></div>${p.type==='타자'&&p.fieldPrimary ? '<div class="section-row"><div class="mini-title">FIELDING SOURCE</div><span class="pill">수비 포지션: '+esc(p.fieldPrimary.POS)+'</span><span class="pill">수비이닝: '+p.fieldPrimary.INN+'</span><span class="pill">실책: '+(p.fieldPrimary.E??'—')+'</span><span class="pill">수비기회: '+(p.fieldPrimary.CHANCES??'—')+'</span></div>':''}</div>`;
@@ -193,13 +204,14 @@ async function changeSeason(value){
    const incoming=await resp.json();
    players=validateSeasonCards(incoming,n);
    await window.RKBONameMap.apply(players,null);
+   window.RKBOTeamBrand.decorate(players);
    seasonCache.set(n,players);
   }
   if(seq!==selectorRequest)return;
   roster=players;activeSeason=n;
   Object.assign(S,{kind:'전체',team:'전체',pos:'전체',grade:'전체',query:'',favOnly:false,limit:24});
   q('team').value='전체';q('search').value='';
-  paintActiveSeason();setPos();draw();
+  paintActiveSeason();rebuildTeams();setPos();draw();
   window.dispatchEvent(new CustomEvent('rkbo-season-change',{detail:{season:n,count:players.length}}));
  }catch(error){
   status.textContent=error.message;
@@ -218,7 +230,7 @@ window.RKBOSeason={
 };
 q('season-select').addEventListener('change',e=>changeSeason(e.target.value).catch(error=>{console.error(error);}));
 
-q('team').innerHTML+=[...Object.keys(names)].map(x=>`<option value="${x}">${names[x]}</option>`).join('');setPos();draw();
+rebuildTeams();setPos();draw();
 paintActiveSeason();loadSeasonManifest().catch(error=>{q('season-loading').textContent='시즌 목록을 불러오지 못했습니다';console.error(error)});
 })();
 

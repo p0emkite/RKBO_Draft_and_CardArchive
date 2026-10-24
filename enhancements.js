@@ -20,15 +20,16 @@ const decode64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,
 const encode64=s=>base64bytes(new TextEncoder().encode(s));
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 const imgSrc=(path)=>{if(!path)return '';const safe=path.split('/').map(encodeURIComponent).join('/');return new URL('./'+safe,document.baseURI).href};
-const teamLogo=team=>imgSrc('assets/teams/'+team+(team==='NC'?'.png':'.svg'));
-const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],KIW:['#6a1e3f','#e6b6c8']};
+const teamLogo=player=>imgSrc(window.RKBOTeamBrand?.logo(player)||('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg')));
+const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd3445','#ffc0bf'],KT:['#222','#bbb'],LG:['#aa3053','#f7bfd0'],LOT:['#659cbb','#e0f4ff'],NC:['#b79c64','#ffedbd'],SAM:['#407acb','#c0ddff'],SSG:['#ffb81c','#ffe3a1'],SK:['#cf292f','#ffe3e2'],KIW:['#6a1e3f','#e6b6c8']};
 const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},코랄:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
-const styleVars=p=>{const g=gradeMeta[p.grade],tm=teamMeta[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`};
+const styleVars=p=>{const g=gradeMeta[p.grade],tm=teamMeta[p.displayTeamCode||p.team]||teamMeta[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`};
+const photoFit=entry=>entry?.fit==='cover'?'cover':'contain';
 function photoHtml(p){const temp=previewCache[p.id];const entry=temp||imgConfig.images?.[p.id];if(!entry)return '';
  const x=Number(entry.x)||0,y=Number(entry.y)||0,zoom=Number(entry.zoom)||1;
  const url=entry.url||(entry.path?imgSrc(entry.path)+(entry.rev?'?rev='+encodeURIComponent(entry.rev):''):'');
  if(!url)return '';
- return `<img class="player-photo" src="${h(url)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)}">`;
+ return `<img class="player-photo" src="${h(url)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)};--photo-fit:${photoFit(entry)}">`;
 }
 function poseHtml(p){
  const file=p.type==='투수'?'assets/default-pitcher.png':'assets/default-batter.png';
@@ -111,10 +112,10 @@ async function imageToWebp(file){if(!file.type.startsWith('image/'))throw Error(
 }
 function imgUrlFromBlob(blob){return URL.createObjectURL(blob)}
 function startEdit(id){if(!authorized)return;const p=window.RKBOSeason?.players()?.find(x=>x.id===id);if(!p)return;
- const pending=previewCache[id];activeEditor={p,blob:pending?.blob||null,url:pending?.url||null,entry:{x:0,y:0,zoom:1,...(imgConfig.images[id]||{}),...(pending||{})}};
+ const pending=previewCache[id];activeEditor={p,blob:pending?.blob||null,url:pending?.url||null,entry:{x:0,y:0,zoom:1,fit:'contain',...(imgConfig.images[id]||{}),...(pending||{})}};
  q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';q('editor-title').textContent=p.name+' · 카드 사진';q('photo-file').value='';renderEditor()}
 function editorImageSource(e){return e.url||(e.entry.path?imgSrc(e.entry.path)+(e.entry.rev?'?rev='+encodeURIComponent(e.entry.rev):''):'')}
-function updateEditorTransform(){const e=activeEditor;if(!e)return;const stage=q('editor-stage'),img=stage?.querySelector('.headshot .player-photo');if(img){img.style.setProperty('--photo-x',clamp(Number(e.entry.x)||0,-150,150)+'%');img.style.setProperty('--photo-y',clamp(Number(e.entry.y)||0,-150,150)+'%');img.style.setProperty('--photo-zoom',clamp(Number(e.entry.zoom)||1,.3,5));}q('editor-zoom').value=clamp(Number(e.entry.zoom)||1,.3,5);q('editor-scale-label').textContent=Math.round(Number(q('editor-zoom').value)*100)+'%';}
+function updateEditorTransform(){const e=activeEditor;if(!e)return;const stage=q('editor-stage'),img=stage?.querySelector('.headshot .player-photo');if(img){img.style.setProperty('--photo-x',clamp(Number(e.entry.x)||0,-150,150)+'%');img.style.setProperty('--photo-y',clamp(Number(e.entry.y)||0,-150,150)+'%');img.style.setProperty('--photo-zoom',clamp(Number(e.entry.zoom)||1,.3,5));img.style.setProperty('--photo-fit',photoFit(e.entry));}q('editor-zoom').value=clamp(Number(e.entry.zoom)||1,.3,5);q('editor-scale-label').textContent=Math.round(Number(q('editor-zoom').value)*100)+'%';if(q('editor-fit'))q('editor-fit').value=photoFit(e.entry);}
 function collectionCardWidth(){
  // Match the actual rendered collection card, not a fixed-size editor template.
  const card=q('cards')?.querySelector('.player-card');
@@ -129,7 +130,7 @@ function renderEditor(){const e=activeEditor;if(!e)return;const src=editorImageS
  const preview=stage.querySelector('.player-card');
  if(preview){
   preview.classList.add('preview-card');preview.removeAttribute('role');preview.removeAttribute('tabindex');
-  // Exact gallery width, so object-fit: cover and percentage-based placement match.
+  // Exact gallery width, so both contain and cover modes use gallery geometry.
   const width=collectionCardWidth();
   preview.style.setProperty('width',width+'px','important');
   preview.style.setProperty('flex','0 0 '+width+'px','important');
@@ -143,7 +144,7 @@ function renderEditor(){const e=activeEditor;if(!e)return;const src=editorImageS
 function applyPreview(){if(!activeEditor)return;const e=activeEditor,src=editorImageSource(e);
  if(!src){delete previewCache[e.p.id];refresh();q('editor-photo-status').textContent='등록 이미지가 없어 기본 실루엣으로 표시합니다.';return}
  const old=previewCache[e.p.id];if(old?.url&&old.url.startsWith('blob:')&&old.url!==src)URL.revokeObjectURL(old.url);
- previewCache[e.p.id]={path:e.entry.path||'',rev:e.entry.rev||'',x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),url:src,blob:e.blob||null};
+ previewCache[e.p.id]={path:e.entry.path||'',rev:e.entry.rev||'',x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),url:src,blob:e.blob||null};
  refresh();q('editor-photo-status').textContent='✓ 도감에 즉시 적용됐습니다. 다른 방문자와 공유하려면 GitHub 저장을 누르세요.';
 }
 function closeEditor(){if(activeEditor?.url&&activeEditor.url.startsWith('blob:')&&previewCache[activeEditor.p.id]?.url!==activeEditor.url)URL.revokeObjectURL(activeEditor.url);activeEditor=null;q('photo-editor-bg').hidden=true;document.body.style.overflow=q('modal')&&!q('modal').hidden?'hidden':''}
@@ -158,7 +159,7 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
  const current=await readJson(IMAGE_META);const latest=current.data||{version:1,images:{}};
  latest.images=latest.images||{};
  if(reset)delete latest.images[e.p.id];
- else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),rev};
+ else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),rev};
  await putJson(IMAGE_META,latest,current.sha);imgConfig=latest;delete previewCache[e.p.id];
  if(e.url?.startsWith('blob:'))URL.revokeObjectURL(e.url);e.url=null;refresh();closeEditor();renderImageList();setStatus('✓ '+e.p.name+' 카드 이미지와 배치를 GitHub에 저장했습니다. 공개 도감에도 연동됩니다.');
  }catch(err){q('editor-photo-status').textContent='저장 실패: '+err.message}
@@ -237,7 +238,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  <div id="admin-controls" hidden><div class="admin-actions"><button id="admin-sync" type="button">↻ GitHub 전체 동기화</button><button id="admin-logout" type="button">연결 해제</button></div><hr><h2>시즌 카드 등록·공개</h2><p>원본 HTML·XLS·HHRecord 보관과 달리, 이 메뉴는 <b>선수별 카드 스탯·OVR이 포함된 JSON</b>을 검증해 시즌을 실제 도감에 등록합니다. 등록된 시즌만 공개 선택 목록에 나타납니다.</p><label for="season-register-number">등록할 시즌</label><input type="number" id="season-register-number" min="1" max="999" step="1" value="59" placeholder="예: 59"><label for="season-register-file">시즌 카드 JSON 파일</label><input type="file" id="season-register-file" accept=".json,application/json"><div class="admin-actions"><button id="season-register" type="button" class="primary">새 시즌 카드 등록 · GitHub 저장</button></div><p class="warning">파일 형식: {season:59,players:[...]} 또는 카드 배열. 선수마다 시즌별 고유 ID·구단·포지션·스탯·OVR·능력치가 필요합니다. HTML/XLS/HHRecord를 업로드하는 것만으로는 카드가 자동 생성되지 않습니다.</p><div id="admin-season-list" class="admin-file-list"></div><hr><h2>선수 카드 이미지 저장소 <span id="admin-image-count">0명 등록</span></h2><p>사진은 카드의 ✎ 편집에서 업로드하고, 배치를 적용한 후 GitHub에 저장합니다. 아래 목록과 도감은 같은 이미지 데이터를 사용합니다.</p><div id="admin-image-list" class="admin-file-list"></div><div class="admin-actions"><button type="button" id="admin-image-sync">↻ 카드 이미지 동기화</button></div><hr><h2>시즌·HHRecord 자료 첨부</h2><p>확장자 .html/.htm/.xls/.xlsx/.csv/.zip/.json 등. 선택한 자료는 GitHub에 원본 보관만 되며, 선수 카드 데이터 자동 반영은 다음 단계입니다.</p><label for="import-kind">자료 종류</label><select id="import-kind"><option value="season">다른 시즌 개인 성적</option><option value="hhrecord">HHRecord</option><option value="other">기타 데이터</option></select><label for="import-files">추가 파일 선택</label><input type="file" id="import-files" multiple accept=".html,.htm,.xls,.xlsx,.csv,.zip,.json,.txt"><div class="admin-actions"><button class="primary" id="upload-import" type="button">선택 파일 GitHub 저장</button></div><div class="warning">주의: 공개 GitHub 저장소이므로 업로드한 자료도 공개될 수 있습니다. 저작권·개인정보를 확인하세요.</div><h2 style="margin-top:15px">업로드 내역</h2><div id="admin-file-list" class="admin-file-list"></div><div class="warning" style="margin-top:10px">선수 사진은 <code>assets/cards/</code>, 이미지 배치 정보는 <code>data/card-images.json</code>에 저장되어 함께 연동됩니다.</div></div><hr><div class="admin-status" id="admin-status">토큰으로 제작자 인증한 후 편집할 수 있습니다.</div>`;
  document.body.append(drawer);
  const overlay=document.createElement('div');overlay.id='photo-editor-bg';overlay.className='photo-editor-bg';overlay.hidden=true;
- overlay.innerHTML=`<div class="photo-editor" role="dialog" aria-modal="true" aria-label="선수 카드 사진 편집"><div class="editor-head"><h2 id="editor-title">카드 사진 편집</h2><button id="editor-close" type="button">닫기 ×</button></div><p>사진 업로드 → 실제 카드 미리보기에서 위치·확대 조절 → 적용 후 GitHub 저장. PNG 출력은 750 × 1050px(5:7)로 생성됩니다.</p><input id="photo-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif"><div class="editor-stage" id="editor-stage"></div><div class="editor-row"><label for="editor-zoom">크기 <span id="editor-scale-label">100%</span></label><input type="range" id="editor-zoom" min="0.3" max="5" value="1" step="0.01"></div><div class="editor-actions"><button id="editor-center" type="button">위치·크기 초기화</button><button id="editor-apply" type="button">도감에 즉시 적용</button><button id="editor-reset" type="button">사진 삭제(기본 실루엣)</button><button class="primary" id="editor-save" type="button">GitHub에 사진·위치 저장</button></div><p id="editor-photo-status" aria-live="polite">등록 이미지 없음</p></div>`;
+ overlay.innerHTML=`<div class="photo-editor" role="dialog" aria-modal="true" aria-label="선수 카드 사진 편집"><div class="editor-head"><h2 id="editor-title">카드 사진 편집</h2><button id="editor-close" type="button">닫기 ×</button></div><p>사진은 기본적으로 원본 전체를 표시합니다. 원하는 경우에만 '영역 채우기'를 선택하면 일부가 잘릴 수 있습니다. 도감과 750×1050 PNG 저장에 같은 배치가 사용됩니다.</p><input id="photo-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif"><div class="editor-row editor-fit-row"><label for="editor-fit">표시 방식</label><select id="editor-fit" aria-label="사진 표시 방식"><option value="contain">원본 전체 보기 (잘림 없음)</option><option value="cover">영역 채우기 (일부 잘림)</option></select></div><div class="editor-stage" id="editor-stage"></div><div class="editor-row"><label for="editor-zoom">크기 <span id="editor-scale-label">100%</span></label><input type="range" id="editor-zoom" min="0.3" max="5" value="1" step="0.01"></div><div class="editor-actions"><button id="editor-center" type="button">위치·크기 초기화</button><button id="editor-apply" type="button">도감에 즉시 적용</button><button id="editor-reset" type="button">사진 삭제(기본 실루엣)</button><button class="primary" id="editor-save" type="button">GitHub에 사진·위치 저장</button></div><p id="editor-photo-status" aria-live="polite">등록 이미지 없음</p></div>`;
  document.body.append(overlay);
  b.addEventListener('click',()=>{drawer.hidden=!drawer.hidden});q('admin-close').addEventListener('click',()=>drawer.hidden=true);
  q('admin-connect').addEventListener('click',connect);q('admin-token').addEventListener('keydown',e=>{if(e.key==='Enter')connect()});
@@ -250,11 +251,12 @@ function initAdmin(){if(!EDIT_MODE)return;
  q('editor-apply').addEventListener('click',applyPreview);
  q('editor-save').addEventListener('click',()=>saveImage(false));
  q('editor-reset').addEventListener('click',()=>{if(confirm('선수의 등록 사진을 삭제하고 기본 실루엣으로 되돌릴까요?'))saveImage(true)});
- q('editor-center').addEventListener('click',()=>{if(!activeEditor)return;Object.assign(activeEditor.entry,{x:0,y:0,zoom:1});renderEditor()});
+ q('editor-center').addEventListener('click',()=>{if(!activeEditor)return;Object.assign(activeEditor.entry,{x:0,y:0,zoom:1,fit:'contain'});renderEditor()});
  q('photo-file').addEventListener('change',async e=>{if(!activeEditor||!e.target.files[0])return;
- try{const blob=await imageToWebp(e.target.files[0]);if(activeEditor.url?.startsWith('blob:')&&previewCache[activeEditor.p.id]?.url!==activeEditor.url)URL.revokeObjectURL(activeEditor.url);activeEditor.blob=blob;activeEditor.url=imgUrlFromBlob(blob);renderEditor()}
+ try{const blob=await imageToWebp(e.target.files[0]);if(activeEditor.url?.startsWith('blob:')&&previewCache[activeEditor.p.id]?.url!==activeEditor.url)URL.revokeObjectURL(activeEditor.url);activeEditor.blob=blob;activeEditor.url=imgUrlFromBlob(blob);Object.assign(activeEditor.entry,{x:0,y:0,zoom:1,fit:'contain'});renderEditor()}
  catch(err){q('editor-photo-status').textContent=err.message}});
  q('editor-zoom').addEventListener('input',e=>{if(!activeEditor)return;activeEditor.entry.zoom=Number(e.target.value);updateEditorTransform()});
+ q('editor-fit').addEventListener('change',e=>{if(!activeEditor)return;activeEditor.entry.fit=e.target.value==='cover'?'cover':'contain';updateEditorTransform()});
  const stage=q('editor-stage');let start=null;
  stage.addEventListener('wheel',e=>{if(!activeEditor||!e.target.closest('.headshot'))return;e.preventDefault();activeEditor.entry.zoom=clamp((Number(activeEditor.entry.zoom)||1)*(e.deltaY>0?.93:1.07),.3,5);updateEditorTransform()},{passive:false});
  stage.addEventListener('pointerdown',e=>{if(!activeEditor||!e.target.closest('.headshot'))return;const area=stage.querySelector('.headshot');start={x:e.clientX,y:e.clientY,ax:Number(activeEditor.entry.x)||0,ay:Number(activeEditor.entry.y)||0,width:area.clientWidth||280,height:area.clientHeight||190};stage.setPointerCapture(e.pointerId)});

@@ -10,7 +10,7 @@ const grades={
  '플래티넘':{metal:'#F6909D',dark:'#ab5e67'},
  '다이아몬드':{metal:'#90ecff',dark:'#417baa'}
 };
-const teams={DOO:'#202f6c',HAN:'#d97521',KIA:'#bd3445',KT:'#222222',LG:'#aa3053',LOT:'#659cbb',NC:'#b79c64',SAM:'#407acb',SSG:'#ffb81c',KIW:'#6a1e3f'};
+const teams={DOO:'#202f6c',HAN:'#d97521',KIA:'#bd3445',KT:'#222222',LG:'#aa3053',LOT:'#659cbb',NC:'#b79c64',SAM:'#407acb',SSG:'#ffb81c',SK:'#cf292f',KIW:'#6a1e3f'};
 const clamp=(v,l,h)=>Math.min(h,Math.max(l,v));
 function rgb(hex,alpha){const raw=hex.replace('#','');const nums=[0,2,4].map(i=>parseInt(raw.slice(i,i+2),16));return 'rgba('+nums.join(',')+','+alpha+')'}
 function round(ctx,x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
@@ -26,12 +26,12 @@ function badge(ctx,value,y,accent){
 async function make(player){
  const canvas=document.createElement('canvas');canvas.width=WIDTH;canvas.height=HEIGHT;
  const ctx=canvas.getContext('2d');ctx.scale(SCALE,SCALE);
- const grade=grades[player.grade]||grades.실버,team=teams[player.team]||'#243e61';
+ const grade=grades[player.grade]||grades.실버,brand=window.RKBOTeamBrand?.code(player)||player.team,team=teams[brand]||'#243e61';
  const photo=window.RKBOArt?.imageState?.(player)||{};
  const photoSrc=photo.url||'';
  const [image,logo,silhouette]=await Promise.all([
   load(photoSrc),
-  load('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg')),
+  load(window.RKBOTeamBrand?.logo(player)||('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg'))),
   photoSrc?Promise.resolve(null):load('assets/default-'+(player.type==='투수'?'pitcher':'batter')+'.png')
  ]);
  // Fixed 300 × 420 logical card, rasterized 2.5×; layout always keeps a 5:7 ratio.
@@ -39,25 +39,28 @@ async function make(player){
  ctx.save();round(ctx,6,6,288,408,13);ctx.clip();
  ctx.fillStyle='#0d1827';ctx.fillRect(6,6,288,408);
  ctx.save();ctx.beginPath();ctx.rect(6,6,288,243);ctx.clip();
+ // This is the same 288 × 243 artwork viewport used in the live card.
+ // Show the WHOLE photograph by default (contain); cropping is opt-in (cover).
+ const bg=ctx.createRadialGradient(120,8,0,140,135,250);
+ bg.addColorStop(0,rgb(team,.65));bg.addColorStop(.55,'#1a2b40');bg.addColorStop(1,'#0c1625');
+ ctx.fillStyle=bg;ctx.fillRect(6,6,288,243);
+ label(ctx,brand,150,163,'1000 90px system-ui, sans-serif','rgba(255,255,255,.07)','center');
+ ctx.beginPath();ctx.arc(150,150,94,0,2*Math.PI);ctx.lineWidth=.8;ctx.strokeStyle=grade.metal;ctx.stroke();
  if(image){
   const zx=clamp(Number(photo.zoom)||1,.3,5), x=clamp(Number(photo.x)||0,-150,150)*288/100, y=clamp(Number(photo.y)||0,-150,150)*243/100;
-  const fit=Math.max(288/image.naturalWidth,243/image.naturalHeight);
+  const mode=photo.fit==='cover'?'cover':'contain';
+  const fit=mode==='cover'?Math.max(288/image.naturalWidth,243/image.naturalHeight):Math.min(288/image.naturalWidth,243/image.naturalHeight);
   const w=image.naturalWidth*fit*zx,h=image.naturalHeight*fit*zx;
   ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
- }else{
-  const bg=ctx.createRadialGradient(120,8,0,140,135,250);
-  bg.addColorStop(0,rgb(team,.65));bg.addColorStop(.55,'#1a2b40');bg.addColorStop(1,'#0c1625');
-  ctx.fillStyle=bg;ctx.fillRect(6,6,288,243);
-  label(ctx,player.team,150,163,'1000 90px system-ui, sans-serif','rgba(255,255,255,.07)','center');
-  ctx.beginPath();ctx.arc(150,150,94,0,2*Math.PI);ctx.lineWidth=.8;ctx.strokeStyle=grade.metal;ctx.stroke();
-  if(silhouette)ctx.drawImage(silhouette,20,player.type==='투수'?45:38,260,260);
+ }else if(silhouette){
+  ctx.drawImage(silhouette,20,player.type==='투수'?45:38,260,260);
  }
  ctx.restore();
  // Club symbol remains; the interactive favorite button is excluded from exported PNGs.
  if(logo){
   const width=logo.naturalWidth,height=logo.naturalHeight;
   if(width>0&&height>0){const f=Math.min(56/width,43/height);ctx.drawImage(logo,13,11,width*f,height*f)}
- }else label(ctx,player.team,15,39,'italic 900 27px system-ui, sans-serif',grade.metal);
+ }else label(ctx,brand,15,39,'italic 900 27px system-ui, sans-serif',grade.metal);
  ctx.fillStyle='#0c1828';ctx.fillRect(6,249,288,64);
  const shade=ctx.createLinearGradient(0,228,0,253);shade.addColorStop(0,'rgba(9,19,33,0)');shade.addColorStop(1,'rgba(9,19,33,.9)');ctx.fillStyle=shade;ctx.fillRect(6,228,288,25);
  label(ctx,player.ovr,21,302,'1000 57px system-ui, sans-serif',grade.metal);

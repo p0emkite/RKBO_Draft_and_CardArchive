@@ -119,3 +119,41 @@
 #rkbo-auto-import label{margin-top:12px;display:block}
 #rkbo-auto-import .admin-actions{flex-wrap:wrap}
 #rkbo-auto-publish{background:#2c6f54;color:#e6fff0;border:1px solid #83d8a9}
+
+
+/* rkbo-photo-fit-v1: uploaded portrait photographs are never automatically cropped.
+   The editor, gallery and saved metadata use the identical image-fit mode. */
+.player-card .headshot .player-photo,
+.photo-editor .preview-card .headshot .player-photo{
+  object-fit:var(--photo-fit,contain)!important;
+  object-position:center center;
+}
+.photo-editor .editor-fit-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:12px;
+  padding:8px 0 7px;
+}
+.photo-editor .editor-fit-row label{
+  flex:0 0 auto;
+  color:#bcd6e6;
+  font-weight:750;
+  font-size:12px;
+}
+.photo-editor #editor-fit{
+  flex:1;
+  min-width:190px;
+  max-width:100%;
+  background:#091726;
+  color:#e9f4fc;
+  border:1px solid #587992;
+  border-radius:8px;
+  padding:9px 10px;
+  font:inherit;
+  font-size:12px;
+}
+.photo-editor #editor-fit:focus-visible{
+  outline:2px solid #8de0f2;
+  outline-offset:2px;
+}
