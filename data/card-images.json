@@ -220,6 +220,16 @@
       "rev": "mvmjztac",
       "commit": "568dde16c9fd6443a036ac3fb1d5cfb8633fe815",
       "blobSha": "51c6850139edae51717da5a4dafc54857f56d745"
+    },
+    "60-KIA-투-010": {
+      "path": "assets/cards/60-KIA-투-010.webp",
+      "x": 1.8461538461538463,
+      "y": 0.7299270072992701,
+      "zoom": 1.7097670675507448,
+      "fit": "contain",
+      "rev": "mvmk13ra",
+      "commit": "e4d3fb033a1f185851ef75bab946a66ac4b0a2c9",
+      "blobSha": "b044f0dc68b975759e41febb985a22c30d41d24b"
     }
   }
 }
