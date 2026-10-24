@@ -24,12 +24,12 @@
     "60-SAM-타-011": {
       "path": "assets/cards/60-SAM-타-011.webp",
       "x": -4.615384615384616,
-      "y": 58.15899581589958,
-      "zoom": 2.5533264261342237,
+      "y": 58.99581589958159,
+      "zoom": 2.565899332865263,
       "fit": "contain",
-      "rev": "mvm4b2l7",
-      "commit": "104b5e0d746e5affe3cfcd9ecdcb8410b8327fe1",
-      "blobSha": "dffd8a51d810cd1de8203df0bc42bc8a8baf80d7"
+      "rev": "mvm4l7ta",
+      "commit": "aed0ef0afa051e254532d1ab502b2a84b4c30d9c",
+      "blobSha": "08986b6f78026e610a3f31ad68a2a98baeaed5ed"
     }
   }
 }
