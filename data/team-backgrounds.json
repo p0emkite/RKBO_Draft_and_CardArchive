@@ -40,6 +40,16 @@
       "commit": "cc3f78a9a5001e92c6e90ca1d572f89bc110628d",
       "blobSha": "d22f968b174ffed4f3ed8d4ca3e7cf8040c3fda5",
       "rev": "mvmhorue"
+    },
+    "LOT": {
+      "path": "assets/team-backgrounds/LOT.webp",
+      "x": 1,
+      "y": 0,
+      "zoom": 1.12,
+      "overlay": 50,
+      "commit": "e55dc6590b577103fa57650bfa462e045453945f",
+      "blobSha": "8ce6f12f32b59953c56ac252a8f861d4e111f157",
+      "rev": "mvmhq243"
     }
   }
 }
