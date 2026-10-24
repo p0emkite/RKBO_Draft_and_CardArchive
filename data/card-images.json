@@ -30,6 +30,16 @@
       "rev": "mvm4l7ta",
       "commit": "aed0ef0afa051e254532d1ab502b2a84b4c30d9c",
       "blobSha": "08986b6f78026e610a3f31ad68a2a98baeaed5ed"
+    },
+    "60-SAM-투-001": {
+      "path": "assets/cards/60-SAM-투-001.webp",
+      "x": 7.692307692307693,
+      "y": 67.88321167883213,
+      "zoom": 2.7320592759636195,
+      "fit": "contain",
+      "rev": "mvmgrz4l",
+      "commit": "8c7e406748f73a345b3d9011045fbc3bce6d82cc",
+      "blobSha": "182188bbb742fa0b60f9786988f59b75296a2a25"
     }
   }
 }
