@@ -10,6 +10,16 @@
       "commit": "9d496bba9d9b053f55a16576ff90195e3a5a68b1",
       "blobSha": "e9b83f4a78c70b6dcae75a66eeb77686ff3428ec",
       "rev": "mvm4ocpg"
+    },
+    "DOO": {
+      "path": "assets/team-backgrounds/DOO.webp",
+      "x": 0,
+      "y": 0,
+      "zoom": 1,
+      "overlay": 50,
+      "commit": "fd32c2a930a2a77edf211984b0c30331222e4403",
+      "blobSha": "d81cf24dbd1c52194a0fd684c11b253e7d7f52a6",
+      "rev": "mvmhe1k8"
     }
   }
 }
