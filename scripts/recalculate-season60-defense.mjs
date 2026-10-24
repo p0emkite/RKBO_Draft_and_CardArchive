@@ -70,19 +70,19 @@ function recalculateSeason60(players,source){
   const r=matched.get(p.id),calc=perPlayer.get(p.team.toUpperCase()+"|"+p.name.toLowerCase().trim());
   const field={POS:r.POS,G:r.G,INN:r.Inn,PO:r.PO,A:r.A,DP:r.DP,E:r.E,
     FA:r.FA,PB:r.PB,SB:r.SB,CS:r.CS,SB_PCT:r["SB%"],TC:r.TC,CHANCES:r.TC,RF:r.RF};
-  p.ratings.수비=calc?.rating??null;
-  p.fieldRating=calc?.rating??null;
+  p.ratings.수비=calc?.rating??50;
+  p.fieldRating=calc?.rating??50;
   p.fieldPrimary=calc?field:null;
   p.fieldPositions=calc?[field]:[];
   p.fieldSource="60차 최종 수비 기록 (data/season60-fielding.tsv)";
-  p.fieldScoreSource=calc?"60차 최종 수비 v1 · 포지션군 실책률 83% / 수비 처리량 17%":"수비 출장 0경기 · 능력 평가 불가";
+  p.fieldScoreSource=calc?"60차 최종 수비 v1 · 포지션군 실책률 83% / 수비 처리량 17%":"수비 출장 0경기 · 규정 최저점 50";
   p.fieldGames=r.G;p.fieldRaw=field;
   p.fieldScoreDetails=calc?{peerGroup:calc.peerGroup,adjustedErrorRate:round(calc.adjustedErrorRate,5),
     rangePerNine:round(calc.rangePerNine,4),errorPercentile:round(calc.errorPercentile,4),
     rangePercentile:round(calc.rangePercentile,4),reliability:round(calc.reliability,4)}:null;
   delete p.defenseRestoration;
   p.unavailable=(p.unavailable||[]).filter(s=>!String(s).includes("수비 기록 없음")&&!String(s).includes("HHRecord 수비 표")&&!String(s).includes("최종 기록상 수비 출장 0경기"));
-  if(!calc)p.unavailable.unshift("최종 기록상 수비 출장 0경기·0이닝: 수비 능력치 미산정");
+  if(!calc)p.unavailable.unshift("최종 기록상 수비 출장 0경기·0이닝: 최저 수비 능력치 50 적용");
   const v=p.ratings;
   p.skillIndex=round(.32*v.정확+.31*v.파워+.23*v.선구+.08*v.주루+.06*(v.수비??72),2);
  }
@@ -110,7 +110,7 @@ function recalculateSeason60(players,source){
   source:"User-supplied final 60th season fielding records",
   sourceRows:rows.length,cardCount:players.length,batters:batters.length,pitchers:pitchers.length,
   exactMatchedBatters:matched.size,fieldingRated:batters.filter(p=>p.ratings.수비!==null).length,
-  noFieldingEvidence:batters.filter(p=>p.ratings.수비===null).map(p=>({id:p.id,name:p.name,battingGames:p.stats.G,fieldingGames:p.fieldGames})),
+  zeroFieldingMin:batters.filter(p=>p.fieldGames===0).map(p=>({id:p.id,name:p.name,battingGames:p.stats.G,fieldingGames:p.fieldGames,defense:50})),
   peerGroupSizes:Object.fromEntries([...groups].map(([g,rs])=>[g,rs.length])),
   abBenchmarkCount:pool.length,
   defenseChanged:changes.filter(p=>p.previousDefense!==p.defense).length,
@@ -118,7 +118,7 @@ function recalculateSeason60(players,source){
   gradeChanged:changes.filter(p=>p.previousGrade!==p.grade).length,
   maxOVRIncrease:Math.max(...changes.map(p=>p.ovr-p.previousOVR)),
   maxOVRDecrease:Math.min(...changes.map(p=>p.ovr-p.previousOVR)),
-  scorer:"83% adjusted fielding error percentile + 17% range per nine percentile; 140 chances shrink to position-group error average; 600 innings shrink to 70; 50-98; no fielding innings => null; batter OVR recalculated using RKBO v0.2 season formula and 72 internal neutral for unknown defense"
+  scorer:"83% adjusted fielding error percentile + 17% range per nine percentile; 140 chances shrink to position-group error average; 600 innings shrink to 70; 50-98; no fielding games => 50 minimum; batter OVR recalculated using RKBO v0.2 season formula"
  };
  return {players,summary,changes};
 }

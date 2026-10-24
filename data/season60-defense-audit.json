@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "summary": {
     "source": "User-supplied final 60th season fielding records",
     "sourceRows": 200,
@@ -7,43 +7,49 @@
     "batters": 87,
     "pitchers": 94,
     "exactMatchedBatters": 87,
-    "fieldingRated": 81,
-    "noFieldingEvidence": [
+    "fieldingRated": 87,
+    "zeroFieldingMin": [
       {
         "id": "60-HAN-타-001",
         "name": "Tabi Arahashi",
         "battingGames": 144,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       },
       {
         "id": "60-KIA-타-007",
         "name": "Siyeon Lee",
         "battingGames": 147,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       },
       {
         "id": "60-LOT-타-013",
         "name": "kodeungeo taevi",
         "battingGames": 147,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       },
       {
         "id": "60-NC-타-008",
         "name": "YooYeon Kim",
         "battingGames": 147,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       },
       {
         "id": "60-SAM-타-006",
         "name": "Namyoon Jr. Lee",
         "battingGames": 146,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       },
       {
         "id": "60-SSG-타-007",
         "name": "Jinsu New",
         "battingGames": 148,
-        "fieldingGames": 0
+        "fieldingGames": 0,
+        "defense": 50
       }
     ],
     "peerGroupSizes": {
@@ -54,12 +60,12 @@
       "C": 11
     },
     "abBenchmarkCount": 72,
-    "defenseChanged": 75,
-    "ovrChanged": 31,
-    "gradeChanged": 5,
+    "defenseChanged": 76,
+    "ovrChanged": 34,
+    "gradeChanged": 6,
     "maxOVRIncrease": 2,
-    "maxOVRDecrease": -1,
-    "scorer": "83% adjusted fielding error percentile + 17% range per nine percentile; 140 chances shrink to position-group error average; 600 innings shrink to 70; 50-98; no fielding innings => null; batter OVR recalculated using RKBO v0.2 season formula and 72 internal neutral for unknown defense"
+    "maxOVRDecrease": -3,
+    "scorer": "83% adjusted fielding error percentile + 17% range per nine percentile; 140 chances shrink to position-group error average; 600 innings shrink to 70; 50-98; no fielding games => 50 minimum; batter OVR recalculated using RKBO v0.2 season formula"
   },
   "players": [
     {
@@ -121,7 +127,7 @@
       "previousDefense": 72,
       "defense": 70,
       "previousOVR": 69,
-      "ovr": 69,
+      "ovr": 70,
       "previousGrade": "실버",
       "grade": "실버",
       "skillIndex": 69.06,
@@ -335,12 +341,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 65,
-      "ovr": 66,
+      "ovr": 64,
       "previousGrade": "실버",
-      "grade": "실버",
-      "skillIndex": 66.92,
+      "grade": "브론즈",
+      "skillIndex": 65.6,
       "scoreDetails": null
     },
     {
@@ -354,7 +360,7 @@
       "previousDefense": 70,
       "defense": 67,
       "previousOVR": 60,
-      "ovr": 59,
+      "ovr": 60,
       "previousGrade": "브론즈",
       "grade": "브론즈",
       "skillIndex": 69.76,
@@ -712,12 +718,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 89,
-      "ovr": 89,
+      "ovr": 88,
       "previousGrade": "코랄",
       "grade": "코랄",
-      "skillIndex": 83.86,
+      "skillIndex": 82.54,
       "scoreDetails": null
     },
     {
@@ -848,10 +854,10 @@
       "battingGames": 85,
       "fieldingGames": 83,
       "fieldingInnings": 269,
-      "previousDefense": null,
+      "previousDefense": 73,
       "defense": 73,
       "previousOVR": 59,
-      "ovr": 59,
+      "ovr": 60,
       "previousGrade": "브론즈",
       "grade": "브론즈",
       "skillIndex": 70.2,
@@ -899,7 +905,7 @@
       "previousDefense": 64,
       "defense": 63,
       "previousOVR": 79,
-      "ovr": 78,
+      "ovr": 79,
       "previousGrade": "골드",
       "grade": "골드",
       "skillIndex": 74.89,
@@ -1016,7 +1022,7 @@
       "battingGames": 108,
       "fieldingGames": 10,
       "fieldingInnings": 93,
-      "previousDefense": null,
+      "previousDefense": 70,
       "defense": 70,
       "previousOVR": 70,
       "ovr": 70,
@@ -1064,7 +1070,7 @@
       "battingGames": 110,
       "fieldingGames": 23,
       "fieldingInnings": 117,
-      "previousDefense": null,
+      "previousDefense": 74,
       "defense": 74,
       "previousOVR": 70,
       "ovr": 70,
@@ -1115,7 +1121,7 @@
       "previousDefense": 73,
       "defense": 64,
       "previousOVR": 71,
-      "ovr": 70,
+      "ovr": 71,
       "previousGrade": "실버",
       "grade": "실버",
       "skillIndex": 69.38,
@@ -1163,7 +1169,7 @@
       "previousDefense": 70,
       "defense": 75,
       "previousOVR": 69,
-      "ovr": 69,
+      "ovr": 70,
       "previousGrade": "실버",
       "grade": "실버",
       "skillIndex": 69.76,
@@ -1329,12 +1335,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 79,
-      "ovr": 79,
+      "ovr": 78,
       "previousGrade": "골드",
       "grade": "골드",
-      "skillIndex": 76.07,
+      "skillIndex": 74.75,
       "scoreDetails": null
     },
     {
@@ -1393,7 +1399,7 @@
       "battingGames": 58,
       "fieldingGames": 52,
       "fieldingInnings": 306,
-      "previousDefense": null,
+      "previousDefense": 66,
       "defense": 66,
       "previousOVR": 59,
       "ovr": 59,
@@ -1490,12 +1496,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 73,
-      "ovr": 73,
+      "ovr": 71,
       "previousGrade": "실버",
       "grade": "실버",
-      "skillIndex": 70.84,
+      "skillIndex": 69.52,
       "scoreDetails": null
     },
     {
@@ -1605,7 +1611,7 @@
       "previousDefense": 88,
       "defense": 86,
       "previousOVR": 83,
-      "ovr": 82,
+      "ovr": 83,
       "previousGrade": "골드",
       "grade": "골드",
       "skillIndex": 78.43,
@@ -1699,12 +1705,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 84,
-      "ovr": 84,
+      "ovr": 82,
       "previousGrade": "코랄",
-      "grade": "코랄",
-      "skillIndex": 79.34,
+      "grade": "골드",
+      "skillIndex": 78.02,
       "scoreDetails": null
     },
     {
@@ -1742,9 +1748,9 @@
       "previousDefense": 92,
       "defense": 90,
       "previousOVR": 84,
-      "ovr": 83,
+      "ovr": 84,
       "previousGrade": "코랄",
-      "grade": "골드",
+      "grade": "코랄",
       "skillIndex": 78.95,
       "scoreDetails": {
         "peerGroup": "MI",
@@ -1980,12 +1986,12 @@
       "fieldingGames": 0,
       "fieldingInnings": 0,
       "previousDefense": null,
-      "defense": null,
+      "defense": 50,
       "previousOVR": 72,
-      "ovr": 72,
+      "ovr": 69,
       "previousGrade": "실버",
       "grade": "실버",
-      "skillIndex": 70.2,
+      "skillIndex": 68.88,
       "scoreDetails": null
     },
     {
@@ -1996,7 +2002,7 @@
       "battingGames": 52,
       "fieldingGames": 50,
       "fieldingInnings": 195,
-      "previousDefense": null,
+      "previousDefense": 65,
       "defense": 65,
       "previousOVR": 60,
       "ovr": 60,
