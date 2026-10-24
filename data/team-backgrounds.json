@@ -60,6 +60,16 @@
       "commit": "914e32cfa26eab5fc364af7b1585393359f526fa",
       "blobSha": "315d27d62e8d355f1dcb356dcd0942cb02db9efe",
       "rev": "mvmhtmjn"
+    },
+    "NC": {
+      "path": "assets/team-backgrounds/NC.webp",
+      "x": 0,
+      "y": 9,
+      "zoom": 1.32,
+      "overlay": 50,
+      "commit": "3a419c72d06f04ec154e166753b697153a5864af",
+      "blobSha": "d80b3512183b1a55a021583c83f26d518a8b0953",
+      "rev": "mvmhvn6x"
     }
   }
 }
