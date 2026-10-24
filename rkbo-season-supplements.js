@@ -33,7 +33,7 @@ function personalToWorkbook(source,season){
   const base=["SS","TEAM","NAME","POS","G","AVG","OBP","SLG","AB","H","H2B","H3B","HR","R","RBI","BB","K","SB","CS",
    "ERA","W","L","S","BS","GS","CG","SHO","IP","ER","BK","WP"];
   const mapped=rows.map(r=>{
-   const obj={SS:season,TEAM:r.team,NAME:r.rawName,...r.record};
+   const obj={...r.record,SS:season,TEAM:r.team,NAME:r.rawName};
    if(obj.H2B===undefined)obj.H2B=obj["2B"]??"0";
    if(obj.H3B===undefined)obj.H3B=obj["3B"]??"0";
    if(!obj.POS&&name==="타자")throw Error(r.rawName+": 타자 포지션 누락");
@@ -227,7 +227,7 @@ async function save(){
   try{await root.RKBOSeason?.reload?.();if(season!==60)await root.RKBOSeason?.refreshSeason?.(season)}catch(error){console.warn("Reload newly published season when Pages syncs",error)}
   info("✓ "+season+"차 자료 "+files.length+"종 · 선수 카드 "+work.cards.length+"장 · GitHub 저장 완료!\n"+
     (work.finalResult?"수비 "+work.finalResult.report.updated+"명 · OVR "+work.finalResult.report.ovrChanged+"명 변경\n":"기존 수비/OVR 유지 · 원본 자료 보관\n")+
-    "커밋 "+commit.slice(0,12)+"\n60차는 화면에 반영하려면 새로고침해 주세요. GitHub Pages 배포 직후에는 잠깐 이전 내용이 보일 수 있습니다.");
+    "커밋 "+commit.slice(0,12)+"\n"+season+"차 카드의 변경 내용은 새로고침 후 확인해 주세요. GitHub Pages 배포 직후에는 잠깐 이전 내용이 보일 수 있습니다.");
   root.dispatchEvent(new Event("rkbo-season-ready"));
  }catch(error){console.error("[RKBO supplement publishing]",error);info("GitHub 저장 실패: "+error.message+"\n원본 카드 변경 여부를 저장소에서 확인해 주세요.")}
  finally{toggle(false)}
