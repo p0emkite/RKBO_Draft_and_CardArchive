@@ -75,6 +75,7 @@ async function apply(players,dataElement){
   }
   for(const p of players){
    p.englishName=p.englishName||p.name;
+   if(typeof p.manualName==='string'&&p.manualName.trim()){p.name=p.manualName.trim();report.matched++;continue}
    const row=byCard.get(p.id);
    const seasonNickname=row&&Number(row.Season)===Number(p.season)
      && key(row.Team)===key(p.team)

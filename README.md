@@ -183,3 +183,8 @@ GitHub Fine-grained PAT을 사용하며 `p0emkite` 계정의 **해당 저장소 
 - HHRecord ZIP은 기록 페이지 및 수비 투표표와 최종 TXT를 교차검증해 원본 보관합니다. **골든글러브 투표표는 수비 전원의 해당 시즌 최종 기록이 아니므로**, HHRecord ZIP만으로 미확인 선수에게 수비 점수를 추측하여 부여하지 않습니다. 최종 TXT가 없으면 기존 수비/OVR을 유지합니다.
 - 시즌별 새 업로드 결과는 `data/season-supplements/{season}-audit.json`, 최종 기록 `data/season-fielding/{season}.tsv`, 자료 원본 조각 `imports/season-supplements/`, `data/imports.json`에 남깁니다. 60차는 `index.html`의 내장 선수 카드에, 다른 시즌은 `data/seasons/{season}.json`에 GitHub 원자적 커밋으로 적용합니다.
 - 미일치 선수나 불완전한 자료는 분석 보고서에 표시하고 추정하지 않습니다. 선수 고유 카드 ID와 사진 데이터는 유지합니다.
+
+## 선수 카드 편집 및 CP 포지션 (2026-10-25)
+
+- GitHub 제작자 로그인 후 카드 상세 화면에서 **선수 이름 직접 입력 및 포지션 드롭다운(C/1B/2B/3B/SS/LF/CF/RF, SP/RP/CP)**을 수정할 수 있습니다. GitHub에 해당 시즌 카드 데이터(60차는 index.html JSON, 1~59차는 data/seasons/N.json)를 저장하며 카드 ID, 원본 rawName, 스탯, OVR, 사진 링크는 유지합니다. 수정된 이름은 `manualName`에 기록되며 한글 이름 자동 변환보다 우선합니다.
+- 1~60차 기존 RP 중 팀별 **세이브 최다 1명씩 CP**로 지정했습니다. 동률은 투구이닝 → 경기 수 → ID로 결정하되 60차 SSG는 요청대로 홍지혜입니다. 직접 선택한 포지션은 `positionManual`로 구분해 자동 규칙이 덮어쓰지 않습니다.

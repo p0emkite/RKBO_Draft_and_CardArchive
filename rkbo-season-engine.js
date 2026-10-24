@@ -121,7 +121,7 @@ function engine(book){
    groups.get(row.season).push(rowToPlayer(row,index));
   }
  }
- const out=new Map();for(const [season,players] of groups){out.set(season,scoreSeason(players).filter(eligibleCard))}
+ const out=new Map();for(const [season,players] of groups){const cards=scoreSeason(players).filter(eligibleCard);root.RKBORoles?.apply(cards,season);out.set(season,cards)}
  return out;
 }
 function htmlPlayers(html,team){

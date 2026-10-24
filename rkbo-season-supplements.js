@@ -102,6 +102,7 @@ async function analyze(){
   if(!cards)throw Error(season+"차 기본 카드가 없습니다. 개인 성적 ZIP(8/10개 구단)을 첨부하면 통합 엑셀 없이 새 시즌을 생성할 수 있습니다.");
   const eligible=p=>Number(p?.stats?.G)>=(p?.type==="타자"?50:p?.type==="투수"?25:Infinity);
   cards=cards.filter(eligible);
+  root.RKBORoles?.apply(cards,season);
   if(!cards.length)throw Error("출전 기준(타자 50 / 투수 25) 충족 카드가 없습니다.");
   let finalResult=null,fielding=null;
   if(defense){
