@@ -20,6 +20,16 @@
       "commit": "fd32c2a930a2a77edf211984b0c30331222e4403",
       "blobSha": "d81cf24dbd1c52194a0fd684c11b253e7d7f52a6",
       "rev": "mvmhe1k8"
+    },
+    "LG": {
+      "path": "assets/team-backgrounds/LG.webp",
+      "x": 0,
+      "y": 0,
+      "zoom": 1,
+      "overlay": 50,
+      "commit": "c5dd0ffffc3f5223b9e83487842025b3b101d0bb",
+      "blobSha": "d81cf24dbd1c52194a0fd684c11b253e7d7f52a6",
+      "rev": "mvmheczb"
     }
   }
 }
