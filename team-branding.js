@@ -1,7 +1,7 @@
 /* RKBO season-aware team identities.
  * Internal Excel team codes and player IDs remain unchanged.
  * The on-card club name, logo, and decorative watermark reflect that season.
- * Historic 'SSG' (unified Excel ID) is displayed as SK through season 59.
+ * Historic 'SSG' (unified Excel ID) is displayed as SK through season 42; SSG from season 43.
  */
 (function(root){
 'use strict';
@@ -15,7 +15,7 @@ const logos={NC:'assets/teams/NC.png'};
 function code(player){
  if(!player)return '';
  const internal=String(player.team||'').toUpperCase();
- if(internal==='SSG'&&Number(player.season)<60)return 'SK';
+ if(internal==='SSG'&&Number(player.season)<=42)return 'SK';
  return internal;
 }
 function logo(player){

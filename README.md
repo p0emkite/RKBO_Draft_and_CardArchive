@@ -114,7 +114,7 @@ GitHub Fine-grained PAT을 사용하며 `p0emkite` 계정의 **해당 저장소 
 ## 시즌별 구단 브랜딩·원본 사진 처리
 
 - **성적/고유 ID용 팀코드와 화면의 구단 브랜딩을 분리합니다.** 선수의 `team`, `id`, `stats`, `ratings`, `ovr`는 변경하지 않습니다.
-- `team-branding.js`에서 `SSG` 코드는 **1~59차 카드에 SK 와이번스 / SK.svg**, 60차부터 SSG 랜더스 / SSG.svg로 표시합니다.
+- `team-branding.js`에서 `SSG` 코드는 **1~42차 카드에 SK 와이번스 / SK.svg**, 43차부터 SSG 랜더스 / SSG.svg로 표시합니다.
 - `KIW`는 키움 히어로즈 / KIW.svg, `KT`는 KT 위즈 / KT.svg를 사용합니다. 로고 3개는 사용자가 제공한 파일입니다.
 - 시즌 변경 시 카드 로고, 구단 이름, 팀 워터마크, 팀 검색 필터, 상세 정보, **750×1050 PNG**까지 함께 변경됩니다.
 - 개인 성적표 업로드에서도 `SK.txt`·`SK.html`을 읽고 통합 엑셀의 `SSG`와 매칭할 수 있습니다.
