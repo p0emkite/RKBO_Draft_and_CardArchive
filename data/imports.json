@@ -57,6 +57,22 @@
       "mime": "application/zip",
       "uploadedAt": "2026-10-24T00:00:00+09:00",
       "source": "User-provided original RKBO season archive"
+    },
+    {
+      "id": "season-team-stats-54-mvm1c4he",
+      "kind": "season-team-stats",
+      "season": 54,
+      "name": "54차 개인 성적.zip",
+      "originalName": "54차 개인 성적.zip",
+      "size": 24406,
+      "format": "base64-file",
+      "chunks": [
+        "imports/season-team-stats/54/mvm1c4hd-54_______.zip.b64"
+      ],
+      "uploadedAt": "2026-10-24T06:46:03.698Z",
+      "source": "personal-stat-roster-authoritative-team-and-nickname",
+      "matched": 208,
+      "unresolved": 0
     }
   ]
 }
