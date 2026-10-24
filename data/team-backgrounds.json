@@ -1,4 +1,14 @@
 {
   "version": 1,
-  "teams": {}
+  "teams": {
+    "SAM": {
+      "path": "assets/team-backgrounds/SAM.webp",
+      "x": 0,
+      "y": 4,
+      "zoom": 1.5,
+      "commit": "4463d24e787fd5e2001223fa7d41c4790fdda989",
+      "blobSha": "e9b83f4a78c70b6dcae75a66eeb77686ff3428ec",
+      "rev": "mvm4k0gb"
+    }
+  }
 }
