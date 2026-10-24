@@ -67,9 +67,9 @@ async function make(player){
   const fit=mode==='cover'?Math.max(288/image.naturalWidth,243/image.naturalHeight):Math.min(288/image.naturalWidth,243/image.naturalHeight);
   const w=image.naturalWidth*fit*zx,h=image.naturalHeight*fit*zx;
   // Two-pass alpha-aware soft outer glow, plus the original sharp photo.
-   ctx.save();ctx.shadowColor='rgba(255,255,255,.23)';ctx.shadowBlur=23*SCALE;
+   ctx.save();ctx.shadowColor='rgba(255,255,255,.115)';ctx.shadowBlur=23*SCALE;
    ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
-   ctx.shadowColor='rgba(255,255,255,.34)';ctx.shadowBlur=11*SCALE;
+   ctx.shadowColor='rgba(255,255,255,.17)';ctx.shadowBlur=11*SCALE;
    ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
    ctx.restore();ctx.drawImage(image,150+x-w/2,127.5+y-h/2,w,h);
  }else if(silhouette){
