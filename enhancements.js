@@ -42,7 +42,7 @@ function photoHtml(p){const temp=previewCache[p.id];const entry=temp||imgConfig.
  const x=Number(entry.x)||0,y=Number(entry.y)||0,zoom=Number(entry.zoom)||1;
  const url=photoUrl(entry);
  if(!url)return '';
- return `<img class="player-photo" src="${h(url)}" data-photo-fallback="${h(entry.url?'':photoPagesUrl(entry))}" data-photo-type="${h(p.type)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)};--photo-fit:${photoFit(entry)}">`;
+ return `<img class="player-photo" src="${h(url)}" data-photo-blob="${h(entry.blobSha||'')}" data-photo-fallback="${h(entry.url?'':photoPagesUrl(entry))}" data-photo-type="${h(p.type)}" draggable="false" alt="${h(p.name)} 이미지" loading="lazy" style="--photo-x:${clamp(x,-150,150)}%;--photo-y:${clamp(y,-150,150)}%;--photo-zoom:${clamp(zoom,.3,5)};--photo-fit:${photoFit(entry)}">`;
 }
 function poseHtml(p){
  const file=p.type==='투수'?'assets/default-pitcher.png':'assets/default-batter.png';
@@ -52,17 +52,54 @@ const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button c
 window.RKBOArt=art;
 function refresh(){const sort=q('sort');if(sort)sort.dispatchEvent(new Event('change',{bubbles:true}));if(activeEditor)renderEditor()}
 function setStatus(s){if(q('admin-status'))q('admin-status').textContent=s}
-document.addEventListener('error',event=>{
- const img=event.target;
- if(!(img instanceof HTMLImageElement)||!img.classList.contains('player-photo'))return;
- if(img.dataset.photoRetry!=='1'&&img.dataset.photoFallback){
-  img.dataset.photoRetry='1';img.src=img.dataset.photoFallback;return;
- }
+// Only broken raw/CDN images request the GitHub Git Blob API. This public
+// endpoint is available without a token and returns the committed image bytes.
+const publicBlobPhotoUrls=new Map(),pendingPublicBlobPhotos=new Map();
+async function publicCardPhotoFromBlob(sha){
+ if(!/^[0-9a-f]{40}$/i.test(String(sha||'')))throw Error('Invalid image blob SHA');
+ if(publicBlobPhotoUrls.has(sha))return publicBlobPhotoUrls.get(sha);
+ if(pendingPublicBlobPhotos.has(sha))return pendingPublicBlobPhotos.get(sha);
+ const promise=(async()=>{
+  const response=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs/${sha}`,{
+   headers:{Accept:'application/vnd.github+json'},cache:'no-store'
+  });
+  if(!response.ok)throw Error('GitHub public image API '+response.status);
+  const record=await response.json();
+  if(record?.encoding!=='base64'||typeof record.content!=='string')throw Error('Unsupported Git blob payload');
+  const decoded=atob(record.content.replace(/\s/g,''));
+  const data=Uint8Array.from(decoded,ch=>ch.charCodeAt(0));
+  const url=URL.createObjectURL(new Blob([data],{type:'image/webp'}));
+  publicBlobPhotoUrls.set(sha,url);
+  return url;
+ })();
+ pendingPublicBlobPhotos.set(sha,promise);
+ try{return await promise}finally{pendingPublicBlobPhotos.delete(sha)}
+}
+function showDefaultPose(img){
+ if(!img.isConnected)return;
  const silhouette=document.createElement('img');
  silhouette.className='player-pose';
  silhouette.src=imgSrc(img.dataset.photoType==='투수'?'assets/default-pitcher.png':'assets/default-batter.png');
  silhouette.alt='저장된 사진을 불러올 수 없어 기본 실루엣을 표시합니다.';
  silhouette.draggable=false;img.replaceWith(silhouette);
+}
+function tryPublicPagesOrPose(img){
+ if(!img.isConnected)return;
+ if(img.dataset.photoRetry!=='pages'&&img.dataset.photoFallback){
+  img.dataset.photoRetry='pages';img.src=img.dataset.photoFallback;return;
+ }
+ showDefaultPose(img);
+}
+document.addEventListener('error',event=>{
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement)||!img.classList.contains('player-photo'))return;
+ if(!img.dataset.photoRetry&&/^[0-9a-f]{40}$/i.test(img.dataset.photoBlob||'')){
+  img.dataset.photoRetry='api';
+  publicCardPhotoFromBlob(img.dataset.photoBlob).then(url=>{if(img.isConnected)img.src=url})
+   .catch(error=>{console.warn('[RKBO photo binary fallback]',error);tryPublicPagesOrPose(img)});
+  return;
+ }
+ tryPublicPagesOrPose(img);
 },true);
 // A newly uploaded photo stays visible as a blob until its pinned remote URL
 // actually responds with a decoded image, regardless of Pages build timing.
@@ -95,17 +132,21 @@ async function gh(path,method='GET',data=null,sha=null){
 async function readJson(path){const file=await gh(path);if(!file)return {sha:null,data:null};if(!file.content)throw Error('파일 응답에 데이터가 없습니다.');return {sha:file.sha,data:JSON.parse(decode64(file.content))}}
 async function putJson(path,data,sha){return gh(path,'PUT',encode64(JSON.stringify(data,null,2)+'\n'),sha)}
 async function loadPublished(){
- // Read newly committed image metadata without waiting for GitHub Pages build.
- // Fallback to Pages for offline/mirror scenarios.
- const candidates=[`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${IMAGE_META}`];
- if(location.protocol!=='file:')candidates.push('./data/card-images.json');
- for(const source of candidates){
+ // The public (token-free) GitHub Contents API reads the current main file;
+ // Pages deploys and raw/main CDN responses can temporarily be stale.
+ const candidates=[
+  {url:`https://api.github.com/repos/${OWNER}/${REPO}/contents/${IMAGE_META}?ref=main&t=${Date.now()}`,api:true},
+  {url:`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${IMAGE_META}?t=${Date.now()}`},
+  ...(location.protocol==='file:'?[]:[{url:'./data/card-images.json?t='+Date.now()}])
+ ];
+ for(const {url,api} of candidates){
   try{
-   const response=await fetch(source+'?t='+Date.now(),{cache:'no-store'});
+   const response=await fetch(url,{cache:'no-store',...(api?{headers:{Accept:'application/vnd.github+json'}}:{})});
    if(!response.ok)continue;
-   const data=await response.json();
-   if(data&&typeof data.images==='object'){imgConfig=data;refresh();return}
-  }catch(error){console.warn('[RKBO photo metadata]',source,error)}
+   const payload=await response.json();
+   const data=api?(payload?.encoding==='base64'&&typeof payload.content==='string'?JSON.parse(decode64(payload.content)):null):payload;
+   if(data&&data.images&&typeof data.images==='object'&&!Array.isArray(data.images)){imgConfig=data;refresh();return}
+  }catch(error){console.warn('[RKBO public photo metadata]',url,error)}
  }
 }
 // Owner repo permissions do not prove that this specific PAT has Contents: write.
@@ -214,7 +255,8 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
  try{
  let path=e.entry.path||'';let rev=e.entry.rev||'';
  let imageCommit=e.entry.commit||imgConfig.images?.[e.p.id]?.commit||'';
- if(reset){path='';rev='';imageCommit=''}
+ let imageBlobSha=e.entry.blobSha||imgConfig.images?.[e.p.id]?.blobSha||'';
+ if(reset){path='';rev='';imageCommit='';imageBlobSha=''}
  else if(e.blob){
   path='assets/cards/'+e.p.id+'.webp';
   const arr=new Uint8Array(await e.blob.arrayBuffer());
@@ -222,6 +264,7 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
   const uploaded=await gh(BASE+path,'PUT',base64bytes(arr),before?.sha||null);
   // GitHub image-content write returns the immutable commit containing the file.
   imageCommit=uploaded?.commit?.sha||'';
+  imageBlobSha=uploaded?.content?.sha||'';
   rev=Date.now().toString(36);
  }
  else if(!path)throw Error('먼저 이미지를 선택해 주세요.');
@@ -229,7 +272,7 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
  const current=await readJson(IMAGE_META);const latest=current.data||{version:1,images:{}};
  latest.images=latest.images||{};
  if(reset)delete latest.images[e.p.id];
- else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),rev,...(imageCommit?{commit:imageCommit}:{})};
+ else latest.images[e.p.id]={path,x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),rev,...(imageCommit?{commit:imageCommit}:{}),...(imageBlobSha?{blobSha:imageBlobSha}:{})};
  await putJson(IMAGE_META,latest,current.sha);imgConfig=latest;
  const id=e.p.id,localURL=e.url?.startsWith('blob:')?e.url:null;
  const oldCache=previewCache[id];
