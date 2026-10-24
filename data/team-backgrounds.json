@@ -70,6 +70,16 @@
       "commit": "3a419c72d06f04ec154e166753b697153a5864af",
       "blobSha": "d80b3512183b1a55a021583c83f26d518a8b0953",
       "rev": "mvmhvn6x"
+    },
+    "KT": {
+      "path": "assets/team-backgrounds/KT.webp",
+      "x": 4,
+      "y": 0,
+      "zoom": 1.29,
+      "overlay": 50,
+      "commit": "67563a1ff387ba23125b2413d948d126f22e2e43",
+      "blobSha": "d364c0363cfdb5dc8b1bb8feb8132daf56e193ce",
+      "rev": "mvmhx7ud"
     }
   }
 }
