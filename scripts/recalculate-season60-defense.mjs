@@ -81,7 +81,7 @@ function recalculateSeason60(players,source){
     rangePerNine:round(calc.rangePerNine,4),errorPercentile:round(calc.errorPercentile,4),
     rangePercentile:round(calc.rangePercentile,4),reliability:round(calc.reliability,4)}:null;
   delete p.defenseRestoration;
-  p.unavailable=(p.unavailable||[]).filter(s=>!String(s).includes("수비 기록 없음")&&!String(s).includes("HHRecord 수비 표"));
+  p.unavailable=(p.unavailable||[]).filter(s=>!String(s).includes("수비 기록 없음")&&!String(s).includes("HHRecord 수비 표")&&!String(s).includes("최종 기록상 수비 출장 0경기"));
   if(!calc)p.unavailable.unshift("최종 기록상 수비 출장 0경기·0이닝: 수비 능력치 미산정");
   const v=p.ratings;
   p.skillIndex=round(.32*v.정확+.31*v.파워+.23*v.선구+.08*v.주루+.06*(v.수비??72),2);
@@ -132,7 +132,12 @@ const players=JSON.parse(html.slice(begin+opening.length,finish));
 const out=recalculateSeason60(players,readFileSync(sourcePath,"utf8"));
 console.log(JSON.stringify(out.summary,null,2));
 if(process.argv.includes("--apply")){
- writeFileSync(cardPath,html.slice(0,begin+opening.length)+JSON.stringify(out.players)+html.slice(finish));
- writeFileSync(auditPath,JSON.stringify({version:1,summary:out.summary,players:out.changes},null,2)+String.fromCharCode(10));
- console.log("Updated 60th season cards and audit");
+ // Keep the original before/after audit intact on repeat runs.
+ if(JSON.stringify(out.players)===JSON.stringify(players)){
+  console.log("Already up to date; leaving saved historical audit untouched.");
+ }else{
+  writeFileSync(cardPath,html.slice(0,begin+opening.length)+JSON.stringify(out.players)+html.slice(finish));
+  writeFileSync(auditPath,JSON.stringify({version:1,summary:out.summary,players:out.changes},null,2)+String.fromCharCode(10));
+  console.log("Updated 60th season cards and audit");
+ }
 }
