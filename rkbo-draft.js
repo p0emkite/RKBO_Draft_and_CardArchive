@@ -53,7 +53,7 @@ function open(){
  state=null;mode="season";setup();
 }
 function close(){
- if(loading)return;
+ if(loading){token++;loading=false;stopTimers();state=null;document.getElementById("rkbo-draft-overlay").hidden=true;document.body.style.overflow=previousOverflow;return}
  if(state&&state.phase!=="result"&&state.picks.size&&state.picks.size<18&&!confirm("진행 중인 드래프트를 종료할까요? 선택한 팀은 초기화됩니다."))return;
  token++;stopTimers();state=null;document.getElementById("rkbo-draft-overlay").hidden=true;document.body.style.overflow=previousOverflow;
 }
@@ -86,6 +86,14 @@ async function allTime(){
   while(next<tasks.length){
    if(runToken!==token)throw Error("취소된 드래프트입니다.");
    const j=next++,s=tasks[j],n=Number(s.season);
+   if(n===60){
+    const built=root.RKBOSeason?.builtin?.();
+    if(!Array.isArray(built))throw Error("60차 기본 카드 데이터가 없습니다.");
+    result[j]=built;done++;
+    const p=stage?.querySelector("#rkbo-draft-load-status");
+    if(p)p.textContent=done+" / "+tasks.length+"개 시즌 불러오는 중…";
+    continue;
+   }
    const path=s.file||("data/seasons/"+n+".json");
    const response=await fetch("./"+path+"?draft="+Date.now(),{cache:"no-store"});
    if(!response.ok)throw Error(n+"차 카드 로딩 실패 (HTTP "+response.status+")");
