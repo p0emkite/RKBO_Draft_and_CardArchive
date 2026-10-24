@@ -123,13 +123,16 @@ function recalculateSeason60(players,source){
  return {players,summary,changes};
 }
 const html=readFileSync(cardPath,"utf8");
-const match=html.match(/(<script id="data" type="application\\/json">)([\\s\\S]*?)(<\\/script>)/);
-if(!match)throw Error("Embedded season 60 data missing");
-const players=JSON.parse(match[2]);
+const opening='<script id="data" type="application/json">';
+const closing='</script>';
+const begin=html.indexOf(opening);
+const finish=html.indexOf(closing,begin+opening.length);
+if(begin<0||finish<0)throw Error("Embedded season 60 data missing");
+const players=JSON.parse(html.slice(begin+opening.length,finish));
 const out=recalculateSeason60(players,readFileSync(sourcePath,"utf8"));
 console.log(JSON.stringify(out.summary,null,2));
 if(process.argv.includes("--apply")){
- writeFileSync(cardPath,html.replace(match[0],match[1]+JSON.stringify(out.players)+match[3]));
- writeFileSync(auditPath,JSON.stringify({version:1,summary:out.summary,players:out.changes},null,2)+"\\n");
+ writeFileSync(cardPath,html.slice(0,begin+opening.length)+JSON.stringify(out.players)+html.slice(finish));
+ writeFileSync(auditPath,JSON.stringify({version:1,summary:out.summary,players:out.changes},null,2)+String.fromCharCode(10));
  console.log("Updated 60th season cards and audit");
 }
