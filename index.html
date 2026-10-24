@@ -65,6 +65,7 @@
 <script src="./rkbo_xls_biff.js"></script>
 <script src="./rkbo-season-engine.js"></script>
 <script src="./enhancements.js"></script>
+<script src="./rkbo-season-identity.js"></script>
 <script src="./rkbo-season-importer.js"></script>
 <script src="./card-export.js"></script>
 <script src="./player-name-map.js"></script>
@@ -143,6 +144,14 @@ function validateSeasonCards(input,season){
   return p;
  });
 }
+async function refreshSeasonFromGitHub(n){
+ const season=Number(n);
+ seasonCache.delete(season);
+ if(activeSeason===season){
+  activeSeason=-1; // force a fresh fetch and re-run Korean/historic name resolution
+  try{await changeSeason(season)}catch(error){activeSeason=season;throw error}
+ }
+}
 function paintActiveSeason(){
  for(const id of ['hero-season-number','hero-background-season','collection-season-number','legend-season-number']){
   if(q(id))q(id).textContent=String(activeSeason);
@@ -204,7 +213,8 @@ window.RKBOSeason={
  seasons:()=>knownSeasons.slice(),
  reload:loadSeasonManifest,
  select:changeSeason,
- validate:validateSeasonCards
+ validate:validateSeasonCards,
+ refreshSeason:refreshSeasonFromGitHub
 };
 q('season-select').addEventListener('change',e=>changeSeason(e.target.value).catch(error=>{console.error(error);}));
 
