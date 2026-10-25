@@ -45,6 +45,15 @@ These config fields are safe for browsers:
 
 Do not share SUPABASE_SERVICE_ROLE_KEY or any private API key.
 
+## Draft lineup editing (October 2026)
+- Blind mode masks **OVR, card tier, and all five player ratings** until the result screen. Stat values appear as `??` with black font on a pale background.
+- Draft selection text says **선발** / **중계** without a numbered position. Slot IDs remain `SP1...SP5` / `RP1...RP3` for verification.
+- After picking 18 players, use **라인업 편집하기**. Drag a row onto another on desktop, or tap two different players in the same group on mobile.
+- Editable groups: batting order (9), defensive assignments including DH (9), starting rotation (5), and middle reliever order (3). The closer remains fixed.
+- TPI is calculated from the exact drafted 18 cards, not their lineup ordering.
+- `rkbo_draft_results.lineup` stores server-validated assignments as JSONB. Older results keep `NULL` and render with the original slot order. Client-submitted lineups must be permutations of the drafted slots; original card/OVR/server verification stays in force.
+- Online roster details use the same Korean-name mapping used by the card archive, with English as a fallback for unmatched historical cards.
+
 ## Four boards
 
 - Current season: filters by selected season
