@@ -289,35 +289,38 @@ function lineupDragEnd(){shell?.querySelectorAll(".rkbo-draft-edit-row.is-draggi
 function result(){
  stopTimers();if(!state||state.picks.size!==18)return;
  state.phase="result";
+ if(!state.lineup)state.lineup=newLineup();
  const pairs=[...state.picks],players=pairs.map(([,p])=>p),score=strength(players);state.score=score;
  if(!state.recorded){state.recorded=true;saveScore({id:"draft-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),
   mode:state.mode,hidden:state.hidden,season:state.season,avg:Number(score.avg),power:score.power,
   at:new Date().toISOString(),slots:pairs.map(([slot,p])=>({slot,id:p.id,ovr:p.ovr}))})}
- const spot=(id)=>{
-  const p=state.picks.get(id),xy=fieldCoords[id],s=byId.get(id);
+ const l=state.lineup,spot=(pos,slot)=>{
+  const p=state.picks.get(slot),xy=fieldCoords[pos],s=byId.get(pos);
   return '<div class="rkbo-draft-field-player" style="left:'+xy[0]+'%;top:'+xy[1]+'%" title="'+esc(s.title+" "+p.name+" OVR "+p.ovr)+'">'+
-   '<small>'+esc(id)+'</small><strong>'+esc(p.name)+'</strong><span>OVR '+p.ovr+'</span></div>';
+   '<small>'+esc(pos)+'</small><strong>'+esc(p.name)+'</strong><span>OVR '+p.ovr+'</span></div>';
  };
- const benchIds=["SP2","SP3","SP4","SP5","RP1","RP2","RP3","CP"];
- const groups=[["STARTING ROTATION · 2~5선발",benchIds.slice(0,4)],["BULLPEN · 중계 3인",benchIds.slice(4,7)],["CLOSER · 마무리",["CP"]]];
- render('<div class="rkbo-draft-result-title"><span class="rkbo-draft-kicker">COMPLETE · 18 / 18</span><h3>MY DREAM TEAM</h3><p>18명의 최종 드래프트가 완성됐습니다.</p></div>'+
+ const groups=[["STARTING ROTATION · 2~5선발",l.rotation.slice(1)],["BULLPEN · 중계 3인",l.bullpen],["CLOSER · 마무리",["CP"]]];
+ render('<div class="rkbo-draft-result-title"><span class="rkbo-draft-kicker">COMPLETE · 18 / 18</span><h3>MY DREAM TEAM</h3><p>18명 지명 완료! 타순·수비·투수진 순서를 편집할 수 있어요.</p></div>'+
   '<div class="rkbo-draft-scoreboard"><div><small>팀 평균 OVR</small><strong>'+score.avg+'</strong></div>'+
   '<div><small>팀 전력지수 · TPI</small><strong>'+score.power+'<span> / 1000</span></strong></div>'+
   '<div><small>지명 완료</small><strong>18<span> / 18</span></strong></div></div>'+
+  '<div class="rkbo-draft-lineup-toggle"><button type="button" data-draft-action="toggle-lineup">'+(state.editLineup?'✓ 라인업 편집 마치기':'✎ 라인업 편집하기')+'</button><span>1번 타자: '+esc(state.picks.get(l.battingOrder[0]).name)+' · 1선발: '+esc(state.picks.get(l.rotation[0]).name)+'</span></div>'+
+  (state.editLineup?lineupEditor():'')+
   '<div class="rkbo-draft-result-layout"><section class="rkbo-draft-field-panel"><div class="rkbo-draft-panel-label">FIELD LINEUP · 주전 타자 9명 + 1선발</div>'+
    '<div class="rkbo-draft-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+
    '<path d="M 3 73 Q 50 -12 97 73 L 50 99 Z" fill="#1f6044" stroke="#a9d4a4" stroke-width=".35"/>'+
    '<path d="M 50 91 L 75 69 L 50 46 L 25 69 Z" fill="#347b4c" stroke="#e8e4c6" stroke-width=".48"/>'+
    '<path d="M 50 91 L 75 69 M 50 91 L 25 69" stroke="#d8e2cb" stroke-width=".5"/>'+
    '<path d="M 50 70 Q 50 65 51 70" stroke="#bdba99" stroke-width=".8" fill="none"/></svg>'+
-    [...batSlots,"SP1"].map(spot).join("")+'</div></section>'+
+    batSlots.map(pos=>spot(pos,l.defense[pos])).join("")+spot("SP1",l.rotation[0])+'</div></section>'+
    '<aside class="rkbo-draft-bench"><div class="rkbo-draft-panel-label">PITCHING STAFF · 선발·불펜</div>'+
    groups.map(([label,ids])=>'<div class="rkbo-draft-bench-group"><h4>'+label+'</h4>'+
-   ids.map(id=>{const p=state.picks.get(id);return '<div class="rkbo-draft-bench-row"><span>'+id+'</span><b>'+esc(p.name)+'</b><small>OVR '+p.ovr+'</small></div>'}).join("")+'</div>').join("")+'</aside></div>'+
+   ids.map((id,i)=>{const p=state.picks.get(id),label=id==="CP"?"CP":id.startsWith("SP")?(i+2)+"선발":(i+1)+"중계";return '<div class="rkbo-draft-bench-row"><span>'+label+'</span><b>'+esc(p.name)+'</b><small>OVR '+p.ovr+'</small></div>'}).join("")+'</div>').join("")+'</aside></div>'+
+   '<div class="rkbo-draft-batting-summary"><h4>타순 · 1~9번</h4><div>'+l.battingOrder.map((id,i)=>'<span><b>'+(i+1)+'번</b> '+esc(state.picks.get(id).name)+'</span>').join("")+'</div></div>'+
    '<p class="rkbo-draft-score-note">TPI(팀 전력지수) = 전체 18명 평균 OVR 70% + 상위 6명 평균 20% + 하위 6명 평균 10%, 합계에 ×10. 정식 경기 승률이 아닌 카드 전력 비교용 지표입니다.</p>'+
    '<div class="rkbo-draft-end-actions"><button type="button" class="rkbo-draft-primary" data-draft-action="again">↻ 같은 모드로 다시 드래프트</button>'+
    '<button type="button" data-draft-action="board">🏆 스코어보드</button>'+
-   '<button type="button" data-draft-action="publish-online" class="rkbo-draft-online-save" '+(!root.RKBOOnline?.isConfigured?.()?'disabled title="온라인 연결 후 사용 가능"':'')+'>🌐 온라인 랭킹에 등록</button>'+
+   '<button type="button" data-draft-action="publish-online" class="rkbo-draft-online-save" '+(!root.RKBOOnline?.isConfigured?.()||state.onlineSaved?'disabled':'')+'>'+(state.onlineSaved?'✓ 온라인 랭킹 등록 완료':'🌐 온라인 랭킹에 등록')+'</button>'+
    '<button type="button" data-draft-action="setup">시즌·모드 다시 선택</button><button type="button" data-draft-action="close">도감으로 돌아가기</button></div>',
   "드래프트 완료 · 최종 라인업");
 }
