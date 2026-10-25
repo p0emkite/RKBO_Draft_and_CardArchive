@@ -252,7 +252,7 @@ function init(){
  });
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
 }
-root.RKBOOnline={isConfigured,open,submitDraft};
+root.RKBOOnline={isConfigured,open,submitDraft,getClient};
 document.addEventListener("DOMContentLoaded",()=>{
  init();
  // Restore account screen on return from Google OAuth.
