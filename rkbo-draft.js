@@ -234,6 +234,58 @@ function strength(players){
  const avg=mean(nums),top=mean(nums.slice(0,6)),bottom=mean(nums.slice(-6));
  return {avg:avg.toFixed(1),power:Math.round((.7*avg+.2*top+.1*bottom)*10)};
 }
+
+function lineupRow(group,slot,label){
+ const p=state.picks.get(slot),selected=state.swapPick?.group===group&&state.swapPick.slot===slot;
+ return '<button type="button" draggable="true" data-lineup-group="'+group+'" data-lineup-slot="'+slot+
+ '" class="rkbo-draft-edit-row'+(selected?' is-selected':'')+'" title="드래그 또는 2명 터치로 교체">'+
+ '<span aria-hidden="true">⠿</span><span>'+esc(label)+'</span><strong>'+esc(p.name)+'</strong><small>OVR '+p.ovr+'</small></button>';
+}
+function lineupEditor(){
+ const l=state.lineup;
+ const section=(title,hint,rows)=>'<section class="rkbo-draft-edit-section"><h4>'+title+'</h4><p>'+hint+'</p><div class="rkbo-draft-edit-list">'+rows+'</div></section>';
+ return '<section class="rkbo-draft-lineup-editor"><div class="rkbo-draft-editor-head"><div><h3>라인업 편집</h3><p>PC: 드래그 · 모바일: 두 선수를 차례로 터치. 원래 지명한 18명과 TPI는 그대로예요.</p></div>'+
+ '<button type="button" data-draft-action="reset-lineup">기본 배치로</button></div><div class="rkbo-draft-editor-grid">'+
+ section('타선 · 타순 1~9번','타격 순서 설정',l.battingOrder.map((id,i)=>lineupRow("batting",id,(i+1)+"번")).join(""))+
+ section('수비 · 지명타자','필드 배치와 DH 설정',batSlots.map(pos=>lineupRow("defense",l.defense[pos],pos)).join(""))+
+ section('선발 로테이션','1~5선발 순서',l.rotation.map((id,i)=>lineupRow("rotation",id,(i+1)+"선발")).join(""))+
+ section('중계투수 순서','1~3중계 순서',l.bullpen.map((id,i)=>lineupRow("bullpen",id,(i+1)+"중계")).join(""))+
+ '</div></section>';
+}
+function lineupSwap(group,first,second){
+ if(!state||state.phase!=="result"||!state.lineup||first===second)return;
+ const l=state.lineup,arr=group==="batting"?l.battingOrder:group==="rotation"?l.rotation:group==="bullpen"?l.bullpen:null;
+ if(group==="defense"){
+  const a=batSlots.find(pos=>l.defense[pos]===first),b=batSlots.find(pos=>l.defense[pos]===second);
+  if(!a||!b)return;[l.defense[a],l.defense[b]]=[l.defense[b],l.defense[a]];
+ }else if(arr){
+  const a=arr.indexOf(first),b=arr.indexOf(second);if(a<0||b<0)return;
+  [arr[a],arr[b]]=[arr[b],arr[a]];
+ }else return;
+ state.swapPick=null;state.onlineSaved=false;result();
+}
+function lineupTap(item){
+ if(!state?.editLineup||state.phase!=="result")return;
+ const group=item.dataset.lineupGroup,slot=item.dataset.lineupSlot;
+ if(!state.swapPick||state.swapPick.group!==group){state.swapPick={group,slot};result();return}
+ if(state.swapPick.slot===slot){state.swapPick=null;result();return}
+ lineupSwap(group,state.swapPick.slot,slot);
+}
+function lineupDragStart(e){
+ const item=e.target.closest("[data-lineup-group]");if(!item||!state?.editLineup)return;
+ e.dataTransfer.effectAllowed="move";
+ e.dataTransfer.setData("text/plain",JSON.stringify({group:item.dataset.lineupGroup,slot:item.dataset.lineupSlot}));
+ item.classList.add("is-dragging");
+}
+function lineupDragOver(e){if(e.target.closest("[data-lineup-group]")&&state?.editLineup){e.preventDefault();e.dataTransfer.dropEffect="move"}}
+function lineupDrop(e){
+ const item=e.target.closest("[data-lineup-group]");if(!item||!state?.editLineup)return;
+ e.preventDefault();
+ try{const from=JSON.parse(e.dataTransfer.getData("text/plain"));if(from.group===item.dataset.lineupGroup)lineupSwap(from.group,from.slot,item.dataset.lineupSlot)}
+ catch(err){console.warn("[RKBO lineup]",err)}
+}
+function lineupDragEnd(){shell?.querySelectorAll(".rkbo-draft-edit-row.is-dragging").forEach(el=>el.classList.remove("is-dragging"))}
+
 function result(){
  stopTimers();if(!state||state.picks.size!==18)return;
  state.phase="result";
