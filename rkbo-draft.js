@@ -23,7 +23,21 @@ const fieldCoords={C:[50,89],"1B":[78,68],"2B":[63,50],"3B":[22,68],SS:[37,50],L
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
 const identity=p=>String(p.rawName||p.englishName||p.name||p.id).normalize("NFKC").toLowerCase().replace(/[^a-z0-9가-힣]/g,"");
-let shell=null,stage=null,mode="season",state=null,interval=null,timeout=null,token=0,loading=false,previousOverflow="";
+let shell=null,stage=null,mode="season",hiddenMode=false,state=null,interval=null,timeout=null,token=0,loading=false,previousOverflow="",boardReturn="setup",boardTab="season";
+const BOARD_KEY="rkbo-draft-scores-v2";
+const BOARD_MODES=[
+ {key:"season",label:"현재 시즌"},{key:"all",label:"올타임"},
+ {key:"season-hidden",label:"현재 시즌 (숨기기)"},{key:"all-hidden",label:"올타임 (숨기기)"}
+];
+const category=x=>x.mode+(x.hidden?"-hidden":"");
+function localScores(){try{const list=JSON.parse(localStorage.getItem(BOARD_KEY)||"[]");return Array.isArray(list)?list:[]}catch{return []}}
+function saveScore(data){try{localStorage.setItem(BOARD_KEY,JSON.stringify([...localScores(),data].slice(-250)))}catch(e){console.warn("Unable to store local draft result",e)}}
+function leaderboardRows(key,season){return localScores().filter(r=>category(r)===key&&(r.mode!=="season"||Number(r.season)===Number(season)))
+ .sort((a,b)=>b.power-a.power||b.avg-a.avg||a.at.localeCompare(b.at)).slice(0,20)}
+function resultPayload(){if(!state||state.picks.size!==18||!state.score)return null;
+ return {mode:state.mode,hidden:state.hidden,season:state.season,averageOVR:Number(state.score.avg),power:state.score.power,
+  slots:[...state.picks].map(([slot,p])=>({slot,cardId:p.id,ovr:Number(p.ovr)}))}}
+
 function stopTimers(){if(interval!==null)clearInterval(interval);if(timeout!==null)clearTimeout(timeout);interval=null;timeout=null}
 function header(subtitle){
  return '<div class="rkbo-draft-header"><div><span class="rkbo-draft-kicker">RKBO · DRAFT ROOM</span><h2>RKBO 드래프트 <span>2026</span></h2>'+
@@ -50,7 +64,7 @@ function init(){
 function open(){
  const el=document.getElementById("rkbo-draft-overlay");if(!el)return;
  previousOverflow=document.body.style.overflow;el.hidden=false;document.body.style.overflow="hidden";
- state=null;mode="season";setup();
+ state=null;mode="season";hiddenMode=false;setup();
 }
 function close(){
  if(loading){token++;loading=false;stopTimers();state=null;document.getElementById("rkbo-draft-overlay").hidden=true;document.body.style.overflow=previousOverflow;return}
@@ -61,11 +75,12 @@ function setup(){
  stopTimers();state=null;
  const season=root.RKBOSeason?.current?.()||60;
  render('<div class="rkbo-draft-intro"><div class="rkbo-draft-big">18<span> PICKS</span></div>'+
-  '<div class="rkbo-draft-copy"><h3>18번의 선택, 단 하나의 최강 팀.</h3><p>포지션을 무작위로 추첨하고, 나타나는 선수 카드 3장 중 한 장을 고르세요. 선발 5명·중계 3명·마무리 1명까지 모두 뽑으면 그라운드에 나만의 라인업이 완성됩니다.</p>'+
+  '<div class="rkbo-draft-copy"><h3>18번의 선택, 단 하나의 최강 팀.</h3><p>포지션을 무작위로 추첨하고, 나타나는 선수 카드 3장 중 한 장을 고르세요. 타자 9명·선발 5명·중계 3명·마무리 1명까지 모두 뽑으면 그라운드에 나만의 라인업이 완성됩니다.</p>'+
   '<div class="rkbo-draft-mode-picker"><button type="button" data-draft-action="mode-season" class="rkbo-draft-mode active"><strong>'+season+'차 시즌</strong><small>현재 선택한 시즌의 카드만</small></button>'+
   '<button type="button" data-draft-action="mode-all" class="rkbo-draft-mode"><strong>올타임 드래프트</strong><small>등록된 모든 시즌을 섞어서</small></button></div>'+
+  '<label class="rkbo-draft-hide-option"><input type="checkbox" id="rkbo-draft-hide-toggle" '+(hiddenMode?"checked":"")+'><span><strong>OVR · 등급 숨기기</strong><small>카드 선택 중엔 OVR·등급이 ??로 보이고 테두리가 검정색으로 바뀝니다. 결과창에서 공개됩니다.</small></span></label>'+
   '<div class="rkbo-draft-rules"><span>포지션 랜덤 추첨</span><span>매번 카드 3장</span><span>다시 뽑기 총 3회</span><span>한 포지션에 1회만</span></div>'+
-  '<button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button></div></div>',
+  '<div class="rkbo-draft-start-actions"><button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button><button class="rkbo-draft-board-link" data-draft-action="board" type="button">🏆 스코어보드</button></div></div></div>',
   "시즌 선택 · 18인 로스터 구성");
 }
 function selectedCount(){return state?.picks?.size||0}
@@ -128,7 +143,7 @@ async function start(){
   }
   const scarce=Object.entries(stock).filter(([,count])=>count<3);
   if(scarce.length)throw Error("드래프트 후보가 부족한 포지션: "+scarce.map(([id,count])=>id+" ("+count+"명)").join(", "));
-  state={phase:"roulette",mode,pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0};
+  state={phase:"roulette",mode,hidden:hiddenMode,season:Number(root.RKBOSeason?.current?.()||60),pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0,recorded:false,score:null};
   loading=false;roulette();
  }catch(err){loading=false;console.error("[RKBO draft]",err);
   if(t===token)render('<div class="rkbo-draft-error"><h3>드래프트를 시작하지 못했습니다</h3><p>'+esc(err.message)+'</p><button data-draft-action="setup" type="button">방식 선택으로 돌아가기</button></div>',"선수 데이터 오류");
@@ -180,12 +195,12 @@ function offers(isReroll){
 function drawOffers(){
  const slot=state.slot,canReroll=state.rerolls>0&&!state.usedRerollSlots.has(slot.id);
  render(progress()+
-  '<div class="rkbo-draft-round-title"><div><span class="rkbo-draft-kicker">ROUND '+state.round+' / 18</span><h3>'+esc(slot.title)+' <em>'+esc(slot.pos)+'</em></h3><p>3명의 후보 중 한 명을 지명해 주세요. 등급과 OVR은 공개됩니다.</p></div>'+
+  '<div class="rkbo-draft-round-title"><div><span class="rkbo-draft-kicker">ROUND '+state.round+' / 18</span><h3>'+esc(slot.title)+' <em>'+esc(slot.pos)+'</em></h3><p>3명의 후보 중 한 명을 지명해 주세요. '+(state.hidden?'블라인드 드래프트 · OVR과 등급은 ??로 표시됩니다.':'등급과 OVR은 공개됩니다.')+'</p></div>'+
   '<button type="button" data-draft-action="reroll" class="rkbo-draft-reroll"'+(canReroll?"":" disabled")+'>'+
   '↻ 다시 뽑기 <strong>'+state.rerolls+'/3</strong></button></div>'+
   '<div class="rkbo-draft-choices">'+state.offered.map((p,i)=>
-   '<div class="rkbo-draft-choice" role="button" tabindex="0" data-draft-pick="'+esc(p.id)+'" aria-label="'+esc(p.name)+' '+p.ovr+' 선택">'+
-   '<div class="rkbo-draft-choice-number">CARD 0'+(i+1)+' <span>OVR '+p.ovr+'</span></div>'+
+   '<div class="rkbo-draft-choice'+(state.hidden?' rkbo-draft-hidden':'')+'" role="button" tabindex="0" data-draft-pick="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 선수 지명">'+
+   '<div class="rkbo-draft-choice-number">CARD 0'+(i+1)+' <span>OVR '+(state.hidden?'??':p.ovr)+'</span></div>'+
    '<div class="rkbo-draft-card-wrap">'+root.RKBOCardView.render(p,true)+'</div>'+
    '<button type="button" class="rkbo-draft-pick-btn" data-draft-pick="'+esc(p.id)+'">'+esc(p.name)+' 지명하기 →</button></div>'
   ).join("")+'</div>'+
@@ -216,7 +231,10 @@ function strength(players){
 function result(){
  stopTimers();if(!state||state.picks.size!==18)return;
  state.phase="result";
- const pairs=[...state.picks],players=pairs.map(([,p])=>p),score=strength(players);
+ const pairs=[...state.picks],players=pairs.map(([,p])=>p),score=strength(players);state.score=score;
+ if(!state.recorded){state.recorded=true;saveScore({id:"draft-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8),
+  mode:state.mode,hidden:state.hidden,season:state.season,avg:Number(score.avg),power:score.power,
+  at:new Date().toISOString(),slots:pairs.map(([slot,p])=>({slot,id:p.id,ovr:p.ovr}))})}
  const spot=(id)=>{
   const p=state.picks.get(id),xy=fieldCoords[id],s=byId.get(id);
   return '<div class="rkbo-draft-field-player" style="left:'+xy[0]+'%;top:'+xy[1]+'%" title="'+esc(s.title+" "+p.name+" OVR "+p.ovr)+'">'+
@@ -240,10 +258,34 @@ function result(){
    ids.map(id=>{const p=state.picks.get(id);return '<div class="rkbo-draft-bench-row"><span>'+id+'</span><b>'+esc(p.name)+'</b><small>OVR '+p.ovr+'</small></div>'}).join("")+'</div>').join("")+'</aside></div>'+
    '<p class="rkbo-draft-score-note">TPI(팀 전력지수) = 전체 18명 평균 OVR 70% + 상위 6명 평균 20% + 하위 6명 평균 10%, 합계에 ×10. 정식 경기 승률이 아닌 카드 전력 비교용 지표입니다.</p>'+
    '<div class="rkbo-draft-end-actions"><button type="button" class="rkbo-draft-primary" data-draft-action="again">↻ 같은 모드로 다시 드래프트</button>'+
+   '<button type="button" data-draft-action="board">🏆 스코어보드</button>'+
+   '<button type="button" data-draft-action="publish-online" class="rkbo-draft-online-save" '+(!root.RKBOOnline?.isConfigured?.()?'disabled title="온라인 연결 후 사용 가능"':'')+'>🌐 온라인 랭킹에 등록</button>'+
    '<button type="button" data-draft-action="setup">시즌·모드 다시 선택</button><button type="button" data-draft-action="close">도감으로 돌아가기</button></div>',
   "드래프트 완료 · 최종 라인업");
 }
+
+function scoreboard(){stopTimers();boardReturn=state?.phase==="result"?"result":"setup";boardTab=category({mode:state?.mode||mode,hidden:state?.hidden??hiddenMode});renderScoreboard()}
+function renderScoreboard(){
+ const season=Number(root.RKBOSeason?.current?.()||60),choice=BOARD_MODES.find(x=>x.key===boardTab)||BOARD_MODES[0];
+ const rows=leaderboardRows(choice.key,season);
+ render('<div class="rkbo-draft-result-title"><span class="rkbo-draft-kicker">RKBO · SCOREBOARD</span><h3>드래프트 스코어보드</h3><p>내 브라우저에 저장된 기록입니다. 온라인 연결이 완료되면 모든 접속자 순위표도 볼 수 있어요.</p></div>'+
+  '<div class="rkbo-draft-leader-tabs">'+BOARD_MODES.map(m=>'<button type="button" data-draft-board="'+m.key+'" class="'+(boardTab===m.key?'active':'')+'">'+esc(m.label)+'</button>').join("")+'</div>'+
+  '<div class="rkbo-draft-board-table"><div class="rkbo-draft-board-head"><span>순위</span><span>기록 / 시즌</span><span>TPI</span><span>평균 OVR</span></div>'+
+  (rows.length?rows.map((r,i)=>'<div class="rkbo-draft-board-row"><b>'+(i+1)+'</b><div><strong>'+(r.mode==="season"?r.season+"차":"올타임")+(r.hidden?" · 숨기기":"")+'</strong><small>'+esc(new Date(r.at).toLocaleString("ko-KR"))+'</small></div><strong>'+r.power+'</strong><span>'+Number(r.avg).toFixed(1)+'</span></div>').join(""):'<p class="rkbo-draft-board-empty">아직 이 모드의 기록이 없어요. 첫 번째 팀을 완성해 보세요!</p>')+'</div>'+
+  '<div class="rkbo-draft-end-actions"><button type="button" data-draft-action="back-to-draft">← 돌아가기</button>'+
+  (root.RKBOOnline?.isConfigured?.()?'<button type="button" data-draft-action="online-board">🌐 전체 접속자 랭킹</button>':'')+'</div>',
+  "4개 모드 분리 · "+choice.label);
+}
+async function publishOnline(){
+ const online=root.RKBOOnline,button=stage?.querySelector('[data-draft-action="publish-online"]');
+ if(!online?.isConfigured?.()){alert("온라인 서비스를 먼저 연결해 주세요.");return}
+ if(button){button.disabled=true;button.textContent="랭킹 등록 중…"}
+ try{await online.submitDraft(resultPayload());if(button)button.textContent="✓ 온라인 랭킹 등록 완료"}
+ catch(err){if(button){button.disabled=false;button.textContent="🌐 온라인 랭킹에 등록"}alert("온라인 등록 실패: "+err.message)}
+}
+
 function clicked(e){
+ const board=e.target.closest("[data-draft-board]");if(board){boardTab=board.dataset.draftBoard;renderScoreboard();return}
  const choice=e.target.closest("[data-draft-pick]");if(choice){pick(choice.dataset.draftPick);return}
  const action=e.target.closest("[data-draft-action]");if(!action)return;
  switch(action.dataset.draftAction){
@@ -255,8 +297,13 @@ function clicked(e){
   case "start":start();break;
   case "reroll":reroll();break;
   case "again":state=null;start();break;
+  case "board":scoreboard();break;
+  case "back-to-draft":boardReturn==="result"&&state?.phase==="result"?result():setup();break;
+  case "online-board":root.RKBOOnline?.open?.("leaderboard");break;
+  case "publish-online":publishOnline();break;
  }
 }
 document.addEventListener("DOMContentLoaded",init);
-root.RKBODraft={open,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id}:null};
+document.addEventListener("change",e=>{if(e.target?.id==="rkbo-draft-hide-toggle")hiddenMode=!!e.target.checked});
+root.RKBODraft={open,openScoreboard:scoreboard,localRecords:localScores,resultPayload,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id,hidden:state.hidden}:null};
 })(window);

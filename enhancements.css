@@ -386,3 +386,37 @@
  .rkbo-draft-bench{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.rkbo-draft-wheel,.rkbo-draft-choice{animation:none;transition:none}}
+
+/* Blackout of draft rarity and OVR in blind mode (unmasked on final result). */
+.rkbo-draft-hide-option{display:flex;align-items:center;gap:13px;padding:14px;margin-top:16px;border:1px solid #55758d;border-radius:12px;background:#0c2033;cursor:pointer}
+.rkbo-draft-hide-option input{width:22px;height:22px;accent-color:#83cfec;flex:none;cursor:pointer}
+.rkbo-draft-hide-option span{display:flex;flex-direction:column;gap:4px}
+.rkbo-draft-hide-option strong{color:#f0f7ff;font-size:14px}
+.rkbo-draft-hide-option small{color:#9bbbd0;font-size:11px;line-height:1.6}
+.rkbo-draft-start-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px}
+.rkbo-draft-start-actions .rkbo-draft-primary{min-width:220px}
+.rkbo-draft-board-link{background:#223d56;color:#e5f3fc;border:1px solid #567e9d;border-radius:10px;padding:13px 18px;font-weight:850;cursor:pointer}
+.rkbo-draft-hidden .player-card{--rim:#08090d!important;--metal:#5c636b!important;--glow:#000a!important;border-color:#050609!important;background:linear-gradient(145deg,#171a21,#090b12)!important;box-shadow:0 6px 22px #000c!important}
+.rkbo-draft-hidden .player-card::before{display:none!important}
+.rkbo-draft-hidden .player-card .headshot::before{border-color:#101115!important;box-shadow:none!important}
+.rkbo-draft-hidden .player-card .ovrnum{font-size:0!important;letter-spacing:0!important}
+.rkbo-draft-hidden .player-card .ovrnum::after{content:"??";font-size:45px;line-height:1;font-weight:950;color:#eceff2}
+.rkbo-draft-hidden .player-card .badge-row .metal-label:not(.season-label){font-size:0!important;color:transparent!important;border-color:#323943!important;background:#161a22!important;box-shadow:none!important;filter:none!important}
+.rkbo-draft-hidden .player-card .badge-row .metal-label:not(.season-label)::after{content:"??";font-size:12px;line-height:1;color:#e6edf4!important}
+.rkbo-draft-hidden .player-card .season-label{border-color:#333d47!important;background:#20252d!important;color:#c5d1dd!important;box-shadow:none!important}
+.rkbo-draft-choice.rkbo-draft-hidden{border-color:#16191e!important;background:#0b111a!important;box-shadow:none}
+.rkbo-draft-choice.rkbo-draft-hidden:hover{border-color:#647989!important;box-shadow:0 16px 35px #000a}
+.rkbo-draft-online-save:disabled{opacity:.48;cursor:not-allowed}
+.rkbo-draft-leader-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:8px 0 21px}
+.rkbo-draft-leader-tabs button{padding:12px 8px;background:#101f32;border:1px solid #37566b;border-radius:9px;color:#a9bdcd;font-size:12px;font-weight:850;cursor:pointer}
+.rkbo-draft-leader-tabs button.active{background:#1e5470;border-color:#8fcde6;color:#fff}
+.rkbo-draft-board-table{background:#0b1b2b;border:1px solid #34536c;border-radius:13px;overflow:hidden}
+.rkbo-draft-board-head,.rkbo-draft-board-row{display:grid;grid-template-columns:70px minmax(0,1fr) 95px 105px;gap:10px;align-items:center;padding:15px 20px}
+.rkbo-draft-board-head{background:#142c42;font-size:11px;letter-spacing:.04em;font-weight:850;color:#a2c1d2}
+.rkbo-draft-board-row{border-top:1px solid #293d4c;color:#eff8ff;font-size:13px}
+.rkbo-draft-board-row>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.rkbo-draft-board-row>div strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rkbo-draft-board-row small{color:#8ca8ba;font-size:10px}
+.rkbo-draft-board-row>b,.rkbo-draft-board-row>strong{color:#ffda90;font-weight:950}
+.rkbo-draft-board-empty{text-align:center;padding:42px 18px;color:#a1bbcd;font-size:13px}
+@media(max-width:650px){.rkbo-draft-leader-tabs{grid-template-columns:1fr 1fr}.rkbo-draft-board-head,.rkbo-draft-board-row{grid-template-columns:39px minmax(0,1fr) 55px 61px;gap:5px;padding:13px 9px}.rkbo-draft-board-head{font-size:9px}.rkbo-draft-board-row{font-size:11px}.rkbo-draft-start-actions{flex-direction:column;align-items:stretch}.rkbo-draft-start-actions button{width:100%}}
