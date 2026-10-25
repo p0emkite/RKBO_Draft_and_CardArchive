@@ -13,12 +13,14 @@ const SLOTS=[
  {id:"CF",pos:"CF",title:"중견수",role:"타자"},
  {id:"RF",pos:"RF",title:"우익수",role:"타자"},
  {id:"DH",pos:"DH",title:"지명타자",role:"타자"},
- ...Array.from({length:5},(_,i)=>({id:"SP"+(i+1),pos:"SP",title:(i+1)+"선발",role:"선발"})),
- ...Array.from({length:3},(_,i)=>({id:"RP"+(i+1),pos:"RP",title:"중계 "+(i+1),role:"중계"})),
+ ...Array.from({length:5},(_,i)=>({id:"SP"+(i+1),pos:"SP",title:"선발",role:"선발"})),
+ ...Array.from({length:3},(_,i)=>({id:"RP"+(i+1),pos:"RP",title:"중계",role:"중계"})),
  {id:"CP",pos:"CP",title:"마무리",role:"마무리"}
 ];
 const byId=new Map(SLOTS.map(s=>[s.id,s]));
 const batSlots=["C","1B","2B","3B","SS","LF","CF","RF","DH"];
+const starterSlots=["SP1","SP2","SP3","SP4","SP5"],relieverSlots=["RP1","RP2","RP3"];
+const newLineup=()=>({battingOrder:batSlots.slice(),defense:Object.fromEntries(batSlots.map(slot=>[slot,slot])),rotation:starterSlots.slice(),bullpen:relieverSlots.slice()});
 const fieldCoords={C:[50,89],"1B":[78,68],"2B":[63,50],"3B":[22,68],SS:[37,50],LF:[20,27],CF:[50,15],RF:[80,27],DH:[15,88],SP1:[50,70]};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
@@ -36,7 +38,7 @@ function leaderboardRows(key,season){return localScores().filter(r=>category(r)=
  .sort((a,b)=>b.power-a.power||b.avg-a.avg||a.at.localeCompare(b.at)).slice(0,20)}
 function resultPayload(){if(!state||state.picks.size!==18||!state.score)return null;
  return {mode:state.mode,hidden:state.hidden,season:state.season,averageOVR:Number(state.score.avg),power:state.score.power,
-  slots:[...state.picks].map(([slot,p])=>({slot,cardId:p.id,ovr:Number(p.ovr)}))}}
+  slots:[...state.picks].map(([slot,p])=>({slot,cardId:p.id,ovr:Number(p.ovr)})),lineup:JSON.parse(JSON.stringify(state.lineup||newLineup()))}}
 
 function stopTimers(){if(interval!==null)clearInterval(interval);if(timeout!==null)clearTimeout(timeout);interval=null;timeout=null}
 function header(subtitle){
@@ -57,6 +59,10 @@ function init(){
  overlay.innerHTML='<div class="rkbo-draft-shell" role="dialog" aria-label="RKBO 18인 드래프트" aria-modal="true"></div>';
  document.body.append(overlay);shell=overlay.querySelector(".rkbo-draft-shell");
  shell.addEventListener("click",clicked);
+ shell.addEventListener("dragstart",lineupDragStart);
+ shell.addEventListener("dragover",lineupDragOver);
+ shell.addEventListener("drop",lineupDrop);
+ shell.addEventListener("dragend",lineupDragEnd);
  shell.addEventListener("keydown",e=>{const el=e.target.closest("[data-draft-pick]");if(el&&(e.key==="Enter"||e.key===" ")){e.preventDefault();pick(el.dataset.draftPick)}});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
@@ -78,7 +84,7 @@ function setup(){
   '<div class="rkbo-draft-copy"><h3>18번의 선택, 단 하나의 최강 팀.</h3><p>포지션을 무작위로 추첨하고, 나타나는 선수 카드 3장 중 한 장을 고르세요. 타자 9명·선발 5명·중계 3명·마무리 1명까지 모두 뽑으면 그라운드에 나만의 라인업이 완성됩니다.</p>'+
   '<div class="rkbo-draft-mode-picker"><button type="button" data-draft-action="mode-season" class="rkbo-draft-mode active"><strong>'+season+'차 시즌</strong><small>현재 선택한 시즌의 카드만</small></button>'+
   '<button type="button" data-draft-action="mode-all" class="rkbo-draft-mode"><strong>올타임 드래프트</strong><small>등록된 모든 시즌을 섞어서</small></button></div>'+
-  '<label class="rkbo-draft-hide-option"><input type="checkbox" id="rkbo-draft-hide-toggle" '+(hiddenMode?"checked":"")+'><span><strong>OVR · 등급 숨기기</strong><small>카드 선택 중엔 OVR·등급이 ??로 보이고 테두리가 검정색으로 바뀝니다. 결과창에서 공개됩니다.</small></span></label>'+
+  '<label class="rkbo-draft-hide-option"><input type="checkbox" id="rkbo-draft-hide-toggle" '+(hiddenMode?"checked":"")+'><span><strong>OVR · 등급 숨기기</strong><small>카드 선택 중엔 OVR·등급·모든 능력치가 ??로 보이고 카드 테두리가 검정색으로 바뀝니다. 결과창에서 공개됩니다.</small></span></label>'+
   '<div class="rkbo-draft-rules"><span>포지션 랜덤 추첨</span><span>매번 카드 3장</span><span>다시 뽑기 총 3회</span><span>한 포지션에 1회만</span></div>'+
   '<div class="rkbo-draft-start-actions"><button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button><button class="rkbo-draft-board-link" data-draft-action="board" type="button">🏆 스코어보드</button></div></div></div>',
   "시즌 선택 · 18인 로스터 구성");
@@ -143,7 +149,7 @@ async function start(){
   }
   const scarce=Object.entries(stock).filter(([,count])=>count<3);
   if(scarce.length)throw Error("드래프트 후보가 부족한 포지션: "+scarce.map(([id,count])=>id+" ("+count+"명)").join(", "));
-  state={phase:"roulette",mode,hidden:hiddenMode,season:Number(root.RKBOSeason?.current?.()||60),pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0,recorded:false,score:null};
+  state={phase:"roulette",mode,hidden:hiddenMode,season:Number(root.RKBOSeason?.current?.()||60),pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0,recorded:false,score:null,lineup:newLineup(),editLineup:false,swapPick:null,onlineSaved:false};
   loading=false;roulette();
  }catch(err){loading=false;console.error("[RKBO draft]",err);
   if(t===token)render('<div class="rkbo-draft-error"><h3>드래프트를 시작하지 못했습니다</h3><p>'+esc(err.message)+'</p><button data-draft-action="setup" type="button">방식 선택으로 돌아가기</button></div>',"선수 데이터 오류");
@@ -195,13 +201,13 @@ function offers(isReroll){
 function drawOffers(){
  const slot=state.slot,canReroll=state.rerolls>0&&!state.usedRerollSlots.has(slot.id);
  render(progress()+
-  '<div class="rkbo-draft-round-title"><div><span class="rkbo-draft-kicker">ROUND '+state.round+' / 18</span><h3>'+esc(slot.title)+' <em>'+esc(slot.pos)+'</em></h3><p>3명의 후보 중 한 명을 지명해 주세요. '+(state.hidden?'블라인드 드래프트 · OVR과 등급은 ??로 표시됩니다.':'등급과 OVR은 공개됩니다.')+'</p></div>'+
+  '<div class="rkbo-draft-round-title"><div><span class="rkbo-draft-kicker">ROUND '+state.round+' / 18</span><h3>'+esc(slot.title)+' <em>'+esc(slot.pos)+'</em></h3><p>3명의 후보 중 한 명을 지명해 주세요. '+(state.hidden?'블라인드 드래프트 · OVR·등급·능력치가 모두 ??로 표시됩니다.':'등급과 OVR은 공개됩니다.')+'</p></div>'+
   '<button type="button" data-draft-action="reroll" class="rkbo-draft-reroll"'+(canReroll?"":" disabled")+'>'+
   '↻ 다시 뽑기 <strong>'+state.rerolls+'/3</strong></button></div>'+
   '<div class="rkbo-draft-choices">'+state.offered.map((p,i)=>
    '<div class="rkbo-draft-choice'+(state.hidden?' rkbo-draft-hidden':'')+'" role="button" tabindex="0" data-draft-pick="'+esc(p.id)+'" aria-label="'+esc(p.name)+' 선수 지명">'+
    '<div class="rkbo-draft-choice-number">CARD 0'+(i+1)+' <span>OVR '+(state.hidden?'??':p.ovr)+'</span></div>'+
-   '<div class="rkbo-draft-card-wrap">'+root.RKBOCardView.render(p,true)+'</div>'+
+   '<div class="rkbo-draft-card-wrap">'+root.RKBOCardView.render(state.hidden?{...p,ratings:Object.fromEntries(Object.keys(p.ratings||{}).map(key=>[key,"??"]))}:p,true)+'</div>'+
    '<button type="button" class="rkbo-draft-pick-btn" data-draft-pick="'+esc(p.id)+'">'+esc(p.name)+' 지명하기 →</button></div>'
   ).join("")+'</div>'+
   '<p class="rkbo-draft-hint">※ 다시 뽑기는 전체 3회만 제공되며, 같은 포지션에서 두 번 사용할 수 없습니다.</p>',
@@ -280,11 +286,13 @@ async function publishOnline(){
  const online=root.RKBOOnline,button=stage?.querySelector('[data-draft-action="publish-online"]');
  if(!online?.isConfigured?.()){alert("온라인 서비스를 먼저 연결해 주세요.");return}
  if(button){button.disabled=true;button.textContent="랭킹 등록 중…"}
- try{await online.submitDraft(resultPayload());if(button)button.textContent="✓ 온라인 랭킹 등록 완료"}
+ try{await online.submitDraft(resultPayload());if(state)state.onlineSaved=true;if(button)button.textContent="✓ 온라인 랭킹 등록 완료"}
  catch(err){if(button){button.disabled=false;button.textContent="🌐 온라인 랭킹에 등록"}alert("온라인 등록 실패: "+err.message)}
 }
 
 function clicked(e){
+ const edit=e.target.closest("[data-lineup-group]");
+ if(edit){lineupTap(edit);return}
  const board=e.target.closest("[data-draft-board]");if(board){boardTab=board.dataset.draftBoard;renderScoreboard();return}
  const choice=e.target.closest("[data-draft-pick]");if(choice){pick(choice.dataset.draftPick);return}
  const action=e.target.closest("[data-draft-action]");if(!action)return;
@@ -301,6 +309,8 @@ function clicked(e){
   case "back-to-draft":boardReturn==="result"&&state?.phase==="result"?result():setup();break;
   case "online-board":root.RKBOOnline?.open?.("leaderboard");break;
   case "publish-online":publishOnline();break;
+  case "toggle-lineup":if(state?.phase==="result"){state.editLineup=!state.editLineup;state.swapPick=null;result()}break;
+  case "reset-lineup":if(state?.phase==="result"){state.lineup=newLineup();state.swapPick=null;state.onlineSaved=false;result()}break;
  }
 }
 document.addEventListener("DOMContentLoaded",init);
