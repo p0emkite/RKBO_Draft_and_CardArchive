@@ -420,3 +420,68 @@
 .rkbo-draft-board-row>b,.rkbo-draft-board-row>strong{color:#ffda90;font-weight:950}
 .rkbo-draft-board-empty{text-align:center;padding:42px 18px;color:#a1bbcd;font-size:13px}
 @media(max-width:650px){.rkbo-draft-leader-tabs{grid-template-columns:1fr 1fr}.rkbo-draft-board-head,.rkbo-draft-board-row{grid-template-columns:39px minmax(0,1fr) 55px 61px;gap:5px;padding:13px 9px}.rkbo-draft-board-head{font-size:9px}.rkbo-draft-board-row{font-size:11px}.rkbo-draft-start-actions{flex-direction:column;align-items:stretch}.rkbo-draft-start-actions button{width:100%}}
+
+/* RKBO ONLINE v1 public ranking + email accounts */
+.rkbo-online-open{font-size:12px;font-weight:900;color:#d3f8e9;background:linear-gradient(115deg,#145a5c,#16485b);border:1px solid #67b6b7;border-radius:9px;padding:9px 14px;cursor:pointer}
+.rkbo-online-open:hover{background:#217278;border-color:#a6ebdd}
+.rkbo-online-overlay[hidden]{display:none!important}
+.rkbo-online-overlay{position:fixed;inset:0;z-index:1900;background:#030915ed;backdrop-filter:blur(12px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:28px 15px 50px;color:#f4faff}
+.rkbo-online-panel{width:min(980px,100%);min-height:560px;border:1px solid #426b82;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse at 80% -20%,#173d4d 0%,transparent 55%),#0b1627;box-shadow:0 25px 100px #000d}
+.rkbo-online-head{padding:21px 25px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid #344f64;background:linear-gradient(105deg,#123149,#14213a)}
+.rkbo-online-head h2{font-size:25px;margin:4px 0;font-weight:950;letter-spacing:-.05em}
+.rkbo-online-head h2 small{font-size:11px;font-weight:750;color:#9ac1d1;letter-spacing:.04em}
+.rkbo-online-head p{font-size:12px;color:#a8c6d4;margin:6px 0 0}
+.rkbo-online-close{width:42px;height:42px;border-radius:10px;border:1px solid #5f829b;background:#18364e;color:#fff;font-size:28px;cursor:pointer}
+.rkbo-online-inner{padding:25px;min-height:455px}
+.rkbo-online-tabs{display:flex;align-items:center;gap:9px;margin-bottom:24px;border-bottom:1px solid #284b61;padding-bottom:14px}
+.rkbo-online-tabs button{padding:10px 19px;border:1px solid #395a6e;background:#122c40;border-radius:9px;color:#b0cbd9;font-weight:850;cursor:pointer}
+.rkbo-online-tabs button.active{border-color:#8cd5da;background:#23617a;color:#fff}
+.rkbo-online-section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:9px;margin-bottom:15px}
+.rkbo-online-section-head h3{font-size:20px;color:#fff;font-weight:900;margin:0}
+.rkbo-online-section-head small{color:#8fbbcd;font-size:11px}
+.rkbo-online-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0 18px}
+.rkbo-online-categories button{background:#11283d;border:1px solid #3b596d;border-radius:9px;color:#b3cad9;padding:12px 8px;font-size:12px;font-weight:900;cursor:pointer}
+.rkbo-online-categories button.active{background:#255979;border-color:#7dc6df;color:#fff}
+.rkbo-online-board{border:1px solid #345267;border-radius:12px;overflow:hidden;min-height:110px;background:#0b1c2e}
+.rkbo-online-table-head,.rkbo-online-entry{display:grid;grid-template-columns:60px minmax(0,1fr) 90px 105px;align-items:center;gap:10px;padding:14px 16px}
+.rkbo-online-table-head{font-size:11px;color:#a9cbdb;background:#18364c;font-weight:850}
+.rkbo-online-entry{width:100%;border:0;border-top:1px solid #31475a;color:#d7e8f6;background:#12263a;text-align:left;cursor:pointer;font-size:13px}
+.rkbo-online-entry:hover{background:#1e455d}
+.rkbo-online-rank,.rkbo-online-entry>b{font-weight:950;color:#ffda8b;font-size:15px}
+.rkbo-online-player{display:flex;flex-direction:column;min-width:0;gap:4px}
+.rkbo-online-player>strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rkbo-online-player small{font-size:10px;color:#94b2c2}
+.rkbo-online-detail-title{padding:16px;color:#fff;font-size:14px;font-weight:900;background:#19415b;border-top:1px solid #6ab5ca}
+.rkbo-online-roster{padding:13px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rkbo-online-roster>div{display:grid;grid-template-columns:39px minmax(0,1fr) 62px 36px;gap:7px;align-items:center;background:#1a3043;padding:9px;border-radius:7px;font-size:11px}
+.rkbo-online-roster>div span{font-size:11px;color:#ffc67b;font-weight:950}
+.rkbo-online-roster strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkbo-online-roster small{color:#9bbaca;text-align:right;overflow:hidden;white-space:nowrap}
+.rkbo-online-roster b{color:#fff;font-size:14px;text-align:right}
+.rkbo-online-wait,.rkbo-online-none{color:#abc6d9;padding:35px 18px;text-align:center;font-size:13px;line-height:1.7}
+.rkbo-online-hint{padding:13px 15px;margin-top:15px;border:1px solid #375469;border-radius:9px;background:#0f2638;color:#a5c6d6;font-size:11px;line-height:1.7}
+.rkbo-online-empty{text-align:center;padding:58px 20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.rkbo-online-big{font-size:55px}.rkbo-online-empty h3{font-size:22px;margin:0}
+.rkbo-online-empty>p{color:#b1cad8;font-size:13px;max-width:575px;line-height:1.8}
+.rkbo-online-empty code{color:#ffe3ac;font-size:11px}
+.rkbo-online-profile,#rkbo-online-login{max-width:580px;margin:12px auto;padding:23px;border:1px solid #3b6077;border-radius:13px;background:#0e2538}
+.rkbo-online-profile p,#rkbo-online-login p{font-size:12px;color:#a4c1d2;line-height:1.8;margin:10px 0 20px}
+.rkbo-online-profile label,#rkbo-online-login label{display:block;font-size:12px;color:#bbd7e5;font-weight:900;margin:13px 0 8px}
+.rkbo-online-profile input,#rkbo-online-login input{width:100%;background:#071725;color:#f7fbff;border:1px solid #466e85;border-radius:9px;padding:12px 14px;font-size:14px}
+.rkbo-online-rename{display:flex;align-items:center;gap:9px}
+.rkbo-online-rename input{min-width:0}
+.rkbo-online-profile button,#rkbo-online-login button{background:#286a83;color:#fff;border:1px solid #70b6cc;border-radius:9px;padding:11px 17px;white-space:nowrap;font-size:12px;font-weight:900;cursor:pointer}
+.rkbo-online-signout{margin-top:14px;background:#344052!important}
+.rkbo-online-message{font-size:12px;color:#f5c984;line-height:1.7;white-space:pre-wrap}
+@media(max-width:700px){
+ .rkbo-online-overlay{padding:5px 0}
+ .rkbo-online-panel{min-height:100vh;border-radius:0;border-left:0;border-right:0}
+ .rkbo-online-head{padding:16px}
+ .rkbo-online-head h2{font-size:22px}
+ .rkbo-online-inner{padding:15px 10px}
+ .rkbo-online-categories{grid-template-columns:1fr 1fr}
+ .rkbo-online-table-head,.rkbo-online-entry{grid-template-columns:39px minmax(0,1fr) 52px 65px;gap:5px;padding:12px 8px;font-size:11px}
+ .rkbo-online-table-head{font-size:9px}
+ .rkbo-online-roster{grid-template-columns:1fr}
+ .rkbo-online-rename{flex-direction:column;align-items:stretch}
+}
