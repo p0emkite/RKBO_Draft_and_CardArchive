@@ -551,3 +551,35 @@
 .rkbo-draft-edit-ovr{display:flex;flex-direction:column;text-align:right;font-size:10px;color:#a7bed0}
 .rkbo-draft-edit-ovr>b{font-size:18px;color:#fff;font-weight:950;font-variant-numeric:tabular-nums}
 @media(max-width:650px){.rkbo-draft-edit-row{grid-template-columns:14px 39px minmax(0,1fr) 48px;gap:5px;padding:9px 6px}.rkbo-draft-edit-metrics{gap:3px 6px}.rkbo-draft-edit-metric{font-size:9px}.rkbo-draft-edit-metric>b{font-size:10px}}
+
+/* MY RKBO - account-private draft team clubhouse. */
+.rkbo-my-open-btn{font-size:12px;font-weight:900;color:#f7e8c2;background:linear-gradient(120deg,#614b28,#4b3865);border:1px solid #d2ae70;border-radius:9px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+.rkbo-my-overlay[hidden]{display:none!important}
+.rkbo-my-overlay{position:fixed;inset:0;z-index:1900;display:flex;justify-content:center;align-items:flex-start;overflow:auto;background:#030a16f0;backdrop-filter:blur(10px);padding:24px 12px 50px;color:#eef8ff}
+body.rkbo-my-open{overflow:hidden}
+.rkbo-my-panel{width:min(820px,100%);background:#0b1829;border:1px solid #3a5e74;border-radius:17px;overflow:hidden;box-shadow:0 22px 85px #000b;min-height:440px}
+.rkbo-my-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;background:linear-gradient(115deg,#102f45,#171d3a);border-bottom:1px solid #3c5369}
+.rkbo-my-head small{letter-spacing:.2em;font-size:10px;color:#8bcbdd;font-weight:900}
+.rkbo-my-head h2{font-size:29px;margin:6px 0;color:#fff}
+.rkbo-my-head p{margin:0;font-size:12px;color:#abc5d6}
+.rkbo-my-head>button{font-size:25px;color:#fff;background:#20394f;border:1px solid #52768d;border-radius:10px;width:46px;height:46px;cursor:pointer;flex:none}
+.rkbo-my-body{padding:22px}
+.rkbo-my-actions,.rkbo-my-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.rkbo-my-actions{margin-bottom:21px}
+.rkbo-my-actions button,.rkbo-my-buttons button,.rkbo-my-empty button{padding:10px 13px;border-radius:9px;border:1px solid #60839c;background:#1b4358;color:#e5f6ff;font-size:12px;font-weight:800;cursor:pointer}
+.rkbo-my-list{display:grid;gap:13px}
+.rkbo-my-team{background:#11263a;border:1px solid #42637a;border-radius:12px;padding:16px}
+.rkbo-my-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rkbo-my-title h3{margin:0 0 5px;font-size:19px;color:#fff}
+.rkbo-my-title small{color:#99b6cb;font-size:11px}
+.rkbo-my-title strong{color:#ffd58b;white-space:nowrap;font-size:18px}
+.rkbo-my-team>p{font-size:12px;color:#a6bed2;margin:10px 0 14px}
+.rkbo-my-buttons button:first-child{background:#267494;border-color:#93d1e4}
+.rkbo-my-buttons button:last-child{background:#44293a;border-color:#926176}
+.rkbo-my-empty{padding:43px 18px;text-align:center;font-size:14px;line-height:1.8;color:#bad3e4;border:1px dashed #405e74;border-radius:12px}
+.rkbo-my-roster{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:15px}
+.rkbo-my-roster>div{display:grid;grid-template-columns:43px minmax(0,1fr) 66px;align-items:center;gap:6px;background:#1b3449;border-radius:7px;padding:9px;font-size:11px}
+.rkbo-my-roster b{color:#eac280}.rkbo-my-roster strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkbo-my-roster span{color:#c3d8e6;text-align:right}
+#rkbo-my-status{color:#9edbc0;font-size:12px;margin:14px 0 0}
+.rkbo-draft-my-save{background:#255a4a!important;border-color:#76c39f!important;color:#fff!important;font-weight:900}
+@media(max-width:650px){.rkbo-my-overlay{padding:4px 0}.rkbo-my-panel{border-radius:0;border-left:0;border-right:0;min-height:100vh}.rkbo-my-head{padding:17px 14px}.rkbo-my-head h2{font-size:23px}.rkbo-my-body{padding:14px}.rkbo-my-roster{grid-template-columns:1fr}.rkbo-my-title strong{font-size:16px}}
