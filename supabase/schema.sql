@@ -15,8 +15,11 @@ create table if not exists public.rkbo_draft_results (
  average_ovr numeric(4,1) not null check (average_ovr between 0 and 99),
  tpi integer not null check (tpi between 0 and 1000),
  picks jsonb not null check (jsonb_typeof(picks)='array' and jsonb_array_length(picks)=18),
+ lineup jsonb, -- server-validated batting order, fielding spots, rotation and bullpen
  created_at timestamptz not null default now()
 );
+-- Safe when upgrading an existing RKBO database created before lineup support.
+alter table public.rkbo_draft_results add column if not exists lineup jsonb;
 create index if not exists rkbo_draft_rank_idx on public.rkbo_draft_results(mode,hidden,season,tpi desc,average_ovr desc,created_at asc);
 create index if not exists rkbo_draft_user_idx on public.rkbo_draft_results(user_id,created_at desc);
 alter table public.rkbo_profiles enable row level security;
