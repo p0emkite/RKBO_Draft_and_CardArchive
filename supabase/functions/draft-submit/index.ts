@@ -1,17 +1,17 @@
 // RKBO ONLINE v1 Edge Function. Supabase CLI: supabase functions deploy draft-submit --no-verify-jwt
-// Service role key is read exclusively from the Edge runtime, never sent to browser.
+// Server-only Supabase secret key is read from the Edge runtime, never sent to browsers.
 // LIMITATION: card identities and scores are verified; browser-generated random offers
 // are not independently verifiable until future server-side draft sessions.
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 const URL=Deno.env.get("SUPABASE_URL")||"";
-const SECRET=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
+const SECRET=(JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS")||"{}") as Record<string,string>).default||Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const ORIGINS=new Set(["https://p0emkite.github.io","http://localhost:8080","http://127.0.0.1:8080"]);
 const BASE="https://raw.githubusercontent.com/p0emkite/RKBO_Draft_and_CardArchive/main/";
 const slots=new Set(["C","1B","2B","3B","SS","LF","CF","RF","DH","SP1","SP2","SP3","SP4","SP5","RP1","RP2","RP3","CP"]);
 const cache=new Map<string,{expires:number,data:any}>();
 const cors=(req:Request)=>({
  "Access-Control-Allow-Origin":ORIGINS.has(req.headers.get("origin")||"")?req.headers.get("origin")!:"https://p0emkite.github.io",
- "Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info",
+ "Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info,x-retry-count,traceparent,tracestate,baggage",
  "Access-Control-Allow-Methods":"POST,OPTIONS","Vary":"Origin"
 });
 const output=(req:Request,status:number,obj:unknown)=>new Response(JSON.stringify(obj),{status,headers:{...cors(req),"Content-Type":"application/json"}});
