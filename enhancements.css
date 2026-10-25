@@ -532,3 +532,12 @@
 .rkbo-draft-batting-summary span{font-size:12px;color:#f1f7fc;padding:9px;background:#1b374a;border-radius:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rkbo-draft-batting-summary b{color:#ffd894;margin-right:8px}
 @media(max-width:650px){.rkbo-draft-editor-grid{grid-template-columns:1fr}.rkbo-draft-editor-head{align-items:flex-start;flex-direction:column}.rkbo-draft-batting-summary>div{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-draft-lineup-editor{padding:11px}.rkbo-draft-edit-row{grid-template-columns:15px 46px minmax(0,1fr) 46px}}
+
+
+/* Lineup details shown for shared RKBO Online scoreboards. */
+.rkbo-online-roster-lineup{padding:14px 15px;background:#0e2233;border-bottom:1px solid #2e4c65}
+.rkbo-online-roster-lineup h4{font-size:13px;color:#f5cf8e;margin:0 0 12px}
+.rkbo-online-roster-lineup>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rkbo-online-roster-lineup span{background:#1b3448;color:#edf6fc;border:1px solid #36536b;padding:9px 10px;border-radius:7px;font-size:12px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.rkbo-online-roster-lineup b{margin-right:8px;color:#ffd99d}
+@media(max-width:650px){.rkbo-online-roster-lineup>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
