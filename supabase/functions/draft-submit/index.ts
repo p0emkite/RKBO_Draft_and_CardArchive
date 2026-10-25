@@ -47,9 +47,10 @@ Deno.serve(async(req:Request)=>{
   if(!auth.startsWith("Bearer "))fail(401,"온라인 랭킹은 로그인 후 등록할 수 있습니다.");
   const db=createClient(URL,SECRET,{auth:{persistSession:false}});
   const {data:{user},error:authErr}=await db.auth.getUser(auth.slice(7).trim());
-  if(authErr||!user||user.is_anonymous)fail(401,"이메일 인증 계정으로 로그인해야 합니다.");
+  if(authErr||!user||user.is_anonymous)fail(401,"Google 계정으로 로그인해야 합니다.");
   const bodyText=await req.text();if(bodyText.length>14000)fail(413,"드래프트 데이터가 너무 큽니다.");
-  const body=JSON.parse(bodyText);
+  let body:any;
+  try{body=JSON.parse(bodyText)}catch{fail(400,"제출 데이터가 올바른 JSON 형식이 아닙니다.")}
   const mode=body?.mode,hidden=body?.hidden,season=Number(body?.season),picks=body?.slots;
   if(!["season","all"].includes(mode)||typeof hidden!=="boolean"||!Number.isInteger(season)||season<1||season>999)
    fail(400,"드래프트 모드나 시즌이 올바르지 않습니다.");
