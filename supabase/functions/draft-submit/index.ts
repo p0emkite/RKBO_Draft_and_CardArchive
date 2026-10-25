@@ -112,6 +112,14 @@ Deno.serve(async(req:Request)=>{
    athletes.add(unique);
    players.push({slot:x.slot,cardId:p.id,ovr:p.ovr,name:p.name,team:p.team,season:Number(p.season),pos:p.pos});
   }
+  if(lineup){
+   const hitterBySlot=new Map(players.filter(p=>["C","1B","2B","3B","SS","LF","CF","RF","DH"].includes(p.slot)).map(p=>[p.slot,p]));
+   for(const [position,slot] of Object.entries(lineup.defense)){
+    if(position==="DH")continue;
+    const player=hitterBySlot.get(slot as string);
+    if(!player||player.pos!==position)fail(400,"선수의 본 포지션과 수비 위치가 일치하지 않습니다: "+position);
+   }
+  }
   const sorted=players.map(p=>Number(p.ovr)).sort((a,b)=>b-a),mean=(a:number[])=>a.reduce((v,w)=>v+w,0)/a.length;
   const avg=Number(mean(sorted).toFixed(1)),tpi=Math.round((.7*mean(sorted)+.2*mean(sorted.slice(0,6))+.1*mean(sorted.slice(-6)))*10);
   if(Number(body.power)!==tpi||Number(body.averageOVR)!==avg)fail(400,"서버에서 계산한 OVR/TPI와 일치하지 않습니다.");
