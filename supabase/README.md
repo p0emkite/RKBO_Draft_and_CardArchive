@@ -1,6 +1,6 @@
 # RKBO ONLINE v1 — Setup instructions
 
-GitHub Pages hosts the frontend. Supabase handles **Google and Kakao OAuth login**, profiles and public rankings.
+GitHub Pages hosts the frontend. Supabase handles **Google OAuth login**, profiles and public rankings.
 
 ## Setup steps for the project owner
 
@@ -17,16 +17,8 @@ GitHub Pages hosts the frontend. Supabase handles **Google and Kakao OAuth login
    - Enter Google's **Client ID** and **Client Secret** into the Supabase Google provider settings and save. Do **not** put the Google Client Secret in this repository, frontend config, or chat.
    - While Google's OAuth app is in Testing mode, add intended test Google accounts to Test users. For unrestricted public sign-in, publish the OAuth app as appropriate.
    - The RKBO browser uses `signInWithOAuth({provider:"google"})`; it does not send sign-in emails.
-4a. Configure **Kakao sign-in** alongside Google:
-   - Open [Kakao Developers](https://developers.kakao.com/) > App > Create app and create your RKBO app.
-   - In App Settings > App > Platform Key, find the **REST API key** (Kakao OAuth Client ID).
-   - Click that REST API key and register the Supabase Kakao **Callback URL** from Authentication > Sign In / Providers > Kakao as the Kakao Login Redirect URI. The provider callback is `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`, **not** your GitHub Pages URL.
-   - Activate the Kakao Login Client Secret code (Kakao OAuth Client Secret), and turn Kakao Login on under Product Settings > Kakao Login > General.
-   - Inspect Kakao consent items for `profile_nickname`, `profile_image`, and `account_email`. **Important (Oct 2026):** Supabase Auth may request `account_email` even when **Allow users without an email** is enabled. Non-Biz apps can hit Kakao `KOE205` unless the email scope is available. Check the consent items before assuming sign-in works; Kakao's **Register as Individual** Biz App process may enable email consent for personal projects. See https://github.com/supabase/auth/issues/2574 and https://github.com/supabase/supabase/issues/36878 .
-   - In Supabase Authentication > Sign In / Providers > Kakao, enable Kakao and enter the **REST API key** and **Kakao Login Client Secret**. Do not place secrets in GitHub or share them in chat.
-   - The browser calls `signInWithOAuth({provider:"kakao"})`. Google OAuth remains available in parallel.
-   - Accounts from separate identity providers are not automatically guaranteed to share one RKBO user profile; test each provider separately. Future account linking may be implemented.
-
+   - Google Cloud > Google Auth Platform > Branding lets you set the app name (e.g. `RKBO DRAFT`); a verified and published brand is required before Google displays your custom name instead of the authorization domain.
+   - The Google account chooser may continue to show the Supabase `*.supabase.co` hostname until a custom Supabase Auth domain is configured. Changing only the Google app name does not change this hostname.
 5. Deploy the `draft-submit` Edge Function. Supabase Dashboard option (no terminal required):
    - Open Edge Functions > Deploy a new function > Via Editor.
    - Name the function `draft-submit` and replace the editor content with `supabase/functions/draft-submit/index.ts`.
@@ -60,7 +52,7 @@ Do not share SUPABASE_SERVICE_ROLE_KEY or any private API key.
 - Current season (hide OVR and grade during draft)
 - All-time (hide OVR and grade during draft)
 
-Each player may play without login and store scores locally. **Google or Kakao login** is needed to publish a score globally.
+Each player may play without login and store scores locally. **Google login** is needed to publish a score globally.
 
 ## Security
 
