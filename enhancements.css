@@ -406,6 +406,10 @@
 .rkbo-draft-hidden .player-card .season-label{border-color:#333d47!important;background:#20252d!important;color:#c5d1dd!important;box-shadow:none!important}
 .rkbo-draft-choice.rkbo-draft-hidden{border-color:#16191e!important;background:#0b111a!important;box-shadow:none}
 .rkbo-draft-choice.rkbo-draft-hidden:hover{border-color:#647989!important;box-shadow:0 16px 35px #000a}
+/* Blind draft masks literal rating text as ??; black text on silver backing remains readable. */
+.rkbo-draft-hidden .player-card .metric-grid .m b{color:#050505!important;background:#c4cbd1!important;border-radius:4px;padding:2px 6px;min-width:34px;display:inline-flex;align-items:center;justify-content:center}
+.rkbo-draft-hidden .player-card .metric-grid .m{border-color:#272a2d!important}
+
 .rkbo-draft-online-save:disabled{opacity:.48;cursor:not-allowed}
 .rkbo-draft-leader-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:8px 0 21px}
 .rkbo-draft-leader-tabs button{padding:12px 8px;background:#101f32;border:1px solid #37566b;border-radius:9px;color:#a9bdcd;font-size:12px;font-weight:850;cursor:pointer}
@@ -498,3 +502,33 @@
  .rkbo-online-roster{grid-template-columns:1fr}
  .rkbo-online-rename{flex-direction:column;align-items:stretch}
 }
+
+
+/* Result lineup editor: desktop drag, mobile two-tap swap. */
+.rkbo-draft-lineup-toggle{display:flex;align-items:center;flex-wrap:wrap;gap:15px;padding:13px 16px;margin:0 0 20px;border:1px solid #426d81;border-radius:12px;background:#11283c}
+.rkbo-draft-lineup-toggle button{background:#277b9b;border:1px solid #93cfe4;color:#fff;font-weight:900;border-radius:9px;padding:12px 18px;cursor:pointer}
+.rkbo-draft-lineup-toggle span{font-size:12px;color:#a8c8db}
+.rkbo-draft-lineup-editor{padding:20px;border-radius:14px;background:#0b1c2d;border:1px solid #416a86;margin:0 0 20px}
+.rkbo-draft-editor-head{display:flex;gap:15px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.rkbo-draft-editor-head h3{font-size:21px;color:#fff;margin:0 0 6px}
+.rkbo-draft-editor-head p{font-size:12px;color:#a0bed0;line-height:1.7;margin:0}
+.rkbo-draft-editor-head button{background:#243f56;color:#e1f2ff;border:1px solid #6899b2;padding:10px 15px;border-radius:9px;white-space:nowrap;cursor:pointer}
+.rkbo-draft-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.rkbo-draft-edit-section{background:#10273b;border:1px solid #33526b;padding:13px;border-radius:10px;min-width:0}
+.rkbo-draft-edit-section h4{color:#f7d490;margin:0;font-size:15px}
+.rkbo-draft-edit-section p{color:#9bb8ce;font-size:11px;margin:4px 0 11px}
+.rkbo-draft-edit-list{display:flex;flex-direction:column;gap:6px}
+.rkbo-draft-edit-row{width:100%;display:grid;grid-template-columns:15px 50px minmax(0,1fr) 47px;align-items:center;gap:7px;text-align:left;border-radius:8px;border:1px solid #375c77;background:#172f45;color:#fff;padding:10px 8px;cursor:grab;touch-action:manipulation}
+.rkbo-draft-edit-row span:first-child{color:#79acc4;font-size:19px}
+.rkbo-draft-edit-row span:nth-child(2){font-weight:900;color:#ffda92;font-size:12px}
+.rkbo-draft-edit-row strong{font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rkbo-draft-edit-row small{font-size:10px;color:#a6c2d3;text-align:right}
+.rkbo-draft-edit-row.is-selected{background:#325e75;outline:2px solid #f3d18a;border-color:#f3d18a}
+.rkbo-draft-edit-row.is-dragging{opacity:.4}
+.rkbo-draft-edit-row:hover{border-color:#a7dcee}
+.rkbo-draft-batting-summary{background:#10283b;border:1px solid #345b72;border-radius:12px;margin-top:20px;padding:17px}
+.rkbo-draft-batting-summary h4{font-size:13px;color:#ffcf82;margin:0 0 13px}
+.rkbo-draft-batting-summary>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rkbo-draft-batting-summary span{font-size:12px;color:#f1f7fc;padding:9px;background:#1b374a;border-radius:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkbo-draft-batting-summary b{color:#ffd894;margin-right:8px}
+@media(max-width:650px){.rkbo-draft-editor-grid{grid-template-columns:1fr}.rkbo-draft-editor-head{align-items:flex-start;flex-direction:column}.rkbo-draft-batting-summary>div{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-draft-lineup-editor{padding:11px}.rkbo-draft-edit-row{grid-template-columns:15px 46px minmax(0,1fr) 46px}}
