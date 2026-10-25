@@ -519,8 +519,8 @@
 .rkbo-draft-edit-section p{color:#9bb8ce;font-size:11px;margin:4px 0 11px}
 .rkbo-draft-edit-list{display:flex;flex-direction:column;gap:6px}
 .rkbo-draft-edit-row{width:100%;display:grid;grid-template-columns:15px 48px minmax(0,1fr) 62px;align-items:center;gap:8px;text-align:left;border-radius:8px;border:1px solid #375c77;background:#172f45;color:#fff;padding:11px 9px;cursor:grab;touch-action:manipulation}
-.rkbo-draft-edit-row span:first-child{color:#79acc4;font-size:19px}
-.rkbo-draft-edit-row span:nth-child(2){font-weight:900;color:#ffda92;font-size:12px}
+.rkbo-draft-edit-row>.rkbo-draft-edit-handle{color:#79acc4;font-size:19px}
+.rkbo-draft-edit-row>.rkbo-draft-edit-position{font-weight:900;color:#ffda92;font-size:12px}
 .rkbo-draft-edit-row strong{font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .rkbo-draft-edit-row small{font-size:10px;color:#a6c2d3;text-align:right}
 .rkbo-draft-edit-row.is-selected{background:#325e75;outline:2px solid #f3d18a;border-color:#f3d18a}
