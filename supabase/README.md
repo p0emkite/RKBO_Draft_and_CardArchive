@@ -1,6 +1,6 @@
 # RKBO ONLINE v1 — Setup instructions
 
-GitHub Pages hosts the frontend. Supabase handles email login, profiles and public rankings.
+GitHub Pages hosts the frontend. Supabase handles **Google OAuth login**, profiles and public rankings.
 
 ## Setup steps for the project owner
 
@@ -8,7 +8,15 @@ GitHub Pages hosts the frontend. Supabase handles email login, profiles and publ
 2. In SQL Editor, run the content of supabase/schema.sql.
 3. In Authentication > URL Configuration, use Site URL and Redirect URL:
    https://p0emkite.github.io/RKBO_Draft_and_CardArchive/
-4. Enable Email (OTP or magic-link) sign-in. Production email volume may require SMTP setup.
+4. Configure **Google sign-in** (no email OTP/magic-link setup required):
+   - In Supabase Authentication > URL Configuration, set both Site URL and an allowed Redirect URL to `https://p0emkite.github.io/RKBO_Draft_and_CardArchive/`.
+   - In Supabase Authentication > Sign In / Providers > Google, enable Google and copy the **Callback URL** (it looks like `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`).
+   - Go to [Google Auth Platform](https://console.cloud.google.com/auth/overview). Create/select a Google Cloud project, configure OAuth consent/branding and an External audience, then create an **OAuth client ID** of type Web application.
+   - Authorized JavaScript origin: `https://p0emkite.github.io` (no repository path).
+   - Authorized redirect URI: **the Supabase Google provider callback URL**, not the GitHub Pages URL.
+   - Enter Google's **Client ID** and **Client Secret** into the Supabase Google provider settings and save. Do **not** put the Google Client Secret in this repository, frontend config, or chat.
+   - While Google's OAuth app is in Testing mode, add intended test Google accounts to Test users. For unrestricted public sign-in, publish the OAuth app as appropriate.
+   - The RKBO browser uses `signInWithOAuth({provider:"google"})`; it does not send sign-in emails.
 5. Deploy the `draft-submit` Edge Function. Supabase Dashboard option (no terminal required):
    - Open Edge Functions > Deploy a new function > Via Editor.
    - Name the function `draft-submit` and replace the editor content with `supabase/functions/draft-submit/index.ts`.
@@ -42,7 +50,7 @@ Do not share SUPABASE_SERVICE_ROLE_KEY or any private API key.
 - Current season (hide OVR and grade during draft)
 - All-time (hide OVR and grade during draft)
 
-Each player may play without login and store scores locally. Login is needed to publish a score globally.
+Each player may play without login and store scores locally. **Google login** is needed to publish a score globally.
 
 ## Security
 
