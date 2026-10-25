@@ -9,10 +9,12 @@ GitHub Pages hosts the frontend. Supabase handles email login, profiles and publ
 3. In Authentication > URL Configuration, use Site URL and Redirect URL:
    https://p0emkite.github.io/RKBO_Draft_and_CardArchive/
 4. Enable Email (OTP or magic-link) sign-in. Production email volume may require SMTP setup.
-5. Deploy the Supabase Edge Function from this repo:
-   supabase login
-   supabase link --project-ref YOUR_PROJECT_REF
-   supabase functions deploy draft-submit --no-verify-jwt
+5. Deploy the Supabase Edge Function from the repository root. If using the official npm CLI on Windows (Node.js 20+):
+   npm install supabase --save-dev
+   npx supabase login
+   npx supabase link --project-ref YOUR_PROJECT_REF
+   npx supabase functions deploy draft-submit --no-verify-jwt
+   Alternatively, if Supabase is connected to ChatGPT, the assistant can guide/manage your project's SQL and function deployment with your approval.
 6. In rkbo-online-config.js set enabled to true and add the Project URL and PUBLIC publishable/anon key, not a secret key.
 
 These config fields are safe for browsers:
