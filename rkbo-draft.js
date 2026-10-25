@@ -333,10 +333,89 @@ function result(){
    '<div class="rkbo-draft-batting-summary"><h4>타순 · 1~9번</h4><div>'+l.battingOrder.map((id,i)=>'<span><b>'+(i+1)+'번</b> '+esc(state.picks.get(id).name)+'</span>').join("")+'</div></div>'+
    '<p class="rkbo-draft-score-note">TPI(팀 전력지수) = 전체 18명 평균 OVR 70% + 상위 6명 평균 20% + 하위 6명 평균 10%, 합계에 ×10. 정식 경기 승률이 아닌 카드 전력 비교용 지표입니다.</p>'+
    '<div class="rkbo-draft-end-actions"><button type="button" class="rkbo-draft-primary" data-draft-action="again">↻ 같은 모드로 다시 드래프트</button>'+
+   '<button type="button" data-draft-action="save-my-team" class="rkbo-draft-my-save">💾 '+(state.savedTeamId?'MY RKBO 팀 덮어쓰기':'내 팀에 저장')+'</button>'+ 
+   (state.savedTeamId?'<button type="button" data-draft-action="save-my-copy">다른 이름으로 저장</button>':'')+
+   '<button type="button" data-draft-action="my-teams">💾 저장한 팀 보기</button>'+
    '<button type="button" data-draft-action="board">🏆 스코어보드</button>'+
    '<button type="button" data-draft-action="publish-online" class="rkbo-draft-online-save" '+(!root.RKBOOnline?.isConfigured?.()||state.onlineSaved?'disabled':'')+'>'+(state.onlineSaved?'✓ 온라인 랭킹 등록 완료':'🌐 온라인 랭킹에 등록')+'</button>'+
    '<button type="button" data-draft-action="setup">시즌·모드 다시 선택</button><button type="button" data-draft-action="close">도감으로 돌아가기</button></div>',
   "드래프트 완료 · 최종 라인업");
+}
+
+
+async function savePersonal(copy=false){
+ if(!state||state.phase!=="result"||state.picks.size!==18)throw Error("드래프트 18명을 완성한 다음 저장해 주세요.");
+ const defaultName=state.savedTeamName||((state.mode==="all"?"올타임":state.season+"차")+" 드림팀");
+ const input=prompt("MY RKBO 팀 이름 (2~40자)",defaultName);
+ if(input===null)return;
+ const name=input.trim();if(name.length<2||name.length>40){alert("팀 이름은 2~40자로 입력해 주세요.");return}
+ const updateId=!copy?state.savedTeamId||null:null;
+ if(updateId&&!confirm('"'+name+'" 팀을 기존 저장 슬롯에 덮어쓸까요?'))return;
+ const button=stage?.querySelector('[data-draft-action="save-my-team"]');
+ if(button){button.disabled=true;button.textContent="💾 저장하는 중…"}
+ try{
+  if(!root.RKBOMyTeams?.saveTeam)throw Error("MY RKBO 모듈을 찾지 못했어요. 새로고침해 주세요.");
+  const saved=await root.RKBOMyTeams.saveTeam(resultPayload(),name,updateId);
+  if(!state||state.phase!=="result")return;
+  state.savedTeamId=saved.id;state.savedTeamName=saved.name;result();
+  alert("✓ MY RKBO에 팀을 저장했어요! 💾 MY RKBO에서 언제든 불러올 수 있어요.");
+ }catch(err){
+  if(button){button.disabled=false;button.textContent="💾 내 팀에 저장"}
+  alert("MY RKBO 저장 실패: "+err.message);
+ }
+}
+function validSavedLineup(lineup,picks){
+ const bat=["C","1B","2B","3B","SS","LF","CF","RF","DH"],sp=["SP1","SP2","SP3","SP4","SP5"],rp=["RP1","RP2","RP3"];
+ if(!lineup||typeof lineup!=="object"||!lineup.defense||typeof lineup.defense!=="object")return false;
+ const permutation=(list,possible)=>Array.isArray(list)&&list.length===possible.length&&new Set(list).size===list.length&&list.every(x=>possible.includes(x));
+ if(!permutation(lineup.battingOrder,bat)||!permutation(lineup.rotation,sp)||!permutation(lineup.bullpen,rp))return false;
+ if(Object.keys(lineup.defense).length!==9||!bat.every(pos=>Object.prototype.hasOwnProperty.call(lineup.defense,pos)))return false;
+ if(!permutation(bat.map(pos=>lineup.defense[pos]),bat))return false;
+ return bat.every(pos=>pos==="DH"||picks.get(lineup.defense[pos])?.pos===pos);
+}
+async function loadSavedTeam(saved){
+ if(loading)throw Error("선수 데이터를 불러오는 중이에요.");
+ if(!saved||!Array.isArray(saved.slots)||saved.slots.length!==18||!saved.lineup)throw Error("저장된 팀의 선수 구성이 올바르지 않습니다.");
+ const slotIds=saved.slots.map(x=>x.slot);
+ if(new Set(slotIds).size!==18||!SLOTS.every(x=>slotIds.includes(x.id)))throw Error("저장 팀의 포지션 18개가 정확하지 않습니다.");
+ const element=document.getElementById("rkbo-draft-overlay");if(!element)throw Error("드래프트 화면을 불러오지 못했습니다.");
+ if(!element.hidden&&state?.phase!=="result"&&state?.picks?.size>0&&!confirm("진행 중인 드래프트를 종료하고 저장 팀을 불러올까요?"))return;
+ if(element.hidden){previousOverflow=document.body.style.overflow;element.hidden=false;document.body.style.overflow="hidden"}
+ const t=++token;stopTimers();loading=true;
+ render('<div class="rkbo-draft-loading"><div class="rkbo-draft-loading-ball">⚾</div><h3>MY RKBO 팀 불러오는 중</h3><p>18명의 공식 카드와 한글 이름을 확인하고 있어요.</p></div>',"MY RKBO · 저장 팀 복원");
+ try{
+  const seasons=[...new Set(saved.slots.map(x=>Number(String(x.cardId||"").split("-")[0])))];
+  const current=root.RKBOSeason?.players?.()||[],groups=await Promise.all(seasons.map(async n=>{
+   if(current.length&&Number(current[0]?.season)===n)return current.map(x=>({...x}));
+   if(n===60)return (root.RKBOSeason?.builtin?.()||[]).map(x=>({...x}));
+   const res=await fetch("./data/seasons/"+n+".json",{cache:"force-cache"});
+   if(!res.ok)throw Error(n+"차 선수 데이터를 불러오지 못했어요.");
+   const raw=await res.json();return (Array.isArray(raw)?raw:raw.players||[]).map(x=>({...x}));
+  }));
+  if(t!==token)return;
+  const full=groups.flat(),available=new Map(full.map(p=>[p.id,p]));
+  const picked=new Map();
+  for(const x of saved.slots){
+   const p=available.get(x.cardId);
+   if(!p)throw Error("공식 카드에서 누락된 선수: "+x.cardId);
+   if(x.slot==="DH"?p.type!=="타자":!eligibleFor(p,byId.get(x.slot)))
+    throw Error("현재 선수 데이터와 드래프트 포지션이 일치하지 않습니다: "+x.slot);
+   picked.set(x.slot,p);
+  }
+  await root.RKBONameMap?.apply?.([...picked.values()],null);
+  if(t!==token)return;
+  const lineup=validSavedLineup(saved.lineup,picked)?JSON.parse(JSON.stringify(saved.lineup)):newLineup();
+  root.RKBOTeamBrand?.decorate?.([...picked.values()]);
+  mode=saved.mode==="all"?"all":"season";hiddenMode=!!saved.hidden;
+  state={phase:"result",mode,hidden:hiddenMode,season:Number(saved.season),pool:[],picks:picked,offered:[],slot:null,
+   usedRerollSlots:new Set(),rerolls:0,round:18,recorded:true,score:null,lineup,editLineup:false,swapPick:null,
+   onlineSaved:false,savedTeamId:saved.id,savedTeamName:saved.name};
+  loading=false;result();
+ }catch(err){
+  loading=false;console.error("[MY RKBO load]",err);
+  if(t===token)render('<div class="rkbo-draft-error"><h3>팀을 불러오지 못했어요</h3><p>'+esc(err.message)+'</p><button data-draft-action="setup">새 드래프트 시작</button></div>',"MY RKBO 오류");
+  throw err;
+ }
 }
 
 function scoreboard(){stopTimers();boardReturn=state?.phase==="result"?"result":"setup";boardTab=category({mode:state?.mode||mode,hidden:state?.hidden??hiddenMode});renderScoreboard()}
@@ -378,11 +457,14 @@ function clicked(e){
   case "back-to-draft":boardReturn==="result"&&state?.phase==="result"?result():setup();break;
   case "online-board":root.RKBOOnline?.open?.("leaderboard");break;
   case "publish-online":publishOnline();break;
+  case "save-my-team":savePersonal(false);break;
+  case "save-my-copy":savePersonal(true);break;
+  case "my-teams":root.RKBOMyTeams?.open?.();break;
   case "toggle-lineup":if(state?.phase==="result"){state.editLineup=!state.editLineup;state.swapPick=null;result()}break;
   case "reset-lineup":if(state?.phase==="result"){state.lineup=newLineup();state.swapPick=null;state.onlineSaved=false;result()}break;
  }
 }
 document.addEventListener("DOMContentLoaded",init);
 document.addEventListener("change",e=>{if(e.target?.id==="rkbo-draft-hide-toggle")hiddenMode=!!e.target.checked});
-root.RKBODraft={open,openScoreboard:scoreboard,localRecords:localScores,resultPayload,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id,hidden:state.hidden}:null};
+root.RKBODraft={open,openScoreboard:scoreboard,loadSavedTeam,localRecords:localScores,resultPayload,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id,hidden:state.hidden}:null};
 })(window);
