@@ -13,6 +13,7 @@ const CATS=[
 ];
 let client=null,clientPromise=null,overlay=null,panel=null,screen="leaderboard",category="season",records=[],selected=null,authUser=null,profile=null,busy=false,editingNickname=false;
 const q=s=>overlay?.querySelector(s);
+const koreanCache=new Map();
 const season=()=>Number(root.RKBOSeason?.current?.()||60);
 async function getClient(){
  if(!isConfigured())throw Error("아직 Supabase 프로젝트가 연결되지 않았습니다.");
@@ -70,7 +71,7 @@ async function loadBoard(){
  try{
   const c=await getClient();
   let query=c.from("rkbo_draft_results")
-   .select("id,user_id,mode,hidden,season,average_ovr,tpi,picks,created_at,rkbo_profiles(nickname)")
+   .select("id,user_id,mode,hidden,season,average_ovr,tpi,picks,lineup,created_at,rkbo_profiles(nickname)")
    .eq("mode",cat.mode).eq("hidden",cat.hidden);
   if(cat.mode==="season")query=query.eq("season",season());
   const {data,error}=await query.order("tpi",{ascending:false}).order("average_ovr",{ascending:false}).order("created_at",{ascending:true}).limit(30);
@@ -82,17 +83,65 @@ async function loadBoard(){
    '<div id="rkbo-online-detail"></div>':'<p class="rkbo-online-none">아직 등록된 팀이 없어! 18인 드래프트를 완성해서 첫 번째 기록을 남겨봐.</p>';
  }catch(err){if(elem.isConnected)elem.innerHTML='<p class="rkbo-online-none">랭킹을 불러오지 못했어. '+esc(err.message)+'</p>'}
 }
+
+function onlineSlotTitle(r,slot){
+ const l=r.lineup;
+ if(l?.defense&&typeof l.defense==="object"){
+  const assigned=Object.keys(l.defense).find(pos=>l.defense[pos]===slot);
+  if(assigned)return assigned;
+ }
+ if(/^SP[1-5]$/.test(slot)&&Array.isArray(l?.rotation)){
+  const n=l.rotation.indexOf(slot);if(n>=0)return (n+1)+"선발";
+ }
+ if(/^RP[1-3]$/.test(slot)&&Array.isArray(l?.bullpen)){
+  const n=l.bullpen.indexOf(slot);if(n>=0)return (n+1)+"중계";
+ }
+ return slot;
+}
+function detailHtml(r){
+ const order=["C","1B","2B","3B","SS","LF","CF","RF","DH","SP1","SP2","SP3","SP4","SP5","RP1","RP2","RP3","CP"];
+ const picks=Array.isArray(r.picks)?r.picks.slice().sort((a,b)=>order.indexOf(a.slot)-order.indexOf(b.slot)):[];
+ const name=p=>esc(koreanCache.get(p.cardId)||p.name||p.cardId||"선수");
+ const batting=Array.isArray(r.lineup?.battingOrder)?r.lineup.battingOrder:[...order.slice(0,9)];
+ const line='<div class="rkbo-online-roster-lineup"><h4>⚾ 타순 1~9번</h4><div>'+
+  batting.map((slot,i)=>{const p=picks.find(x=>x.slot===slot);return p?'<span><b>'+(i+1)+'번</b> '+name(p)+'</span>':''}).join("")+'</div></div>';
+ return '<div class="rkbo-online-detail-title">⚾ '+esc(r.rkbo_profiles?.nickname||"익명 선수")+'의 18인 드래프트 · TPI '+r.tpi+'</div>'+
+ line+'<div class="rkbo-online-roster">'+picks.map(p=>'<div><span>'+esc(onlineSlotTitle(r,p.slot))+'</span><strong>'+name(p)+'</strong><small>'+esc(p.team||"")+' · '+esc(String(p.season||""))+'차</small><b>'+Number(p.ovr)+'</b></div>').join("")+'</div>';
+}
+async function resolveNames(picks){
+ const ids=picks.filter(p=>p?.cardId&&!koreanCache.has(p.cardId)),seasonIds=[...new Set(ids.map(p=>Number(p.season)))];
+ if(!seasonIds.length||!root.RKBONameMap?.apply)return;
+ const chosen=new Set(ids.map(p=>p.cardId));let roster=[];
+ for(const n of seasonIds){
+  try{
+   let list;
+   const current=root.RKBOSeason?.players?.()||[];
+   if(current.length&&Number(current[0]?.season)===n)list=current;
+   else if(n===60)list=root.RKBOSeason?.builtin?.()||[];
+   else{
+    const response=await fetch("./data/seasons/"+n+".json",{cache:"force-cache"});
+    if(!response.ok)continue;
+    const d=await response.json();list=Array.isArray(d)?d:d.players||[];
+   }
+   roster.push(...list.filter(p=>chosen.has(p.id)).map(p=>({...p})));
+  }catch(e){console.warn("[RKBO online] Failed to resolve names for season",n,e)}
+ }
+ if(!roster.length)return;
+ try{await root.RKBONameMap.apply(roster,null)}catch(e){console.warn("[RKBO online] Name translation unavailable",e)}
+ for(const p of roster)if(p.name)koreanCache.set(p.id,p.name);
+}
 function showDetails(id){
  const e=q("#rkbo-online-detail");if(!e)return;
  if(selected===id){selected=null;e.innerHTML="";return}
  const r=records.find(x=>x.id===id);if(!r)return;
- selected=id;
- const order=["C","1B","2B","3B","SS","LF","CF","RF","DH","SP1","SP2","SP3","SP4","SP5","RP1","RP2","RP3","CP"];
- const picks=Array.isArray(r.picks)?r.picks.slice().sort((a,b)=>order.indexOf(a.slot)-order.indexOf(b.slot)):[];
- e.innerHTML='<div class="rkbo-online-detail-title">⚾ '+esc(r.rkbo_profiles?.nickname||"익명 선수")+'의 18인 드래프트 · TPI '+r.tpi+'</div>'+
- '<div class="rkbo-online-roster">'+picks.map(p=>'<div><span>'+esc(p.slot)+'</span><strong>'+esc(p.name||p.cardId||"선수")+'</strong><small>'+esc(p.team||"")+' · '+esc(String(p.season||""))+'차</small><b>'+Number(p.ovr)+'</b></div>').join("")+'</div>';
+ selected=id;e.innerHTML=detailHtml(r);
  e.scrollIntoView({behavior:"smooth",block:"nearest"});
+ resolveNames(r.picks||[]).then(()=>{
+  if(selected!==id||!e.isConnected)return;
+  e.innerHTML=detailHtml(r);
+ }).catch(error=>console.warn("[RKBO online] roster names",error));
 }
+
 async function accountView(){
  if(!isConfigured()){disabledView();return}
  shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 계정으로 로그인하고 다른 기기에서도 기록을 확인하세요.</small></div>'+
