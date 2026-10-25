@@ -469,14 +469,18 @@
 .rkbo-online-profile label{display:block;font-size:12px;color:#bbd7e5;font-weight:900;margin:13px 0 8px}
 .rkbo-online-profile input{width:100%;background:#071725;color:#f7fbff;border:1px solid #466e85;border-radius:9px;padding:12px 14px;font-size:14px}
 .rkbo-online-rename{display:flex;align-items:center;gap:9px}
+.rkbo-online-current-nickname{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:1px solid #45697c;background:#102f43;border-radius:10px}
+.rkbo-online-current-nickname>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.rkbo-online-current-nickname small{color:#a8c8d9;font-size:11px;font-weight:700}
+.rkbo-online-current-nickname strong{font-size:21px;color:#fff;overflow-wrap:anywhere}
+.rkbo-online-current-nickname button{flex-shrink:0}
+
 .rkbo-online-rename input{min-width:0}
 .rkbo-online-profile button{background:#286a83;color:#fff;border:1px solid #70b6cc;border-radius:9px;padding:11px 17px;white-space:nowrap;font-size:12px;font-weight:900;cursor:pointer}
 .rkbo-online-login{display:flex;flex-direction:column;gap:11px}
 .rkbo-online-login .rkbo-online-social{width:100%;border-radius:10px;padding:14px 18px;display:flex;justify-content:center;align-items:center;gap:12px;cursor:pointer;font-size:14px;font-weight:900;transition:filter .15s,transform .15s}
 .rkbo-online-login .rkbo-online-social:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .rkbo-online-login .rkbo-online-social:focus-visible{outline:3px solid #85d6f3;outline-offset:2px}
-.rkbo-online-login .rkbo-online-social-kakao{background:#fee500;color:#191919;border:1px solid #fee500}
-.rkbo-online-login .rkbo-online-social-kakao span{font-size:22px;line-height:1;color:#191919}
 .rkbo-online-login .rkbo-online-social-google{background:#fff;color:#202124;border:1px solid #d7dde4}
 .rkbo-online-login .rkbo-online-social-google span{font-size:19px;line-height:1;color:#4285f4}
 .rkbo-online-login p{margin:6px 0 0;text-align:center}
