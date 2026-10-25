@@ -518,7 +518,7 @@
 .rkbo-draft-edit-section h4{color:#f7d490;margin:0;font-size:15px}
 .rkbo-draft-edit-section p{color:#9bb8ce;font-size:11px;margin:4px 0 11px}
 .rkbo-draft-edit-list{display:flex;flex-direction:column;gap:6px}
-.rkbo-draft-edit-row{width:100%;display:grid;grid-template-columns:15px 50px minmax(0,1fr) 47px;align-items:center;gap:7px;text-align:left;border-radius:8px;border:1px solid #375c77;background:#172f45;color:#fff;padding:10px 8px;cursor:grab;touch-action:manipulation}
+.rkbo-draft-edit-row{width:100%;display:grid;grid-template-columns:15px 48px minmax(0,1fr) 62px;align-items:center;gap:8px;text-align:left;border-radius:8px;border:1px solid #375c77;background:#172f45;color:#fff;padding:11px 9px;cursor:grab;touch-action:manipulation}
 .rkbo-draft-edit-row span:first-child{color:#79acc4;font-size:19px}
 .rkbo-draft-edit-row span:nth-child(2){font-weight:900;color:#ffda92;font-size:12px}
 .rkbo-draft-edit-row strong{font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -541,3 +541,13 @@
 .rkbo-online-roster-lineup span{background:#1b3448;color:#edf6fc;border:1px solid #36536b;padding:9px 10px;border-radius:7px;font-size:12px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
 .rkbo-online-roster-lineup b{margin-right:8px;color:#ffd99d}
 @media(max-width:650px){.rkbo-online-roster-lineup>div{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.rkbo-draft-edit-player{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rkbo-draft-edit-player>strong{font-size:13px;color:#f1f7fd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkbo-draft-edit-metrics{display:flex;flex-wrap:wrap;gap:4px 9px;min-width:0}
+.rkbo-draft-edit-metric{font-size:10px;display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+.rkbo-draft-edit-metric>span{color:#9bb5c8}
+.rkbo-draft-edit-metric>b{font-size:11px;font-weight:950;font-variant-numeric:tabular-nums}
+.rkbo-draft-edit-ovr{display:flex;flex-direction:column;text-align:right;font-size:10px;color:#a7bed0}
+.rkbo-draft-edit-ovr>b{font-size:18px;color:#fff;font-weight:950;font-variant-numeric:tabular-nums}
+@media(max-width:650px){.rkbo-draft-edit-row{grid-template-columns:14px 39px minmax(0,1fr) 48px;gap:5px;padding:9px 6px}.rkbo-draft-edit-metrics{gap:3px 6px}.rkbo-draft-edit-metric{font-size:9px}.rkbo-draft-edit-metric>b{font-size:10px}}
