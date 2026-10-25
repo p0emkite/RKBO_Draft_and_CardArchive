@@ -38,3 +38,32 @@ create policy rkbo_profiles_own_insert on public.rkbo_profiles for insert to aut
 create policy rkbo_profiles_own_update on public.rkbo_profiles for update to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
 create policy rkbo_results_public on public.rkbo_draft_results for select to anon,authenticated using (true);
 comment on table public.rkbo_draft_results is 'Server-validates card identities, OVRs and team scores. Random-offer fairness cannot yet be proven (v1 beta).';
+
+
+-- MY RKBO: private, account-owned editable team snapshots (not public rankings).
+create table if not exists public.rkbo_saved_teams (
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid not null references auth.users(id) on delete cascade,
+ name text not null check (char_length(btrim(name)) between 2 and 40),
+ mode text not null check (mode in ('season','all')),
+ hidden boolean not null default false,
+ season integer not null check (season between 1 and 999),
+ average_ovr numeric(4,1) not null check (average_ovr between 0 and 99),
+ tpi integer not null check (tpi between 0 and 1000),
+ slots jsonb not null check (jsonb_typeof(slots)='array' and jsonb_array_length(slots)=18),
+ lineup jsonb not null check (jsonb_typeof(lineup)='object'),
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+create index if not exists rkbo_saved_teams_owner_idx on public.rkbo_saved_teams(user_id,updated_at desc);
+alter table public.rkbo_saved_teams enable row level security;
+revoke all on public.rkbo_saved_teams from public,anon,authenticated;
+grant select,insert,update,delete on public.rkbo_saved_teams to authenticated;
+drop policy if exists rkbo_saved_teams_own_select on public.rkbo_saved_teams;
+drop policy if exists rkbo_saved_teams_own_insert on public.rkbo_saved_teams;
+drop policy if exists rkbo_saved_teams_own_update on public.rkbo_saved_teams;
+drop policy if exists rkbo_saved_teams_own_delete on public.rkbo_saved_teams;
+create policy rkbo_saved_teams_own_select on public.rkbo_saved_teams for select to authenticated using ((select auth.uid())=user_id);
+create policy rkbo_saved_teams_own_insert on public.rkbo_saved_teams for insert to authenticated with check ((select auth.uid())=user_id);
+create policy rkbo_saved_teams_own_update on public.rkbo_saved_teams for update to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
+create policy rkbo_saved_teams_own_delete on public.rkbo_saved_teams for delete to authenticated using ((select auth.uid())=user_id);
