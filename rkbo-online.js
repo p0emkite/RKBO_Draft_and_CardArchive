@@ -1,5 +1,5 @@
 /* RKBO ONLINE v1 — public leaderboard with Google + Kakao OAuth.
- * Inactive until public Supabase config is added by the repository owner.
+ * Kakao may be disabled in config pending provider policy review.
  * User identity + leaderboard only; client never gets a server-side secret. */
 (function(root){"use strict";
 const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
@@ -106,13 +106,13 @@ function drawAccount(){
  '<label>공개 닉네임 (2~20자)</label><div class="rkbo-online-rename"><input id="rkbo-online-nickname" maxlength="20" value="'+esc(profile?.nickname||"")+'" autocomplete="off"><button data-online="save-nickname" type="button">닉네임 저장</button></div>'+
  '<p>온라인 랭킹에는 이메일이 아닌 공개 닉네임이 표시됩니다.</p><button type="button" class="rkbo-online-signout" data-online="signout">로그아웃</button></div>':
  '<div class="rkbo-online-login">'+
- '<button type="button" class="rkbo-online-social rkbo-online-social-kakao" data-online="kakao-signin"><span aria-hidden="true">●</span> 카카오로 시작하기</button>'+
+ (cfg().kakaoEnabled?'<button type="button" class="rkbo-online-social rkbo-online-social-kakao" data-online="kakao-signin"><span aria-hidden="true">●</span> 카카오로 시작하기</button>':'')+
  '<button type="button" class="rkbo-online-social rkbo-online-social-google" data-online="google-signin"><span aria-hidden="true">G</span> Google 계정으로 로그인</button>'+
  '<p>별도의 인증 메일이나 RKBO 비밀번호는 필요하지 않아요. 로그인 없이도 드래프트는 플레이할 수 있어요.</p></div>';
 }
 async function signInSocial(provider){
  if(busy)return;
- if(!["google","kakao"].includes(provider))return;
+ if(!["google","kakao"].includes(provider)||provider==="kakao"&&!cfg().kakaoEnabled)return;
  const label=provider==="kakao"?"카카오":"Google";
  busy=true;notice(label+" 로그인 페이지로 이동하는 중…");
  try{
