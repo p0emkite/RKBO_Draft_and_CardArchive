@@ -1,4 +1,4 @@
-/* RKBO ONLINE v1 — public leaderboard and Google Auth.
+/* RKBO ONLINE v1 — public leaderboard with Google + Kakao OAuth.
  * Inactive until public Supabase config is added by the repository owner.
  * User identity + leaderboard only; client never gets a server-side secret. */
 (function(root){"use strict";
@@ -42,7 +42,7 @@ async function loadUser(){
  return authUser;
 }
 function buildHeader(){
- return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 RKBO ONLINE <small>v1</small></h2><p>온라인 공동 랭킹 · 이메일 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
+ return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 RKBO ONLINE <small>v1</small></h2><p>온라인 공동 랭킹 · Google·카카오 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
 }
 function shell(inner){if(!panel)return;panel.innerHTML=buildHeader()+'<div class="rkbo-online-inner">'+inner+'</div>'}
 function notice(text){const el=q("#rkbo-online-message");if(el)el.textContent=text}
@@ -95,31 +95,35 @@ function showDetails(id){
 }
 async function accountView(){
  if(!isConfigured()){disabledView();return}
- shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 계정으로 간편하게 로그인하고 다른 기기에서도 기록을 확인하세요.</small></div>'+
+ shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 또는 카카오 계정으로 로그인하고 다른 기기에서도 기록을 확인하세요.</small></div>'+
  '<div id="rkbo-online-account"><p class="rkbo-online-wait">로그인 상태 확인 중…</p></div>'+
  '<p class="rkbo-online-message" id="rkbo-online-message" role="status"></p>');
  try{await loadUser();drawAccount()}catch(e){notice(e.message)}
 }
 function drawAccount(){
  const el=q("#rkbo-online-account");if(!el)return;
- el.innerHTML=authUser?'<div class="rkbo-online-profile"><p><strong>로그인 완료</strong> · '+esc(authUser.email||"")+'</p>'+
+ el.innerHTML=authUser?'<div class="rkbo-online-profile"><p><strong>로그인 완료</strong> · '+esc(authUser.email||authUser.user_metadata?.full_name||"소셜 로그인 계정")+'</p>'+
  '<label>공개 닉네임 (2~20자)</label><div class="rkbo-online-rename"><input id="rkbo-online-nickname" maxlength="20" value="'+esc(profile?.nickname||"")+'" autocomplete="off"><button data-online="save-nickname" type="button">닉네임 저장</button></div>'+
  '<p>온라인 랭킹에는 이메일이 아닌 공개 닉네임이 표시됩니다.</p><button type="button" class="rkbo-online-signout" data-online="signout">로그아웃</button></div>':
- '<div class="rkbo-online-login"><button type="button" data-online="google-signin">Google 계정으로 로그인</button>'+
- '<p>별도의 이메일 인증 링크나 RKBO 비밀번호는 필요하지 않아요. 드래프트 자체는 로그인 없이도 가능해요.</p></div>';
+ '<div class="rkbo-online-login">'+
+ '<button type="button" class="rkbo-online-social rkbo-online-social-kakao" data-online="kakao-signin"><span aria-hidden="true">●</span> 카카오로 시작하기</button>'+
+ '<button type="button" class="rkbo-online-social rkbo-online-social-google" data-online="google-signin"><span aria-hidden="true">G</span> Google 계정으로 로그인</button>'+
+ '<p>별도의 인증 메일이나 RKBO 비밀번호는 필요하지 않아요. 로그인 없이도 드래프트는 플레이할 수 있어요.</p></div>';
 }
-async function signInGoogle(){
+async function signInSocial(provider){
  if(busy)return;
- busy=true;notice("Google 로그인 페이지로 이동하는 중…");
+ if(!["google","kakao"].includes(provider))return;
+ const label=provider==="kakao"?"카카오":"Google";
+ busy=true;notice(label+" 로그인 페이지로 이동하는 중…");
  try{
   const c=await getClient();
   const redirect=location.origin+location.pathname;
-  try{sessionStorage.setItem("rkbo-online-google-return","1")}catch{}
-  const {error}=await c.auth.signInWithOAuth({provider:"google",options:{redirectTo:redirect}});
+  try{sessionStorage.setItem("rkbo-online-oauth-return","1")}catch{}
+  const {error}=await c.auth.signInWithOAuth({provider,options:{redirectTo:redirect}});
   if(error)throw Error(error.message);
  }catch(err){
-  try{sessionStorage.removeItem("rkbo-online-google-return")}catch{}
-  notice("Google 로그인 실패: "+err.message);
+  try{sessionStorage.removeItem("rkbo-online-oauth-return")}catch{}
+  notice(label+" 로그인 실패: "+err.message);
  }finally{busy=false}
 }
 async function saveNickname(){
@@ -139,7 +143,7 @@ async function saveNickname(){
 async function submitDraft(payload){
  if(!payload||!isConfigured())throw Error("RKBO ONLINE 서버를 연결해야 합니다.");
  const c=await getClient(),{data:{user},error:authErr}=await c.auth.getUser();
- if(authErr||!user){open("account");throw Error("이메일 로그인 후 다시 랭킹 등록 버튼을 눌러 주세요.")}
+ if(authErr||!user){open("account");throw Error("Google 또는 카카오 계정으로 로그인한 후 다시 랭킹 등록 버튼을 눌러 주세요.")}
  const {data,error}=await c.functions.invoke("draft-submit",{body:payload});
  if(error){
   let reason=error.message;
@@ -180,7 +184,8 @@ function init(){
    case "close":close();break;
    case "tab-board":screen="leaderboard";scoreboardView();break;
    case "tab-account":screen="account";accountView();break;
-   case "google-signin":signInGoogle();break;
+   case "google-signin":signInSocial("google");break;
+   case "kakao-signin":signInSocial("kakao");break;
    case "save-nickname":saveNickname();break;
    case "signout":if(busy)return;busy=true;try{await (await getClient()).auth.signOut();authUser=null;profile=null;drawAccount();notice("로그아웃했습니다.")}catch(err){notice(err.message)}finally{busy=false}break;
   }
@@ -190,9 +195,9 @@ function init(){
 root.RKBOOnline={isConfigured,open,submitDraft};
 document.addEventListener("DOMContentLoaded",()=>{
  init();
- // Restore the account screen on return from Google OAuth (also processes auth tokens).
+ // Restore account screen on return from Google or Kakao OAuth.
  let returned=false;
- try{returned=sessionStorage.getItem("rkbo-online-google-return")==="1";if(returned)sessionStorage.removeItem("rkbo-online-google-return")}catch{}
+ try{returned=sessionStorage.getItem("rkbo-online-oauth-return")==="1"||sessionStorage.getItem("rkbo-online-google-return")==="1";if(returned){sessionStorage.removeItem("rkbo-online-oauth-return");sessionStorage.removeItem("rkbo-online-google-return")}}catch{}
  if(returned&&isConfigured())open("account");
 });
 })(window);
