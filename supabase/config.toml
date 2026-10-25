@@ -1,0 +1,3 @@
+# JWT is verified inside the function to allow unauthenticated CORS preflight.
+[functions.draft-submit]
+verify_jwt = false
