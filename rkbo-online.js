@@ -1,6 +1,6 @@
-/* RKBO ONLINE v1 — public leaderboard and email Auth.
+/* RKBO ONLINE v1 — public leaderboard and Google Auth.
  * Inactive until public Supabase config is added by the repository owner.
- * User identity + leaderboard only; client never gets a service_role secret. */
+ * User identity + leaderboard only; client never gets a server-side secret. */
 (function(root){"use strict";
 const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
 const cfg=()=>root.RKBOOnlineConfig||{};
@@ -95,7 +95,7 @@ function showDetails(id){
 }
 async function accountView(){
  if(!isConfigured()){disabledView();return}
- shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>이메일 인증으로 다른 기기에서도 내 기록을 확인할 수 있어요.</small></div>'+
+ shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 계정으로 간편하게 로그인하고 다른 기기에서도 기록을 확인하세요.</small></div>'+
  '<div id="rkbo-online-account"><p class="rkbo-online-wait">로그인 상태 확인 중…</p></div>'+
  '<p class="rkbo-online-message" id="rkbo-online-message" role="status"></p>');
  try{await loadUser();drawAccount()}catch(e){notice(e.message)}
@@ -105,22 +105,22 @@ function drawAccount(){
  el.innerHTML=authUser?'<div class="rkbo-online-profile"><p><strong>로그인 완료</strong> · '+esc(authUser.email||"")+'</p>'+
  '<label>공개 닉네임 (2~20자)</label><div class="rkbo-online-rename"><input id="rkbo-online-nickname" maxlength="20" value="'+esc(profile?.nickname||"")+'" autocomplete="off"><button data-online="save-nickname" type="button">닉네임 저장</button></div>'+
  '<p>온라인 랭킹에는 이메일이 아닌 공개 닉네임이 표시됩니다.</p><button type="button" class="rkbo-online-signout" data-online="signout">로그아웃</button></div>':
- '<form id="rkbo-online-login"><label for="rkbo-online-email">이메일 주소</label><input id="rkbo-online-email" type="email" required autocomplete="email" placeholder="you@example.com"><button type="submit">로그인 인증 메일 받기</button>'+
- '<p>인증 링크를 눌러 로그인하면 온라인 랭킹에 참여할 수 있어요. 드래프트 자체는 로그인 없이도 가능해요.</p></form>';
+ '<div class="rkbo-online-login"><button type="button" data-online="google-signin">Google 계정으로 로그인</button>'+
+ '<p>별도의 이메일 인증 링크나 RKBO 비밀번호는 필요하지 않아요. 드래프트 자체는 로그인 없이도 가능해요.</p></div>';
 }
-async function sendOTP(e){
- e.preventDefault();if(busy)return;
- const input=q("#rkbo-online-email"),email=input?.value.trim();
- if(!email||!input.validity.valid){notice("유효한 이메일 주소를 입력해 주세요.");return}
- busy=true;notice("인증 메일 발송 중…");
+async function signInGoogle(){
+ if(busy)return;
+ busy=true;notice("Google 로그인 페이지로 이동하는 중…");
  try{
   const c=await getClient();
   const redirect=location.origin+location.pathname;
-  const {error}=await c.auth.signInWithOtp({email,options:{emailRedirectTo:redirect,shouldCreateUser:true}});
+  try{sessionStorage.setItem("rkbo-online-google-return","1")}catch{}
+  const {error}=await c.auth.signInWithOAuth({provider:"google",options:{redirectTo:redirect}});
   if(error)throw Error(error.message);
-  notice("✓ 로그인 인증 메일을 보냈어요. 이메일의 인증 링크를 누르면 사이트로 돌아옵니다.");
- }catch(err){notice("메일 발송 실패: "+err.message)}
- finally{busy=false}
+ }catch(err){
+  try{sessionStorage.removeItem("rkbo-online-google-return")}catch{}
+  notice("Google 로그인 실패: "+err.message);
+ }finally{busy=false}
 }
 async function saveNickname(){
  if(busy)return;
@@ -180,13 +180,19 @@ function init(){
    case "close":close();break;
    case "tab-board":screen="leaderboard";scoreboardView();break;
    case "tab-account":screen="account";accountView();break;
+   case "google-signin":signInGoogle();break;
    case "save-nickname":saveNickname();break;
    case "signout":if(busy)return;busy=true;try{await (await getClient()).auth.signOut();authUser=null;profile=null;drawAccount();notice("로그아웃했습니다.")}catch(err){notice(err.message)}finally{busy=false}break;
   }
  });
- panel.addEventListener("submit",e=>{if(e.target.id==="rkbo-online-login")sendOTP(e)});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
 }
 root.RKBOOnline={isConfigured,open,submitDraft};
-document.addEventListener("DOMContentLoaded",init);
+document.addEventListener("DOMContentLoaded",()=>{
+ init();
+ // Restore the account screen on return from Google OAuth (also processes auth tokens).
+ let returned=false;
+ try{returned=sessionStorage.getItem("rkbo-online-google-return")==="1";if(returned)sessionStorage.removeItem("rkbo-online-google-return")}catch{}
+ if(returned&&isConfigured())open("account");
+});
 })(window);
