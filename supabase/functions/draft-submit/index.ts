@@ -37,6 +37,29 @@ function legal(p:any,slot:string):boolean{
  if(slot==="CP")return p.type==="투수"&&p.pos==="CP";
  return p.type==="타자"&&p.pos===slot;
 }
+
+const hitterSlots=["C","1B","2B","3B","SS","LF","CF","RF","DH"];
+const starters=["SP1","SP2","SP3","SP4","SP5"],relievers=["RP1","RP2","RP3"];
+function validateLineup(value:any){
+ if(value==null)return null; // Previously released clients send no lineup.
+ if(!value||typeof value!=="object"||Array.isArray(value))fail(400,"라인업 데이터 형식 오류");
+ const order=(items:any,allowed:string[],name:string)=>{
+  if(!Array.isArray(items)||items.length!==allowed.length||new Set(items).size!==allowed.length||
+    !items.every((v:any)=>typeof v==="string"&&allowed.includes(v)))fail(400,name+" 배치 오류");
+  return items as string[];
+ };
+ const battingOrder=order(value.battingOrder,hitterSlots,"타순");
+ const rotation=order(value.rotation,starters,"선발 로테이션");
+ const bullpen=order(value.bullpen,relievers,"중계 로테이션");
+ const defense=value.defense;
+ if(!defense||typeof defense!=="object"||Array.isArray(defense)||
+   Object.keys(defense).length!==hitterSlots.length||
+   !hitterSlots.every(pos=>Object.prototype.hasOwnProperty.call(defense,pos)))
+  fail(400,"수비 포지션 배치 오류");
+ order(hitterSlots.map(pos=>defense[pos]),hitterSlots,"수비");
+ return {battingOrder,defense:Object.fromEntries(hitterSlots.map(pos=>[pos,defense[pos]])),rotation,bullpen};
+}
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(req)});
  if(req.method!=="POST")return output(req,405,{error:"POST 전용 API"});
@@ -52,6 +75,7 @@ Deno.serve(async(req:Request)=>{
   let body:any;
   try{body=JSON.parse(bodyText)}catch{fail(400,"제출 데이터가 올바른 JSON 형식이 아닙니다.")}
   const mode=body?.mode,hidden=body?.hidden,season=Number(body?.season),picks=body?.slots;
+  const lineup=validateLineup(body?.lineup);
   if(!["season","all"].includes(mode)||typeof hidden!=="boolean"||!Number.isInteger(season)||season<1||season>999)
    fail(400,"드래프트 모드나 시즌이 올바르지 않습니다.");
   if(!Array.isArray(picks)||picks.length!==18||new Set(picks.map((x:any)=>x?.slot)).size!==18)
@@ -102,7 +126,7 @@ Deno.serve(async(req:Request)=>{
    if(created.error)fail(503,"사용자 닉네임 생성에 실패했습니다.");
   }
   const saved=await db.from("rkbo_draft_results").insert({
-   user_id:user.id,mode,hidden,season,average_ovr:avg,tpi,picks:players
+   user_id:user.id,mode,hidden,season,average_ovr:avg,tpi,picks:players,lineup
   }).select("id,created_at").single();
   if(saved.error)fail(503,"랭킹 기록 저장 실패: "+saved.error.message);
   return output(req,200,{ok:true,id:saved.data.id,createdAt:saved.data.created_at,averageOVR:avg,power:tpi});
