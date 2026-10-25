@@ -235,11 +235,17 @@ function strength(players){
  return {avg:avg.toFixed(1),power:Math.round((.7*avg+.2*top+.1*bottom)*10)};
 }
 
+const statLabels=p=>p?.type==="타자"?["정확","파워","선구","주루","수비"]:["구위","제구","피안타 억제","피홈런 억제","체력"];
+const statColor=value=>{const n=Number(value);return value==null||!Number.isFinite(n)?"#fff":n>=90?"#90ecff":n>=85?"#F6909D":n>=80?"#f4cf74":n>=70?"#c9d7df":"#fff"};
+const shortStat=name=>name==="피안타 억제"?"피안":name==="피홈런 억제"?"피홈":name;
 function lineupRow(group,slot,label){
  const p=state.picks.get(slot),selected=state.swapPick?.group===group&&state.swapPick.slot===slot;
  return '<button type="button" draggable="true" data-lineup-group="'+group+'" data-lineup-slot="'+slot+
  '" class="rkbo-draft-edit-row'+(selected?' is-selected':'')+'" title="드래그 또는 2명 터치로 교체">'+
- '<span aria-hidden="true">⠿</span><span>'+esc(label)+'</span><strong>'+esc(p.name)+'</strong><small>OVR '+p.ovr+'</small></button>';
+ '<span class="rkbo-draft-edit-handle" aria-hidden="true">⠿</span><span class="rkbo-draft-edit-position">'+esc(label)+'</span>'+
+ '<span class="rkbo-draft-edit-player"><strong>'+esc(p.name)+'</strong><span class="rkbo-draft-edit-metrics">'+
+ statLabels(p).map(key=>'<span class="rkbo-draft-edit-metric"><span>'+esc(shortStat(key))+'</span><b style="color:'+statColor(p.ratings?.[key])+'">'+(p.ratings?.[key]??"—")+'</b></span>').join("")+
+ '</span></span><span class="rkbo-draft-edit-ovr">OVR <b>'+p.ovr+'</b></span></button>';
 }
 function lineupEditor(){
  const l=state.lineup;
@@ -257,7 +263,15 @@ function lineupSwap(group,first,second){
  const l=state.lineup,arr=group==="batting"?l.battingOrder:group==="rotation"?l.rotation:group==="bullpen"?l.bullpen:null;
  if(group==="defense"){
   const a=batSlots.find(pos=>l.defense[pos]===first),b=batSlots.find(pos=>l.defense[pos]===second);
-  if(!a||!b)return;[l.defense[a],l.defense[b]]=[l.defense[b],l.defense[a]];
+  if(!a||!b)return;
+  // A player can play DH or their original card position; arbitrary field moves are forbidden.
+  const allowed=(slot,pos)=>pos==="DH"||state.picks.get(slot)?.pos===pos;
+  if(!allowed(first,b)||!allowed(second,a)){
+   state.swapPick=null;result();
+   alert("수비 포지션이 맞지 않습니다. 선수는 자신의 원래 포지션 또는 지명타자로만 배치할 수 있어요.");
+   return;
+  }
+  [l.defense[a],l.defense[b]]=[l.defense[b],l.defense[a]];
  }else if(arr){
   const a=arr.indexOf(first),b=arr.indexOf(second);if(a<0||b<0)return;
   [arr[a],arr[b]]=[arr[b],arr[a]];
