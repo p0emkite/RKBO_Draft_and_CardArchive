@@ -3,7 +3,7 @@
 (function(root){"use strict";
 const teams={DOO:"두산 베어스",HAN:"한화 이글스",KIA:"KIA 타이거즈",KT:"KT 위즈",LG:"LG 트윈스",LOT:"롯데 자이언츠",NC:"NC 다이노스",SAM:"삼성 라이온즈",SSG:"SSG 랜더스",KIW:"키움 히어로즈"};
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let owned=new Set(),userId=null,status="loading",lastError="",container=null,cardList=null,client=null,request=0,observer=null;
+let owned=new Set(),upgrades=new Map(),userId=null,status="loading",lastError="",container=null,cardList=null,client=null,request=0,observer=null;
 const percent=(a,b)=>b?Math.round(a/b*100):0;
 function cards(){return root.RKBOSeason?.players?.()||[]}
 function getProgress(){
@@ -23,6 +23,9 @@ function paintCardStates(){
  cardList.querySelectorAll(".player-card[data-id]").forEach(card=>{
   const locked=status==="ready"&&!!userId&&!owned.has(card.dataset.id);
   card.classList.toggle("rkbo-uncollected",locked);
+  const effects=upgrades.get(card.dataset.id);
+  card.classList.toggle("rkbo-gold-border",!!effects?.gold_border&&!locked);
+  card.classList.toggle("rkbo-prism",!!effects?.prism&&!locked);
   if(locked)card.setAttribute("data-collection-status","미수집");
   else card.removeAttribute("data-collection-status");
  });
@@ -63,20 +66,21 @@ async function refresh(){
   if(!c)throw Error("Supabase 연결이 준비되지 않았어요.");
   const {data:sessionData,error:sessionError}=await c.auth.getSession();
   if(sessionError)throw sessionError;
-  if(!sessionData?.session?.user){if(ticket!==request)return;userId=null;owned.clear();status="ready";redraw();return}
+  if(!sessionData?.session?.user){if(ticket!==request)return;userId=null;owned.clear();upgrades.clear();status="ready";redraw();return}
   const {data:userData,error:userError}=await c.auth.getUser();
   if(userError||!userData?.user)throw userError||Error("로그인 확인 실패");
   const id=userData.user.id;
-  const {data,error}=await c.from("rkbo_card_inventory").select("card_id,quantity").eq("user_id",id).limit(20000);
+  const {data,error}=await c.from("rkbo_card_inventory").select("card_id,quantity,gold_border,prism").eq("user_id",id).limit(20000);
   if(error)throw error;
   if(ticket!==request)return;
-  owned=new Set((data||[]).filter(x=>x.quantity>0).map(x=>x.card_id));
+  owned=new Set((data||[]).filter(x=>x.quantity>0||x.gold_border||x.prism).map(x=>x.card_id));
+  upgrades=new Map((data||[]).map(x=>[x.card_id,{gold_border:x.gold_border,prism:x.prism}]));
   userId=id;status="ready";lastError="";redraw();
  }catch(error){
   if(ticket!==request)return;
   lastError=String(error?.message||error);
   console.warn("[RKBO collection]",lastError);
-  status="error";userId=null;owned.clear();redraw();
+  status="error";userId=null;owned.clear();upgrades.clear();redraw();
  }
 }
 function init(){
@@ -92,6 +96,7 @@ function init(){
  observer.observe(cardList,{childList:true});
  root.addEventListener("rkbo-season-change",redraw);
  root.addEventListener("rkbo-player-data-updated",redraw);
+ root.addEventListener("rkbo-collection-updated",refresh);
  root.addEventListener("rkbo-pack-opened",async()=>{
   await refresh();
  });
