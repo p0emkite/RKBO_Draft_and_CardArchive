@@ -106,7 +106,7 @@ begin
   or p_lineup->'defense' is null or jsonb_typeof(p_lineup->'defense')<>'object'
   or (select count(*) from jsonb_object_keys(p_lineup->'defense'))<>9
   or not public.rkbo_owned_perm(
-    (select jsonb_agg(p_lineup->'defense'->v_pos) from unnest(v_hit) v_pos),v_hit)
+    (select jsonb_agg(p_lineup->'defense'->positions.slot_value) from unnest(v_hit) as positions(slot_value)),v_hit)
  then raise exception '타순·수비·투수진 배치 오류' using errcode='22023';end if;
  foreach v_base in array v_hit loop
   if v_base='DH' then continue;end if;
