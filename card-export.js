@@ -8,7 +8,10 @@ const grades={
  '골드':{metal:'#f4cf74',dark:'#a57532'},
  '코랄':{metal:'#F6909D',dark:'#ab5e67'},
  '플래티넘':{metal:'#F6909D',dark:'#ab5e67'},
- '다이아몬드':{metal:'#90ecff',dark:'#417baa'}
+ '다이아몬드':{metal:'#90ecff',dark:'#417baa'},
+ '신인왕':{metal:'#e5b966',dark:'#6d491d'},'드림':{metal:'#9bd5f4',dark:'#38779e'},
+ '나눔':{metal:'#9bc5de',dark:'#235371'},'MVP':{metal:'#ffdc91',dark:'#915d1e'},
+ '베스트릴리프':{metal:'#eabb74',dark:'#604725'}
 };
 const teams={DOO:'#202f6c',HAN:'#d97521',KIA:'#bd3445',KT:'#222222',LG:'#aa3053',LOT:'#659cbb',NC:'#b79c64',SAM:'#407acb',SSG:'#ffb81c',SK:'#cf292f',KIW:'#6a1e3f'};
 const ratingColor=v=>v==null||!Number.isFinite(Number(v))?'#fff':Number(v)>=90?grades['다이아몬드'].metal:Number(v)>=85?grades['코랄'].metal:Number(v)>=80?grades['골드'].metal:Number(v)>=70?grades['실버'].metal:'#fff';
@@ -21,8 +24,9 @@ function label(ctx,s,x,y,font,color,align='left',maxW=undefined){
 }
 function load(src){return new Promise(resolve=>{if(!src)return resolve(null);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=src})}
 function badge(ctx,value,y,accent){
- round(ctx,230,y,55,20,5);ctx.fillStyle='rgba(5,14,27,.70)';ctx.fill();ctx.strokeStyle=accent;ctx.lineWidth=1;ctx.stroke();
- label(ctx,value,257.5,y+13,'900 9px system-ui, sans-serif',accent,'center');
+ const w=String(value).length>=6?87:55,x=285-w;
+ round(ctx,x,y,w,20,5);ctx.fillStyle='rgba(5,14,27,.70)';ctx.fill();ctx.strokeStyle=accent;ctx.lineWidth=1;ctx.stroke();
+ label(ctx,value,x+w/2,y+13,'900 9px system-ui, sans-serif',accent,'center',w-6);
 }
 // PNG exports are hand-drawn, so CSS card upgrades must also be painted on Canvas.
 async function loadSavedEffects(player){
@@ -87,14 +91,15 @@ async function make(player,effects){
  const canvas=document.createElement('canvas');canvas.width=WIDTH;canvas.height=HEIGHT;
  const ctx=canvas.getContext('2d');ctx.scale(SCALE,SCALE);
  const grade=grades[player.grade]||grades.실버,brand=window.RKBOTeamBrand?.code(player)||player.team,team=teams[brand]||'#243e61';
- const photo=window.RKBOArt?.imageState?.(player)||{};
- const teamBg=window.RKBOTeamBackground?.imageState?.(player)||{};
+ const photo=window.RKBOArt?.imageState?.(player.baseCardId?{...player,id:player.baseCardId}:player)||{};
+ const teamBg=window.RKBOCardSpecials?.backgroundFor?.(player)||window.RKBOTeamBackground?.imageState?.(player)||{};
  const photoSrc=photo.url||'';
- const [image,logo,silhouette,background]=await Promise.all([
+ const [image,logo,silhouette,background,awardIcon]=await Promise.all([
   load(photoSrc),
   load(window.RKBOTeamBrand?.logo(player)||('assets/teams/'+player.team+(player.team==='NC'?'.png':'.svg'))),
   photoSrc?Promise.resolve(null):load('assets/default-'+(player.type==='투수'?'pitcher':'batter')+'.png'),
-  load(teamBg.url||'')
+  load(teamBg.url||''),
+  load(player.specialKind?window.RKBOCardSpecials?.icon?.(player.specialKind):'')
  ]);
  // Fixed 300 × 420 logical card, rasterized 2.5×; layout always keeps a 5:7 ratio.
  round(ctx,1,1,298,418,17);ctx.fillStyle='#0d1827';ctx.fill();ctx.strokeStyle=grade.metal;ctx.lineWidth=1.6;ctx.stroke();
@@ -145,6 +150,8 @@ async function make(player,effects){
  label(ctx,player.ovr,21,302,'1000 57px system-ui, sans-serif',grade.metal);
  badge(ctx,player.season+'차',258,'#a8dfbc');
  badge(ctx,player.grade==='플래티넘'?'코랄':player.grade,283,grade.metal);
+ if(awardIcon){const ratio=Math.min(72/awardIcon.naturalWidth,60/awardIcon.naturalHeight);const w=awardIcon.naturalWidth*ratio,h=awardIcon.naturalHeight*ratio;ctx.drawImage(awardIcon,156-w/2,282-h/2,w,h)}
+ else if(player.specialKind)label(ctx,player.grade,155,288,'950 10px system-ui, sans-serif',grade.metal,'center',66);
  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(6,313);ctx.lineTo(294,313);ctx.stroke();
  const ng=ctx.createLinearGradient(0,314,0,370);ng.addColorStop(0,'#0e1a2c');ng.addColorStop(1,'#091421');ctx.fillStyle=ng;ctx.fillRect(6,314,288,56);
  // One-line name + position layout, matching the gallery card.
