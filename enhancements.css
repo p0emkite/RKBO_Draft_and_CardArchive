@@ -803,3 +803,85 @@ body.rkbo-pack-open{overflow:hidden}
  .rkbo-archive-card-footer{min-height:68px}
  .rkbo-archive-upgrade-btn,.rkbo-archive-upgrade-done{font-size:11px}
 }
+
+
+/* RKBO MY TEAM: independent collected-card club editor and server match room. */
+.rkbo-club-nav{background:linear-gradient(120deg,#245e60,#25405e);border:1px solid #71bbc0;border-radius:9px;padding:9px 12px;color:#dffcff;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+.rkbo-club-overlay[hidden]{display:none!important}
+.rkbo-club-overlay{position:fixed;inset:0;z-index:2250;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:17px 10px 45px;background:#030914ef;backdrop-filter:blur(12px)}
+body.rkbo-club-open{overflow:hidden}
+.rkbo-club-panel{width:min(1110px,100%);min-height:470px;border:1px solid #476e7e;border-radius:17px;background:#091726;color:#ecf6fc;overflow:hidden;box-shadow:0 22px 80px #000b}
+.rkbo-club-head{padding:22px 24px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(115deg,#14394b,#132343);border-bottom:1px solid #47667b;gap:15px}
+.rkbo-club-head small{color:#8dccdd;font-size:10px;font-weight:900;letter-spacing:.16em}
+.rkbo-club-head h2{font-size:26px;color:#fff;margin:7px 0}
+.rkbo-club-head p{font-size:12px;color:#adc8da;margin:0}
+.rkbo-club-head>button{border:1px solid #6593ac;border-radius:9px;width:45px;height:45px;color:#fff;background:#1d3a4b;font-size:25px;cursor:pointer;flex:none}
+.rkbo-club-tabs{display:flex;flex-wrap:wrap;gap:9px;padding:13px 19px;border-bottom:1px solid #34536c}
+.rkbo-club-tabs button,.rkbo-club-tools button,.rkbo-club-footer-buttons button,.rkbo-club-team button,.rkbo-club-match-actions button,.rkbo-club-body>button{
+ border:1px solid #4e8a9d;border-radius:9px;background:#1b4053;color:#eaf9ff;padding:11px 15px;font-weight:850;cursor:pointer;font-size:12px}
+.rkbo-club-tabs button.active{background:#2e7891;border-color:#9bd8eb;color:#fff}
+.rkbo-club-body{padding:21px}
+.rkbo-club-body h3{font-size:18px;color:#f2d6a1;margin:27px 0 13px}
+.rkbo-club-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.rkbo-club-summary>div{padding:13px;background:#122e41;border:1px solid #3d627c;border-radius:10px;display:flex;flex-direction:column;gap:6px}
+.rkbo-club-summary small{color:#acc6d6;font-size:11px}
+.rkbo-club-summary strong{font-size:24px;color:#ffdc9a;font-weight:950}
+.rkbo-club-tools{display:flex;gap:9px;align-items:end;flex-wrap:wrap;margin:18px 0}
+.rkbo-club-tools label{font-size:12px;color:#a9c6d6;display:flex;flex-direction:column;gap:5px;flex:1;min-width:170px}
+.rkbo-club-tools input{width:100%;padding:10px 12px;color:#fff;background:#0c2435;border:1px solid #5b8598;border-radius:8px}
+.rkbo-club-body button.primary{background:#26775f;border-color:#8bdab7;color:#fff}
+.rkbo-club-body button:disabled{opacity:.45;cursor:not-allowed}
+.rkbo-club-instructions{color:#a7c1d2;font-size:12px;line-height:1.7}
+.rkbo-club-slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rkbo-club-position{min-width:0;background:#122a3c;border:1px solid #385972;border-radius:10px;padding:13px}
+.rkbo-club-position label{color:#f7dda8;font-size:13px;font-weight:900;display:block;margin-bottom:9px}
+.rkbo-club-position label small{margin-left:7px;font-size:10px;color:#93c3d4}
+.rkbo-club-position select{display:block;width:100%;padding:10px;background:#071827;border:1px solid #436e88;color:#fff;border-radius:8px;margin-bottom:11px;max-width:100%;min-width:0}
+.rkbo-club-player{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.rkbo-club-player strong{font-size:14px;color:#eefaff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rkbo-club-player span{font-size:13px;font-weight:900;color:#ffcf8a}
+.rkbo-club-stats{display:flex;gap:8px;flex-wrap:wrap}
+.rkbo-club-stat{font-size:10px;color:#a6bdcf;white-space:nowrap;display:flex;gap:4px}
+.rkbo-club-stat b{font-size:11px}
+.rkbo-club-empty-slot{font-size:11px;color:#7f9aaf}
+.rkbo-club-order-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rkbo-club-order-section{min-width:0;background:#102839;border:1px solid #3b5e74;border-radius:11px;padding:12px}
+.rkbo-club-order-section h4{font-size:13px;color:#ffd59a;margin:0 0 10px}
+.rkbo-club-order-row{display:grid;grid-template-columns:17px 54px minmax(0,1fr) 55px;gap:7px;align-items:center;text-align:left;border:1px solid #42657c;background:#1c364a;border-radius:7px;padding:10px 9px;color:#fff;margin-bottom:5px;width:100%;touch-action:manipulation;cursor:grab}
+.rkbo-club-order-row span{color:#9fd1df}
+.rkbo-club-order-row b{color:#f4d292;font-size:11px}
+.rkbo-club-order-row strong{font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rkbo-club-order-row small{font-size:10px;color:#b4c9d9;text-align:right}
+.rkbo-club-order-row.selected{border-color:#ffd694;background:#3b576b;outline:1px solid #ffd694}
+.rkbo-club-footer-buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.rkbo-club-team-list{display:grid;gap:12px}
+.rkbo-club-team{display:flex;align-items:center;gap:15px;flex-wrap:wrap;background:#142a3e;border:1px solid #365c74;border-radius:12px;padding:15px}
+.rkbo-club-team>div:first-child{flex:1;min-width:130px}
+.rkbo-club-team h4{color:#fff;font-size:17px;margin:0 0 7px}
+.rkbo-club-team small{font-size:11px;color:#9bbcd2}
+.rkbo-club-team>strong{font-size:18px;color:#ffd58c}
+.rkbo-club-team-actions{display:flex;gap:7px;flex-wrap:wrap}
+.rkbo-club-play-row{display:block;width:100%;margin:7px 0;text-align:left!important}
+.rkbo-club-match-score{border:1px solid #497c90;border-radius:13px;padding:25px 15px;text-align:center;background:radial-gradient(circle at 50% 5%,#235c61,#10243b 67%)}
+.rkbo-club-match-score small{letter-spacing:.18em;font-size:10px;color:#9cd0dd}
+.rkbo-club-match-score h3{font-size:28px;margin:12px 0;color:#ffde9c}
+.rkbo-club-match-score>div{display:flex;justify-content:center;align-items:center;gap:17px;flex-wrap:wrap}
+.rkbo-club-match-score strong{font-size:24px;color:#fff}
+.rkbo-club-match-score span{font-size:28px;color:#91b8c9}
+.rkbo-club-inning-scroll{overflow-x:auto;margin:15px 0}
+.rkbo-club-innings{border-collapse:collapse;width:100%;min-width:500px}
+.rkbo-club-innings th,.rkbo-club-innings td{padding:12px 8px;text-align:center;border:1px solid #426278;font-size:12px}
+.rkbo-club-innings th{background:#213b50;color:#ffdb9a}
+.rkbo-club-innings td{background:#122d41;color:#fff}
+.rkbo-club-match-actions{display:flex;gap:8px;flex-wrap:wrap}
+.rkbo-club-events,.rkbo-club-match-history{display:grid;gap:6px;max-height:365px;overflow-y:auto}
+.rkbo-club-events>div,.rkbo-club-match-history>div{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:9px 12px;background:#193247;border:1px solid #34576d;border-radius:7px;font-size:11px}
+.rkbo-club-events b{color:#ffd18a}
+.rkbo-club-events strong{color:#fff}
+.rkbo-club-events span,.rkbo-club-match-history span{color:#c2d4e2}
+.rkbo-club-match-history small{color:#8faebf;margin-left:auto}
+.rkbo-club-loading,.rkbo-club-error{padding:35px 15px;text-align:center;color:#b8d5e2}
+.rkbo-club-error{color:#ffd4c8}
+#rkbo-club-status{padding:0 19px 17px;color:#8bdbc0;font-size:12px}
+@media(max-width:760px){.rkbo-club-slot-grid,.rkbo-club-order-grid{grid-template-columns:1fr}.rkbo-club-body{padding:13px}.rkbo-club-head{padding:17px 13px}.rkbo-club-summary strong{font-size:20px}}
+@media(max-width:540px){.rkbo-club-overlay{padding:0}.rkbo-club-panel{border-radius:0;border-left:0;border-right:0;min-height:100vh}.rkbo-club-head h2{font-size:21px}.rkbo-club-tabs{padding:10px}.rkbo-club-tabs button{font-size:11px;padding:9px}.rkbo-club-order-row{grid-template-columns:13px 42px minmax(0,1fr) 42px;gap:4px;padding:9px 6px}}
