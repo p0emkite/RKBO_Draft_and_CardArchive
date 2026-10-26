@@ -1119,3 +1119,35 @@ body.rkbo-club-open{overflow:hidden}
  .rkbo-special-editor-row button{font-size:10px}
  .rkbo-special-sliders{grid-template-columns:1fr}
 }
+
+
+/* Regular season card packs: 2.5% special award group. */
+.rkbo-pack-odds>span{line-height:1.7;overflow-wrap:anywhere}
+.rkbo-pack-revealed-card.is-special{position:relative;border-radius:15px}
+.rkbo-pack-revealed-card.is-special:after{
+ content:"";position:absolute;inset:-5px;z-index:8;pointer-events:none;
+ border-radius:17px;outline:2px solid #f7d68b;
+ box-shadow:0 0 16px 6px #f8cf80b8,0 0 47px 18px #f7ad5d73;
+ animation:rkbo-rarity-pulse 2.7s ease-in-out infinite;
+}
+.rkbo-pack-reveal-heading.rarity-신인왕 strong,
+.rkbo-pack-reveal-heading.rarity-MVP strong,
+.rkbo-pack-reveal-heading.rarity-베스트릴리프 strong{color:#ffdf9b}
+.rkbo-pack-reveal-heading.rarity-드림 strong{color:#9bd5f4}
+.rkbo-pack-reveal-heading.rarity-나눔 strong{color:#9bc5de}
+.rkbo-pack-prelude.rarity-신인왕>strong,
+.rkbo-pack-prelude.rarity-MVP>strong,
+.rkbo-pack-prelude.rarity-베스트릴리프>strong{color:#ffdf9b;text-shadow:0 0 25px #f6b35d}
+.rkbo-pack-prelude.rarity-드림>strong,.rkbo-pack-prelude.rarity-나눔>strong{color:#b8e5ff;text-shadow:0 0 25px #8dbaff}
+.rkbo-pack-result-tile.rarity-신인왕,
+.rkbo-pack-result-tile.rarity-MVP,
+.rkbo-pack-result-tile.rarity-베스트릴리프{border-color:#f9d792;box-shadow:0 0 18px #ffd17459}
+.rkbo-pack-result-tile.rarity-드림,.rkbo-pack-result-tile.rarity-나눔{border-color:#99d7f2;box-shadow:0 0 18px #7bcbff5c}
+.rkbo-pack-history-entry span.rarity-신인왕,
+.rkbo-pack-history-entry span.rarity-MVP,
+.rkbo-pack-history-entry span.rarity-베스트릴리프{color:#ffdf9b}
+.rkbo-pack-history-entry span.rarity-드림,.rkbo-pack-history-entry span.rarity-나눔{color:#a7dfff}
+.rkbo-special-pack-sync{border:1px solid #8c6d36;background:#1e2b3a;border-radius:10px;padding:14px;margin:14px 0}
+.rkbo-special-pack-sync h3{font-size:15px;color:#ffd78f;margin:0 0 8px}
+.rkbo-special-pack-sync button{padding:9px 13px;background:#735528;border:1px solid #b3925e;border-radius:8px;font-size:12px;color:#fff}
+@media(prefers-reduced-motion:reduce){.rkbo-pack-revealed-card.is-special:after{animation:none}}
