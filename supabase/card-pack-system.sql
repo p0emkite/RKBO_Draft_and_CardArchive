@@ -71,7 +71,7 @@ declare
  v_draws jsonb := '[]'::jsonb;
  i integer;
 begin
- if v_user is null or v_role <> 'authenticated' or coalesce((auth.jwt()->>'is_anonymous')::boolean,false) then
+ if v_user is null or coalesce(v_role,'') <> 'authenticated' or coalesce((auth.jwt()->>'is_anonymous')::boolean,false) then
   raise exception 'Google 로그인이 필요합니다' using errcode='28000';
  end if;
  if p_season not in (59,60) then
