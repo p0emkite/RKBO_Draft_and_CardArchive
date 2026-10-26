@@ -46,7 +46,7 @@ function renderPlayer(p){
  catch(e){console.warn("[RKBO packs] render",e);return '<div class="rkbo-pack-card-missing">'+esc(p.name)+'</div>'}
 }
 function loginView(error){
- return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"카드팩 개봉 기록과 수집 도감은 계정별로 저장돼요.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
+ return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"로그인하지 않으면 카드팩을 개봉할 수 없고 카드는 계정에 저장되지 않아요. Google 로그인 후 개봉 및 수집 기록이 계정별로 안전하게 저장됩니다.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
  dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎫 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
@@ -74,7 +74,7 @@ function renderPack(){
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
  '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening?'disabled':'')+'>'+
  (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button></div>'+
- '<div class="rkbo-pack-footnote">계정별 무료 카드팩 · 서버 추첨 · 5초 개봉 간격 · 유료 구매 없음</div>';
+ '<div class="rkbo-pack-footnote">🔐 Google 로그인 필요 · 개봉 카드와 기록은 로그인한 계정에 저장 · 서버 추첨 · 5초 개봉 간격 · 유료 구매 없음</div>';
  if(draws.length)showCurrentReveal();
 }
 function renderResult(){
