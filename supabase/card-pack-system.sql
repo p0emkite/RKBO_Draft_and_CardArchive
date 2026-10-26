@@ -57,7 +57,7 @@ returns jsonb language plpgsql security definer set search_path=''
 as $$
 declare
  v_user uuid := auth.uid();
- v_role text := current_setting('request.jwt.claim.role',true);
+ v_role text := auth.jwt()->>'role'; -- Current PostgREST JWT claim accessor; legacy request.jwt.claim.role can be absent.
  v_state public.rkbo_pack_state%rowtype;
  v_now timestamptz := clock_timestamp();
  v_pack_number integer;
