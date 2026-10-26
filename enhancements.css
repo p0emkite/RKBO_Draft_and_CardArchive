@@ -1066,3 +1066,56 @@ body.rkbo-club-open{overflow:hidden}
 .card-download:disabled:hover{transform:none;filter:grayscale(.3)}
 
 .rkbo-pack-guest-warning{font-size:12px;line-height:1.7;color:#ffe0b2;background:#382b1c;border:1px solid #9f7c4e;border-radius:9px;padding:12px;margin:12px 0}
+
+
+/* Special award card layout: stable original club crest + central award emblem.
+   Never replaces the original five regular rarity colors or team identity. */
+.player-card[data-special-kind]{
+ border-width:2px;
+ box-shadow:0 18px 40px #0009,0 0 26px var(--glow),inset 0 0 18px #fff1;
+}
+.player-card .card-mid{position:relative}
+.rkbo-special-emblem-box{
+ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+ display:flex;align-items:center;justify-content:center;
+ width:84px;height:71px;pointer-events:none;z-index:3;
+ filter:drop-shadow(0 3px 9px #000a);
+}
+.rkbo-special-emblem-box img{display:block;max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}
+.rkbo-special-emblem-box span{
+ font-size:12px;font-weight:1000;letter-spacing:-.03em;text-align:center;
+ color:var(--metal);text-shadow:0 2px 8px #000;background:#081b2cbb;
+ border:1px solid var(--metal);padding:6px 5px;border-radius:6px;max-width:90%;
+}
+.player-card .metal-label:last-child{white-space:normal;text-align:center}
+.player-card[data-special-kind] .badge-row{max-width:102px;align-items:flex-end}
+.player-card[data-special-kind] .badge-row .metal-label{font-size:9px;line-height:1.22}
+.rkbo-special-editor{margin-top:18px;border:1px solid #9a7a48;background:#221f1b;
+ padding:15px;border-radius:10px}
+.rkbo-special-editor>.mini-title{color:#ffde9b}
+.rkbo-special-editor>p{font-size:11px;line-height:1.7;color:#d7c29e}
+.rkbo-special-editor-list{display:grid;gap:8px;margin-top:12px}
+.rkbo-special-editor-row{display:flex;align-items:center;justify-content:space-between;
+ gap:12px;padding:10px;border:1px solid #605437;border-radius:8px;background:#101e2b}
+.rkbo-special-editor-row span{min-width:0;display:grid;gap:4px}
+.rkbo-special-editor-row b{font-size:12px;color:#ffe6ac}
+.rkbo-special-editor-row small{font-size:10px;color:#b6bac1}
+.rkbo-special-editor-row button{flex-shrink:0;font-size:11px;font-weight:850;padding:9px 10px;
+ background:#72562e;border:1px solid #b99153;color:#fff1d2;border-radius:7px;cursor:pointer}
+.rkbo-special-editor-row button:disabled{opacity:.35;cursor:not-allowed}
+.rkbo-special-settings{margin:19px 0 32px;padding-bottom:18px}
+.rkbo-special-settings h2{font-size:17px;color:#ffe2a8}
+.rkbo-special-settings p{font-size:12px;line-height:1.75;color:#afc1d1}
+.rkbo-special-settings label{display:grid;gap:7px;font-size:12px;font-weight:750;color:#dce8f4;margin:12px 0}
+.rkbo-special-settings input[type="file"],.rkbo-special-settings select{max-width:100%;min-width:0}
+.rkbo-special-bg-preview{position:relative;height:160px;border:1px dashed #697687;
+ background:linear-gradient(135deg,#20354a,#0b1a2a);border-radius:10px;overflow:hidden}
+.rkbo-special-bg-preview img{width:100%;height:100%;object-fit:cover}
+.rkbo-special-sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 13px}
+.rkbo-special-sliders input[type="range"]{width:100%}
+#rkbo-special-status,#rkbo-special-editor-status{white-space:pre-wrap;font-size:12px;color:#f3d5a1}
+@media(max-width:520px){
+ .rkbo-special-emblem-box{width:75px;height:64px}
+ .rkbo-special-editor-row button{font-size:10px}
+ .rkbo-special-sliders{grid-template-columns:1fr}
+}
