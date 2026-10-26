@@ -68,3 +68,14 @@ Each player may play without login and store scores locally. **Google login** is
 Supabase RLS gives public visitors read-only scoreboard access. Only the server-side Edge Function may insert game results; it verifies the 18 official card identities, legal slot positions, OVR and computed TPI. A per-user hourly limit is enforced.
 
 Limitation: in v1 the browser shuffles random offers; the server does not know which exact three cards were presented on each round. This is a casual beta board, not a tamper-proof prize competition. Server-issued draft sessions are the next step for robust competitive integrity.
+
+## MY RKBO private saved teams
+- Supabase migration adds `public.rkbo_saved_teams` with owner-only SELECT, INSERT, UPDATE and DELETE RLS policies. Anonymous visitors have no access to this table.
+- Teams are saved privately, separately from competitive `rkbo_draft_results`. Saving a team never adds a public ranking entry.
+- On the draft result screen, use **💾 내 팀에 저장** (team name 2–40 characters). A loaded team can be overwritten or saved as a copy.
+- Use the **💾 MY RKBO** button in the site navigation to list teams, inspect names, restore an 18-player lineup, rename a team or delete it.
+- Restoring looks up the official card IDs from local season assets and re-applies the Korean name map. Saved lineup permutations are checked again before display.
+- Defense positions are constrained to the player's original card position (or DH) by both UI logic and the `draft-submit` Edge Function. TPI is unaffected by batting/pitching-order edits.
+- The saved-team API is operated through the authenticated browser Supabase client under RLS. Never include service-role or secret credentials in the browser.
+- Edge Function `draft-submit` remains the sole path for posting *public* leaderboard results, with server-side OVR and native-position validation.
+
