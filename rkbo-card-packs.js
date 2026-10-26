@@ -366,6 +366,11 @@ function init(){
  });
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
 }
+root.addEventListener("rkbo-collection-updated",async event=>{
+ if(event.detail?.origin!=="main-archive"||!overlay||overlay.hidden||tab!=="collection")return;
+ try{await refreshStats();if(tab==="collection"&&!overlay.hidden)renderCollection()}
+ catch(error){console.warn("[RKBO packs] inventory sync",error)}
+});
 root.RKBOCardPacks={open};
 document.addEventListener("DOMContentLoaded",init);
 })(window);
