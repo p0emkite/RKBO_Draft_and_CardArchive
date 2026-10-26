@@ -50,7 +50,7 @@ function loginView(error){
 }
 function frame(){
  dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>60차 선수 카드 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
- '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button></nav>'+
+ '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
 }
@@ -231,14 +231,70 @@ async function loadHistory(){
   ).join("")+'</div>':'<p class="rkbo-pack-loading">아직 개봉한 카드팩이 없어!</p>';
  }catch(e){body.innerHTML=loginView(e.message)}
 }
+function renderAdmin(){
+ const body=$("#rkbo-pack-body");if(!body||!adminAuthorized)return;
+ const selected=packFor(adminSeason),img=selected?.image_url||defaultPackArt;
+ body.innerHTML='<div class="rkbo-pack-admin"><h3>⚙️ 제작자 · 카드팩 관리</h3>'+
+  '<p>실제 Supabase 관리자 계정으로 인증된 경우에만 저장 가능. 삭제는 기록 보존을 위해 비활성화로 처리돼요.</p>'+
+  '<div class="rkbo-pack-admin-form"><label>차수 선택<select id="rkbo-admin-season" data-admin-season>'+
+   Array.from({length:60},(_,i)=>i+1).reverse().map(n=>'<option value="'+n+'"'+(n===adminSeason?' selected':'')+'>'+n+'차</option>').join("")+'</select></label>'+
+  '<label>팩 이름<input id="rkbo-admin-label" maxlength="70" value="'+esc(selected?.label||adminSeason+'차 시즌 카드팩')+'"></label>'+
+  '<label class="rkbo-pack-admin-active">팩 공개 및 개봉 허용 <input id="rkbo-admin-active" type="checkbox" '+(selected?.active?'checked':'')+'></label>'+
+  '<div class="rkbo-pack-admin-art"><img src="'+esc(img)+'" alt="현재 카드팩 이미지"><label>팩 이미지 파일 선택 (PNG/JPEG/WebP, 최대 3MB)<input id="rkbo-admin-image" type="file" accept="image/png,image/jpeg,image/webp"></label></div>'+
+  '<div class="rkbo-pack-admin-actions"><button data-pack-admin-action="save">등록 / 수정 / 적용</button>'+
+   '<button data-pack-admin-action="remove">팩 삭제(비활성)</button></div></div>'+
+  '<h4>등록한 팩</h4><div class="rkbo-pack-admin-list">'+
+  (packChoices.length?packChoices.map(p=>'<div><span>'+esc(p.label)+'</span><small>'+(p.active?'🟢 공개':'⚪ 비활성')+'</small><button type="button" data-admin-select="'+p.season+'">수정</button></div>').join(""):'<p>등록된 팩 없음</p>')+
+  '</div></div>';
+}
+async function saveAdmin(remove=false){
+ if(adminBusy||!adminAuthorized)return;
+ const form=$("#rkbo-admin-season");if(!form)return;
+ const seasonNo=Number(form.value),label=$("#rkbo-admin-label")?.value?.trim()||"",
+  active=remove?false:!!$("#rkbo-admin-active")?.checked,
+  file=remove?null:$("#rkbo-admin-image")?.files?.[0];
+ if(label.length<2||label.length>70)throw Error("팩 이름은 2~70자여야 합니다.");
+ if(file&&(file.size>3145728||!["image/png","image/jpeg","image/webp"].includes(file.type)))
+  throw Error("3MB 이하 PNG/JPEG/WebP 파일만 사용할 수 있어요.");
+ adminBusy=true;const controls=dialog.querySelectorAll("[data-pack-admin-action]");
+ controls.forEach(b=>b.disabled=true);
+ try{
+  const {c}=await context();
+  let url=packFor(seasonNo)?.image_url||defaultPackArt;
+  if(file){
+   const ext={"image/png":"png","image/jpeg":"jpg","image/webp":"webp"}[file.type];
+   const key="season-"+seasonNo+"/"+Date.now()+"-"+crypto.randomUUID()+"."+ext;
+   const uploaded=await c.storage.from("rkbo-pack-art").upload(key,file,{contentType:file.type,upsert:false});
+   if(uploaded.error)throw Error("팩 이미지 업로드 실패: "+uploaded.error.message);
+   url=c.storage.from("rkbo-pack-art").getPublicUrl(key).data.publicUrl;
+  }
+  let cards=null;
+  if(active){
+   const roster=await playersFor(seasonNo);
+   cards=[...roster.values()].filter(p=>RARITIES.includes(p.grade)).map(p=>({
+    id:p.id,grade:p.grade,name:p.name,team:p.team,pos:p.pos,type:p.type,ovr:Number(p.ovr)
+   }));
+   if(!cards.length)throw Error("공식 시즌 카드 데이터가 없어요.");
+  }
+  const {error}=await c.rpc("rkbo_manage_pack",{p_season:seasonNo,p_label:label,
+   p_image_url:url,p_active:active,p_cards:cards});
+  if(error)throw Error("팩 등록 실패: "+error.message);
+  await loadPackChoices();
+  if(tab==="admin")renderAdmin();
+  message(remove?"팩이 비활성화됐어. 기존 개봉 기록과 수집 카드는 유지돼.":"✓ "+seasonNo+"차 카드팩 설정이 저장됐어!");
+ }finally{adminBusy=false;controls.forEach(b=>b.disabled=false)}
+}
+
 async function showTab(next){
- if(!["pack","collection","history"].includes(next))return;
+ if(!["pack","collection","history","admin"].includes(next))return;
+ if(next==="admin"&&!adminAuthorized)return;
  if(opening)return;
  tab=next;draws=[];cursor=0;revealToken++;frame();
  try{
   if(tab==="pack"){await Promise.all([refreshStats(),loadPackChoices()]);if(overlay.hidden||tab!=="pack")return;frame();renderPack()}
   if(tab==="collection"){await loadPackChoices();frame();await loadCollection()}
   if(tab==="history")await loadHistory();
+  if(tab==="admin")renderAdmin();
  }catch(e){$("#rkbo-pack-body").innerHTML=loginView(e.message)}
 }
 function close(){if(!overlay)return;overlay.hidden=true;revealToken++;document.body.classList.remove("rkbo-pack-open")}
@@ -279,8 +335,17 @@ function init(){
    message("강화 성공! 카드 "+cost+"장을 소모했어요.");
   }catch(err){btn.disabled=false;message("강화 실패: "+err.message)}
  });
+ dialog.addEventListener("click",async e=>{
+  const pick=e.target.closest("[data-admin-select]");
+  if(pick&&adminAuthorized){adminSeason=Number(pick.dataset.adminSelect);renderAdmin();return}
+  const btn=e.target.closest("[data-pack-admin-action]");
+  if(!btn||!adminAuthorized)return;
+  try{await saveAdmin(btn.dataset.packAdminAction==="remove")}
+  catch(err){message(err.message);alert("팩 설정 실패: "+err.message)}
+ });
  dialog.addEventListener("change",e=>{
   if(e.target.matches("[data-pack-filter]")){collectionFilter=e.target.value;collectionLimit=36;renderCollection()}
+  if(e.target.matches("[data-admin-season]")){adminSeason=Number(e.target.value);renderAdmin()}
   if(e.target.matches("[data-pack-season]")){if(opening)return;season=Number(e.target.value);if(tab==="collection")loadCollection();else renderPack()}
   if(e.target.matches("[data-pack-grade]")){collectionGrade=e.target.value;collectionLimit=36;renderCollection()}
  });
