@@ -91,7 +91,7 @@ function rowHtml(slot,label,role){
 function orderedRow(group,slot,label){
  const p=owned.get(picks[slot]),active=focusedSwap?.group===group&&focusedSwap.slot===slot;
  return '<button type="button" draggable="true" class="rkbo-club-order-row'+(active?' selected':'')+'" data-club-group="'+group+'" data-club-order-slot="'+slot+'">'+
- '<span>⠿</span><b>'+E(label)+'</b><strong>'+E(display(p)||"미배치")+'</strong>'+
+ '<span>⠿</span><b>'+E(label)+'</b><strong>'+(p?E(display(p)):'미배치')+'</strong>'+
  (p?'<small>OVR '+p.ovr+'</small>':'')+'</button>';
 }
 function editor(){
@@ -247,7 +247,7 @@ function init(){
   const slot=select.dataset.clubSlot,val=select.value;
   if(val&&Object.values(picks).some((id)=>id===val&&picks[slot]!==id)){message("한 카드로 두 포지션을 동시에 채울 수 없어.");editor();return}
   if(val)picks[slot]=val;else delete picks[slot];
-  teamId=null;editor();
+  editor();
  });
  panel.addEventListener("click",async e=>{
   const ord=e.target.closest("[data-club-group]");
