@@ -560,6 +560,16 @@
       "rev": "mvpfruxe",
       "commit": "1e6d15061844c2c97555341b9ded73dcfc249d5d",
       "blobSha": "73aa5a38c0dfbf5c04d739020bde72e683af970c"
+    },
+    "60-SAM-타-005": {
+      "path": "assets/cards/60-SAM-타-005.webp",
+      "x": -12.923076923076923,
+      "y": 5.839416058394161,
+      "zoom": 1.4933767731249405,
+      "fit": "contain",
+      "rev": "mvpfssnn",
+      "commit": "4389197ee15739ed720e239840c0ff24b2d6cae3",
+      "blobSha": "cc057fbca05a74f516645574f93ff7e966cff1df"
     }
   }
 }
