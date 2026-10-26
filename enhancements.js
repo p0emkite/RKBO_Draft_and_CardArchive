@@ -375,7 +375,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  q('admin-connect').addEventListener('click',connect);q('admin-token').addEventListener('keydown',e=>{if(e.key==='Enter')connect()});
  q('admin-sync').addEventListener('click',()=>syncAll(true).catch(e=>setStatus('동기화 실패: '+e.message)));
  q('admin-image-sync').addEventListener('click',()=>syncAll(true).catch(e=>setStatus('이미지 동기화 실패: '+e.message)));
- q('admin-logout').addEventListener('click',()=>{token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 해제 완료. 새로 로그인해야 편집할 수 있습니다.');refresh()});
+ q('admin-logout').addEventListener('click',()=>{token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 해제 완료. 새로 로그인해야 편집할 수 있습니다.');refresh();window.dispatchEvent(new Event('rkbo-admin-disconnected'))});
  q('upload-import').addEventListener('click',importFiles);
  q('season-register').addEventListener('click',registerSeasonCards);renderRegisteredSeasons();
  q('editor-close').addEventListener('click',closeEditor);
@@ -444,7 +444,7 @@ window.RKBOAdminBridge={
  writeJson:(path,data,sha)=>{if(!authorized)throw Error('GitHub 인증 필요');return putJson(path,data,sha)},
  uploadBinary:async(path,blob)=>{
   if(!authorized||!token)throw Error('GitHub 인증 필요');
-  if(!/^assets\/team-backgrounds\/[A-Z]{2,3}\.webp$/.test(path))throw Error('구단 배경 이미지 경로만 허용합니다.');
+  if(!/^assets\/(?:team-backgrounds\/[A-Z]{2,3}\.webp|special-backgrounds\/(?:ROY|DREAM|NANUM|MVP|RELIEF)\.webp|special-emblems\/(?:ROY|DREAM|NANUM|MVP|RELIEF)\.webp)$/.test(path))throw Error('허용되지 않은 배경/엠블럼 경로입니다.');
   const before=await gh(path);
   const data=new Uint8Array(await blob.arrayBuffer());
   if(data.byteLength>3*1024*1024)throw Error('구단 배경 이미지 용량이 3MB를 초과했습니다.');
