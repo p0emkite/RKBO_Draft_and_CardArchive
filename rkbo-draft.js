@@ -100,7 +100,7 @@ async function allTime(){
  await root.RKBOSeason?.reload?.();
  const manifest=root.RKBOSeason?.seasons?.()||[];
  if(manifest.length<2)throw Error("전체 시즌 목록을 불러오지 못했습니다.");
- const pool=[...(root.RKBOSeason?.players?.()||[])];
+ const pool=[...(root.RKBOSeason?.players?.()||[])].filter(p=>!p.specialKind);
  const current=root.RKBOSeason?.current?.();
  const tasks=manifest.filter(x=>Number(x.season)!==Number(current));
  const result=new Array(tasks.length);let next=0,done=0;const runToken=token;
@@ -152,7 +152,7 @@ async function start(){
  try{
   let pool=useAll?await allTime():[...(root.RKBOSeason?.players?.()||[])];
   if(t!==token)return;
-  pool=pool.filter(p=>Number(p.ovr)>0&&p.ratings&&(p.type==="타자"||p.type==="투수"));
+  pool=pool.filter(p=>!p.specialKind&&Number(p.ovr)>0&&p.ratings&&(p.type==="타자"||p.type==="투수"));
   const stock={};
   for(const s of SLOTS){
    const candidates=new Set(pool.filter(p=>eligibleFor(p,s)).map(identity));
