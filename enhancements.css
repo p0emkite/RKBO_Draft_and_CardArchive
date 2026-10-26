@@ -662,3 +662,25 @@ body.rkbo-pack-open{overflow:hidden}
 .rkbo-pack-history-entry span.rarity-다이아몬드{color:#90ecff}.rkbo-pack-history-entry span.rarity-코랄{color:#F6909D}.rkbo-pack-history-entry span.rarity-골드{color:#f4cf74}
 @media(max-width:760px){.rkbo-pack-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-pack-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-pack-stage{min-height:410px}}
 @media(max-width:540px){.rkbo-pack-overlay{padding:3px 0}.rkbo-pack-dialog{border-radius:0;min-height:100vh;border-left:0;border-right:0}.rkbo-pack-header{padding:17px 12px}.rkbo-pack-header h2{font-size:21px}.rkbo-pack-body{padding:10px}.rkbo-pack-tabs{padding:10px}.rkbo-pack-tabs button{padding:9px 12px;font-size:11px}.rkbo-pack-summary>div{padding:9px}.rkbo-pack-summary strong{font-size:17px}.rkbo-pack-summary small{font-size:10px}.rkbo-pack-collection-grid{gap:7px}.rkbo-pack-silhouette{height:245px}.rkbo-pack-odds{font-size:11px}.rkbo-pack-stage{min-height:395px}}
+
+
+/* Account-specific season/team collection overview on the public archive. */
+.rkbo-archive-collection{background:linear-gradient(115deg,#0d2234,#15253a);border:1px solid #355772;border-radius:13px;padding:17px 18px;margin:16px 0 19px}
+.rkbo-archive-summary-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:13px}
+.rkbo-archive-summary-head small{font-size:10px;letter-spacing:.14em;font-weight:900;color:#8fb4ca}
+.rkbo-archive-summary-head h3{margin:5px 0 3px;color:#fff;font-size:19px}
+.rkbo-archive-summary-head h3 strong{color:#f2d28c;margin-left:5px}
+.rkbo-archive-summary-head p{margin:0;color:#acc5d5;font-size:12px}
+.rkbo-archive-summary-head button,.rkbo-archive-collection-hint button{background:#28536b;color:#e2f4ff;border:1px solid #78a4ba;padding:8px 12px;border-radius:7px;font-size:12px;cursor:pointer}
+.rkbo-archive-collection-hint{font-size:12px;color:#b6cfde;padding:6px 1px}
+.rkbo-archive-progress-track{width:100%;height:7px;background:#07131e;border:1px solid #2a4559;border-radius:99px;overflow:hidden}
+.rkbo-archive-progress-track>div{height:100%;background:linear-gradient(90deg,#4883a7,#8ed8da);border-radius:99px;transition:width .35s ease}
+.rkbo-archive-total-track{height:11px}
+.rkbo-archive-progress-label{font-size:12px;font-weight:850;color:#d8e8f2;margin:15px 0 10px}
+.rkbo-archive-team-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 22px}
+.rkbo-archive-team-progress>div:first-child{display:flex;justify-content:space-between;gap:7px;align-items:center;margin-bottom:5px;font-size:11px}
+.rkbo-archive-team-progress strong{color:#f0f8ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkbo-archive-team-progress span{color:#b1c9d9;white-space:nowrap}
+#cards .player-card.rkbo-uncollected{position:relative}
+#cards .player-card.rkbo-uncollected::after{content:"🔒 미수집";display:flex;align-items:center;justify-content:center;position:absolute;inset:0;z-index:40;background:rgba(0,0,0,.50);color:#fff;text-shadow:0 2px 9px #000;font-weight:900;font-size:17px;letter-spacing:.04em;border-radius:inherit;pointer-events:none}
+@media(max-width:650px){.rkbo-archive-collection{padding:12px;margin:13px 0}.rkbo-archive-team-grid{grid-template-columns:1fr;gap:12px}.rkbo-archive-summary-head{align-items:start}.rkbo-archive-summary-head h3{font-size:16px}#cards .player-card.rkbo-uncollected::after{font-size:15px}}
