@@ -276,7 +276,13 @@ root.RKBOCardSpecials={TYPES,CODES,load,addTo,derived,definition,icon,background
 root.document.addEventListener("DOMContentLoaded",makePanel);
 root.addEventListener("rkbo-admin-connected",()=>{
  makePanel();
- const card=q("modal-body")?.querySelector(".player-card[data-id]");
- if(card){const p=root.RKBOSeason?.players?.().find(x=>x.id===card.dataset.id);if(p)mount(p)}
+ // Let the existing PLAYER EDIT handler insert its form first.
+ Promise.resolve().then(()=>{
+  const card=q("modal-body")?.querySelector(".player-card[data-id]");
+  if(card){const p=root.RKBOSeason?.players?.().find(x=>x.id===card.dataset.id);if(p)mount(p)}
+ });
+});
+root.addEventListener("rkbo-admin-disconnected",()=>{
+ q("rkbo-special-editor")?.remove();
 });
 })(window);
