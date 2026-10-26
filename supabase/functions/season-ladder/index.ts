@@ -95,7 +95,7 @@ function simulate(team:any,myCards:Map<string,Player>,opponent:Club,played:numbe
   batters:number;startInning:number;relief:boolean;};
  const makeState=(p:Player,inning:number,relief:boolean):PitchState=>{
   const sta=rating(p,"체력");
-  const budget=relief?clamp(15+(sta-50)*.68,15,49):clamp(72+(sta-50)*1.43,72,142);
+  const budget=relief?clamp(20+(sta-50)*.75,20,60):clamp(104+(sta-50)*2.38,104,230);
   return {player:p,remaining:budget,budget,load:0,pitches:0,runs:0,hits:0,walks:0,
    inningRuns:0,inningHits:0,inningWalks:0,batters:0,startInning:inning,relief};
  };
@@ -230,7 +230,7 @@ function simulate(team:any,myCards:Map<string,Player>,opponent:Club,played:numbe
      if(strikeout){pitchStats.K++;batterStats.K++}
     }
     batterStats.RBI+=rbi;
-    const numPitches=3+Math.floor(roll()*5)+(outcome==="볼넷"?1:0);
+    const numPitches=2+Math.floor(roll()*5)+(outcome==="볼넷"?1:0);
     manager.account(numPitches,outcome,rbi);
     scores[half]+=rbi;
     if(events.length<270)events.push({inning,half:ourAtBat?"말":"초",team:ourAtBat?"ours":"cpu",
