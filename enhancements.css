@@ -687,6 +687,23 @@ body.rkbo-pack-open{overflow:hidden}
 
 
 /* Premium high-rarity presentation: deliberately-paced reveal, back-to-front flip, and original-border-preserving aura. */
+/* Coral/Diamond floating motion: animate a wrapper, not the flipping transform.
+   Starting after 1.65s gives the back-to-front flip time to complete. */
+.rkbo-pack-hover-shell{width:min(270px,72vw);position:relative}
+.rkbo-pack-hover-shell.is-floating{
+ animation:rkbo-pack-float 3.8s ease-in-out 1.65s infinite;
+ will-change:transform
+}
+@keyframes rkbo-pack-float{
+ 0%,100%{transform:translateY(0)}
+ 25%{transform:translateY(-7px)}
+ 75%{transform:translateY(5px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .rkbo-pack-hover-shell.is-floating{animation:none;will-change:auto}
+}
+
+
 .rkbo-pack-prelude{animation-duration:1.1s}
 .rkbo-pack-revealed-card{position:relative;isolation:isolate}
 .rkbo-pack-revealed-card.is-coral,.rkbo-pack-revealed-card.is-diamond{border-radius:15px}
