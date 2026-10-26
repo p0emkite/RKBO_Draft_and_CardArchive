@@ -767,3 +767,39 @@ body.rkbo-pack-open{overflow:hidden}
 #modal-body .player-card.rkbo-prism .card-inner{position:relative}
 #modal-body .player-card.rkbo-prism .card-inner::after{content:"";position:absolute;inset:0;z-index:10;pointer-events:none;border-radius:inherit;opacity:.3;background:linear-gradient(115deg,transparent 15%,#ff5980a6 26%,#f2da58b3 36%,#47e8c9b3 49%,#80a1ff9e 63%,#ff71e0b6 78%,transparent 92%);background-size:230% 230%;mix-blend-mode:screen;animation:rkbo-prism-shimmer 5.5s linear infinite}
 @media(prefers-reduced-motion:reduce){#modal-body .player-card.rkbo-prism .card-inner::after{animation:none}}
+
+
+/* 2026-10-26: Own-card counters and upgrade actions directly inside the public card archive. */
+#cards .rkbo-archive-card-slot{display:flex;flex-direction:column;min-width:0;gap:8px;align-self:stretch}
+#cards .rkbo-archive-card-slot>.player-card{width:100%;flex:1 0 auto;min-height:398px;box-sizing:border-box}
+.rkbo-archive-card-footer{
+ min-height:73px;display:flex;flex-direction:column;gap:7px;justify-content:space-between;
+ border:1px solid #314d63;border-radius:10px;padding:9px 10px;background:linear-gradient(140deg,#142a3d,#0c1c2b);
+ color:#eef4fb;font-size:11px
+}
+.rkbo-archive-owned-line{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-height:20px}
+.rkbo-archive-owned-line>strong{font-size:12px;font-weight:950;color:#eaf8ff;letter-spacing:.01em;margin-right:auto}
+.rkbo-archive-owned-line.is-missing{color:#9bb1c4;font-size:12px}
+.rkbo-archive-earned{padding:4px 7px;border-radius:6px;font-size:10px;font-weight:900;white-space:nowrap}
+.rkbo-archive-earned.is-gold{background:#5b461d;color:#ffe39d;border:1px solid #a78945}
+.rkbo-archive-earned.is-prism{background:#302d5e;color:#e3d5ff;border:1px solid #8077bd}
+.rkbo-archive-upgrade-actions{display:flex;gap:5px;flex-wrap:wrap}
+.rkbo-archive-upgrade-btn,.rkbo-archive-upgrade-done{flex:1 1 74px;text-align:center;min-width:0;
+ border:1px solid #9f8549;border-radius:7px;background:#3f331e;color:#ffe3a1;
+ font-size:10px;font-weight:900;padding:7px 4px;white-space:nowrap;cursor:pointer;line-height:1.25}
+.rkbo-archive-upgrade-btn.is-prism{border-color:#8b7ac4;color:#e4d4ff;background:#302849}
+.rkbo-archive-upgrade-btn:disabled{opacity:.44;cursor:not-allowed}
+.rkbo-archive-upgrade-btn:not(:disabled):hover{filter:brightness(1.24)}
+.rkbo-archive-upgrade-done{display:inline-block;background:#1b3c38;color:#9cddc4;border-color:#477669;cursor:default}
+.rkbo-archive-modal-collection{border:1px solid #55768b;background:#132c3e;border-radius:12px;margin-bottom:18px;padding:15px}
+.rkbo-archive-modal-collection h3{color:#f3f8ff;font-size:15px;margin:0 0 10px}
+.rkbo-archive-modal-collection .rkbo-archive-owned-line strong{font-size:16px}
+.rkbo-archive-modal-collection .rkbo-archive-upgrade-actions{margin-top:10px;gap:9px}
+.rkbo-archive-modal-collection .rkbo-archive-upgrade-btn,.rkbo-archive-modal-collection .rkbo-archive-upgrade-done{flex:0 1 auto;min-width:125px;padding:10px}
+.rkbo-archive-owned-description{font-size:11px;color:#aec6d5;margin:10px 0 0;line-height:1.6}
+@media(max-width:860px){.rkbo-archive-card-footer{padding:8px;gap:6px}}
+@media(max-width:500px){
+ #cards .rkbo-archive-card-slot>.player-card{min-height:405px}
+ .rkbo-archive-card-footer{min-height:68px}
+ .rkbo-archive-upgrade-btn,.rkbo-archive-upgrade-done{font-size:11px}
+}
