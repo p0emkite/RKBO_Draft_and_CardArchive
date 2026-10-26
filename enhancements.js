@@ -53,7 +53,7 @@ function poseHtml(p){
  const file=p.type==='투수'?'assets/default-pitcher.png':'assets/default-batter.png';
  return `<img class="player-pose" src="${h(imgSrc(file))}" draggable="false" alt="${h(p.type==='투수'?'투구':'타격')} 동작 기본 실루엣">`;
 }
-const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} 사진 편집">✎ 사진 편집</button>`:''}`},refresh,imageState(p){const entry=resolvedPhoto(p);if(!entry)return null;return {...entry,url:photoUrl(entry)}}};
+const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} ${p.specialKind?'특수카드 전용 사진':'사진'} 편집">✎ ${p.specialKind?'특수 사진':'사진 편집'}</button>`:''}`},refresh,imageState(p){const entry=resolvedPhoto(p);if(!entry)return null;return {...entry,url:photoUrl(entry)}}};
 window.RKBOArt=art;
 function refresh(){const sort=q('sort');if(sort)sort.dispatchEvent(new Event('change',{bubbles:true}));if(activeEditor)renderEditor()}
 function setStatus(s){if(q('admin-status'))q('admin-status').textContent=s}
