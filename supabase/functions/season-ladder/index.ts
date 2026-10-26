@@ -59,94 +59,205 @@ const rating=(p:any,key:string)=>clamp(Number(p?.ratings?.[key]??p?.ovr??75)||75
 const HIT_SLOTS=["C","1B","2B","3B","SS","LF","CF","RF","DH"];
 const SP_SLOTS=["SP1","SP2","SP3","SP4","SP5"];
 const RP_SLOTS=["RP1","RP2","RP3"];
+// A pitcher is a finite game resource: stamina controls effective pitch budget,
+// while baserunners, walks, homers and bad innings accelerate fatigue.
+// Each manager independently decides when to use a fresh arm, including mid-inning.
 function simulate(team:any,myCards:Map<string,Player>,opponent:Club,played:number){
  const slotMap=new Map<string,Player>();
  for(const item of team.slots)slotMap.set(item.slot,myCards.get(item.cardId)!);
- const battingOrder=team.lineup?.battingOrder;
- const rotation=team.lineup?.rotation;
- const bullpen=team.lineup?.bullpen;
- if(!Array.isArray(battingOrder)||battingOrder.length!==9||!Array.isArray(rotation)||rotation.length!==5||!Array.isArray(bullpen)||bullpen.length!==3
-    ||[...HIT_SLOTS,...SP_SLOTS,...RP_SLOTS,"CP"].some(slot=>!slotMap.has(slot)))fail(400,"저장된 팀 구성에 문제가 있습니다");
- const hitters=battingOrder.map((s:string)=>slotMap.get(s)!);
- if(hitters.some(p=>!p))fail(400,"타순이 잘못되었습니다");
- const pitchers=[slotMap.get(rotation[played%5])!,...bullpen.map((s:string)=>slotMap.get(s)!),slotMap.get("CP")!];
- if(pitchers.some(p=>!p))fail(400,"투수 로테이션이 잘못되었습니다");
+ const battingOrder=team.lineup?.battingOrder,rotation=team.lineup?.rotation,bullpen=team.lineup?.bullpen;
+ if(!Array.isArray(battingOrder)||battingOrder.length!==9||new Set(battingOrder).size!==9
+  ||!Array.isArray(rotation)||rotation.length!==5||new Set(rotation).size!==5
+  ||!Array.isArray(bullpen)||bullpen.length!==3||new Set(bullpen).size!==3
+  ||[...HIT_SLOTS,...SP_SLOTS,...RP_SLOTS,"CP"].some(slot=>!slotMap.has(slot)))
+  fail(400,"저장된 팀 구성에 문제가 있습니다");
+ const hitters=battingOrder.map((slot:string)=>slotMap.get(slot)!);
+ if(hitters.some(p=>!p||p.type!=="타자"))fail(400,"MY TEAM 타순이 잘못되었습니다");
+ const myStarter=slotMap.get(rotation[played%5])!;
+ const myBullpen=[...bullpen.map((s:string)=>slotMap.get(s)!),slotMap.get("CP")!];
  const cpuHitters=opponent.players.filter(p=>p.type==="타자").sort((a,b)=>b.ovr-a.ovr);
  const cpuPitchers=opponent.players.filter(p=>p.type==="투수").sort((a,b)=>b.ovr-a.ovr);
  if(!cpuHitters.length||!cpuPitchers.length)fail(503,"상대 구단 선수 데이터가 부족합니다");
  const cpuLineup=Array.from({length:9},(_,i)=>cpuHitters[i%cpuHitters.length]);
- const cpuStarter=cpuPitchers.find(p=>p.pos==="SP")||cpuPitchers[0];
- const cpuRelievers=cpuPitchers.filter(p=>p.id!==cpuStarter.id&&p.pos!=="SP");
- const cpuPitchAt=(inning:number)=>inning<=5?cpuStarter:cpuRelievers.length?cpuRelievers[(inning-6)%cpuRelievers.length]:cpuStarter;
- const myPitchAt=(inning:number)=>inning<=5?pitchers[0]:inning<=8?pitchers[inning-5]:pitchers[4];
- const myFielding=HIT_SLOTS.slice(0,8).reduce((sum,s)=>sum+rating(slotMap.get(team.lineup?.defense?.[s]||s),"수비"),0)/8;
- const hitStats:Record<string,any>={},pitchStats:Record<string,any>={};
- const batterLine=(p:Player)=>hitStats[p.id]||(hitStats[p.id]={cardId:p.id,name:p.name,PA:0,AB:0,H:0,BB:0,K:0,HR:0,twob:0,threeb:0,R:0,RBI:0});
- const pitcherLine=(p:Player)=>pitchStats[p.id]||(pitchStats[p.id]={cardId:p.id,name:p.name,outs:0,H:0,BB:0,K:0,ER:0});
- hitters.forEach(batterLine);pitchers.forEach(pitcherLine);
- const lines:any[]=[],events:any[]=[];
- let cpuOrder=0,ourOrder=0,ourRuns=0,cpuRuns=0;
+ const cpuStarters=cpuPitchers.filter(p=>p.pos==="SP");
+ const cpuStarter=(cpuStarters.length?cpuStarters:cpuPitchers)[played%(cpuStarters.length||cpuPitchers.length)];
+ // Relievers first, other starting pitchers can work long relief when a roster has too few bullpen arms.
+ const cpuBullpen=cpuPitchers.filter(p=>p.id!==cpuStarter.id).sort((a,b)=>{
+  const ar=a.pos==="CP"?2:a.pos==="RP"?0:1,br=b.pos==="CP"?2:b.pos==="RP"?0:1;
+  return ar-br||b.ovr-a.ovr;
+ });
+ const myDefense=HIT_SLOTS.slice(0,8).reduce((sum,pos)=>{
+  const slot=team.lineup?.defense?.[pos]||pos;return sum+rating(slotMap.get(slot),"수비");
+ },0)/8;
+ const cpuDefense=cpuLineup.reduce((sum,p)=>sum+rating(p,"수비"),0)/9;
+ type PitchState={player:Player;remaining:number;budget:number;load:number;pitches:number;
+  runs:number;hits:number;walks:number;inningRuns:number;inningHits:number;inningWalks:number;
+  batters:number;startInning:number;relief:boolean;};
+ const makeState=(p:Player,inning:number,relief:boolean):PitchState=>{
+  const sta=rating(p,"체력");
+  const budget=relief?clamp(15+(sta-50)*.68,15,49):clamp(72+(sta-50)*1.43,72,142);
+  return {player:p,remaining:budget,budget,load:0,pitches:0,runs:0,hits:0,walks:0,
+   inningRuns:0,inningHits:0,inningWalks:0,batters:0,startInning:inning,relief};
+ };
+ const myPitchers=new Map<string,any>(),cpuPitchStats=new Map<string,any>();
+ const myHitStats=new Map<string,any>(),cpuHitStats=new Map<string,any>();
+ const hitterLine=(p:Player,ours:boolean)=>{
+  const map=ours?myHitStats:cpuHitStats;
+  if(!map.has(p.id))map.set(p.id,{cardId:p.id,name:p.name||p.id,
+   PA:0,AB:0,H:0,BB:0,K:0,HR:0,twob:0,threeb:0,R:0,RBI:0});
+  return map.get(p.id);
+ };
+ const pitcherLine=(p:Player,ours:boolean)=>{
+  const map=ours?myPitchers:cpuPitchStats;
+  if(!map.has(p.id))map.set(p.id,{cardId:p.id,name:p.name||p.id,outs:0,
+   H:0,BB:0,K:0,ER:0,pitches:0,batters:0,staminaStart:rating(p,"체력"),remaining:100});
+  return map.get(p.id);
+ };
+ hitters.forEach(p=>hitterLine(p,true));
+ cpuLineup.forEach(p=>hitterLine(p,false));
+ const makeManager=(starter:Player,bench:Player[],ours:boolean)=>{
+  const used=new Set([starter.id]);
+  let active=makeState(starter,1,false);
+  pitcherLine(starter,ours);
+  return {
+   current:()=>active,
+   startInning:()=>{active.inningRuns=0;active.inningHits=0;active.inningWalks=0},
+   maybeChange:(inning:number,outs:number)=>{
+    const recent=active.inningRuns>=3||(active.inningHits>=4)
+      ||(active.inningHits+active.inningWalks>=5);
+    const struggling=(active.runs>=5&&active.batters>=5)||
+      (active.runs>=3&&active.inningRuns>=2&&active.batters>=5);
+    const exhausted=active.remaining<=0;
+    const worn=active.remaining<active.budget*(active.relief?.12:.13);
+    const pitchCap=active.pitches>active.budget*1.13;
+    const emergency=recent||struggling||(exhausted&&active.batters>=2);
+    const inGameLongEnough=active.batters>=(active.relief?3:5);
+    if(!(emergency||(inGameLongEnough&&(pitchCap||worn))))return;
+    const options=bench.filter(p=>!used.has(p.id));
+    if(!options.length)return; // A team cannot summon pitchers it does not have.
+    // Save the closer for a late lead or ninth; use otherwise only if no alternatives remain.
+    const important=inning>=8&&((ours?ourRuns-cpuRuns:cpuRuns-ourRuns)>=-1);
+    const closer=options.find(p=>p.pos==="CP");
+    const ordinary=options.filter(p=>p.pos!=="CP");
+    const next=(important&&closer)||ordinary[0]||closer;
+    if(!next)return;
+    used.add(next.id);
+    active=makeState(next,inning,true);
+    pitcherLine(next,ours);
+    if(events.length<270)events.push({inning,half:ours?"초":"말",result:"투수 교체",pitcherCardId:next.id,
+     pitcher:next.name||next.id,outs,team:ours?"ours":"cpu"});
+   },
+   account:(pitches:number,outcome:string,runs:number)=>{
+    const extra=outcome==="홈런"?10:outcome==="3루타"?6:outcome==="2루타"?4:
+      outcome==="안타"?3:outcome==="볼넷"?2:0;
+    const charge=pitches+extra+runs*2;
+    active.pitches+=pitches;active.load+=charge;
+    active.remaining=active.budget-active.load;active.batters++;
+    if(outcome==="볼넷"){active.walks++;active.inningWalks++}
+    if(["안타","2루타","3루타","홈런"].includes(outcome)){active.hits++;active.inningHits++}
+    active.runs+=runs;active.inningRuns+=runs;
+    const ps=pitcherLine(active.player,ours);ps.pitches+=pitches;ps.batters++;
+    ps.remaining=Math.round(clamp(active.remaining/active.budget*100,0,100));
+   }
+  };
+ };
+ let ourRuns=0,cpuRuns=0,ourOrder=0,cpuOrder=0;
+ const events:any[]=[],lines:any[]=[];
+ const managers=[makeManager(myStarter,myBullpen,true),makeManager(cpuStarter,cpuBullpen,false)];
  for(let inning=1;inning<=9;inning++){
   const scores=[0,0];
   for(let half=0;half<2;half++){
-   const ourAtBat=half===1,batters=ourAtBat?hitters:cpuLineup,pitcher=ourAtBat?cpuPitchAt(inning):myPitchAt(inning);
-   let outs=0,pa=0,bases:(Player|null)[]=[null,null,null];
-   while(outs<3&&pa<20){
+   const ourAtBat=half===1,batters=ourAtBat?hitters:cpuLineup;
+   const manager=managers[ourAtBat?1:0],ourPitching=!ourAtBat;
+   manager.startInning();
+   let outs=0,pa=0;
+   type Runner={player:Player;pitcherId:string};
+   let bases:(Runner|null)[]=[null,null,null];
+   while(outs<3&&pa<25){
+    manager.maybeChange(inning,outs);
+    const current=manager.current(),pitcher=current.player;
     pa++;
-    const b=batters[((ourAtBat?ourOrder++:cpuOrder++)%9)];
-    const st=ourAtBat?batterLine(b):null;
-    const ps=!ourAtBat?pitcherLine(pitcher):null;
-    if(st)st.PA++;
-    const contact=rating(b,"정확"),power=rating(b,"파워"),eye=rating(b,"선구");
-    const quality=rating(pitcher,"구위"),control=rating(pitcher,"제구");
-    const defense=ourAtBat?75:myFielding;
-    const walk=clamp(.075+(eye-control)*.0012,.03,.14);
-    const hit=clamp(.24+(contact-quality)*.003+(75-defense)*.001,.11,.39);
+    const batter=batters[(ourAtBat?ourOrder++:cpuOrder++)%9];
+    const batterStats=hitterLine(batter,ourAtBat),pitchStats=pitcherLine(pitcher,ourPitching);
+    batterStats.PA++;
+    const fatigue=clamp(1-current.remaining/current.budget,0,1.35);
+    const quality=rating(pitcher,"구위")-fatigue*20;
+    const control=rating(pitcher,"제구")-fatigue*16;
+    const contact=rating(batter,"정확"),power=rating(batter,"파워"),eye=rating(batter,"선구");
+    const field=ourAtBat?cpuDefense:myDefense;
+    const walkChance=clamp(.075+(eye-control)*.0012,.035,.21);
+    const hitChance=clamp(.225+(contact-quality)*.0029+(75-field)*.0008,.115,.43);
     const x=roll();
-    let outcome="",rbi=0;
-    const scoreRunner=(runner:Player|null)=>{
+    let outcome="",rbi=0,scoredByBatter=0;
+    // Runners carry pitcher responsibility through pitching changes.
+    const scoreRunner=(runner:Runner|null)=>{
      if(!runner)return;
-     rbi++;if(ourAtBat){batterLine(runner).R++}
+     rbi++;
+     hitterLine(runner.player,ourAtBat).R++;
+     const all=ourPitching?myPitchers:cpuPitchStats;
+     const responsible=all.get(runner.pitcherId);
+     if(responsible)responsible.ER++;
     };
-    if(x<walk){
-     outcome="볼넷";if(st)st.BB++;if(ps)ps.BB++;
+    const batterRunner:Runner={player:batter,pitcherId:pitcher.id};
+    if(x<walkChance){
+     outcome="볼넷";batterStats.BB++;pitchStats.BB++;
      if(bases[0]&&bases[1]&&bases[2])scoreRunner(bases[2]);
      if(bases[0]&&bases[1])bases[2]=bases[1];
      if(bases[0])bases[1]=bases[0];
-     bases[0]=b;
-    }else if(x<walk+hit){
-     const y=roll(),hr=clamp(.10+(power-78)*.0025,.025,.22);
-     if(st){st.AB++;st.H++}if(ps)ps.H++;
+     bases[0]=batterRunner;
+    }else if(x<walkChance+hitChance){
+     const y=roll(),hr=clamp(.075+(power-78)*.0024,.015,.19);
+     batterStats.AB++;batterStats.H++;pitchStats.H++;
      if(y<hr){
-      outcome="홈런";if(st)st.HR++;
-      bases.forEach(scoreRunner);bases=[null,null,null];scoreRunner(b);
-     }else if(y<hr+.025){
-      outcome="3루타";if(st)st.threeb++;
-      bases.forEach(scoreRunner);bases=[null,null,b];
-     }else if(y<hr+.24){
-      outcome="2루타";if(st)st.twob++;
+      outcome="홈런";batterStats.HR++;
+      bases.forEach(scoreRunner);bases=[null,null,null];
+      scoreRunner(batterRunner);scoredByBatter=1;
+     }else if(y<hr+.022){
+      outcome="3루타";batterStats.threeb++;
+      bases.forEach(scoreRunner);bases=[null,null,batterRunner];
+     }else if(y<hr+.23){
+      outcome="2루타";batterStats.twob++;
       scoreRunner(bases[1]);scoreRunner(bases[2]);
-      bases=[null,b,bases[0]];
+      bases=[null,batterRunner,bases[0]];
      }else{
-      outcome="안타";scoreRunner(bases[1]);scoreRunner(bases[2]);
-      bases=[b,bases[0],null];
+      outcome="안타";
+      scoreRunner(bases[1]);scoreRunner(bases[2]);
+      bases=[batterRunner,bases[0],null];
      }
     }else{
-     const strikeout=roll()<clamp(.43+(quality-contact)*.002,.25,.62);
-     outcome=strikeout?"삼진":"범타";outs++;
-     if(st){st.AB++;if(strikeout)st.K++}
-     if(ps){ps.outs++;if(strikeout)ps.K++}
+     const strikeout=roll()<clamp(.43+(quality-contact)*.002,.25,.67);
+     outcome=strikeout?"삼진":"범타";outs++;pitchStats.outs++;batterStats.AB++;
+     if(strikeout){pitchStats.K++;batterStats.K++}
     }
-    if(st)st.RBI+=rbi;
-    if(ps)ps.ER+=rbi;
+    batterStats.RBI+=rbi;
+    const numPitches=3+Math.floor(roll()*5)+(outcome==="볼넷"?1:0);
+    manager.account(numPitches,outcome,rbi);
     scores[half]+=rbi;
-    if(events.length<270)events.push({inning,half:ourAtBat?"말":"초",batter:b.name||b.id,result:outcome,rbi,outs});
+    if(events.length<270)events.push({inning,half:ourAtBat?"말":"초",team:ourAtBat?"ours":"cpu",
+     batter:batter.name||batter.id,batterCardId:batter.id,pitcher:pitcher.name||pitcher.id,
+     pitcherCardId:pitcher.id,result:outcome,rbi,outs,pitches:numPitches});
    }
   }
   cpuRuns+=scores[0];ourRuns+=scores[1];
   lines.push({inning,cpu:scores[0],ours:scores[1]});
  }
- return {ourRuns,cpuRuns,innings:lines,events,playerStats:{batters:Object.values(hitStats),pitchers:Object.values(pitchStats)}};
+ // The award is selected for the winning MY TEAM, with pitching and batting contributions both eligible.
+ let mvp:any=null;let best=-Infinity;
+ if(ourRuns>cpuRuns){
+  for(const s of myHitStats.values()){
+   const value=s.H*2+s.twob*1.2+s.threeb*2.5+s.HR*3.5+s.RBI*1.6+s.R+ s.BB*.6;
+   if(value>best){best=value;mvp={cardId:s.cardId,role:"타자",score:Math.round(value*10)/10}}
+  }
+  for(const s of myPitchers.values()){
+   const value=s.outs/3*2.4+s.K*1.25-s.ER*2.7-s.BB*.55-s.H*.35;
+   if(s.outs>0&&value>best){best=value;mvp={cardId:s.cardId,role:"투수",score:Math.round(value*10)/10}}
+  }
+ }
+ return {ourRuns,cpuRuns,innings:lines,events,playerStats:{
+  ours:{batters:[...myHitStats.values()],pitchers:[...myPitchers.values()]},
+  cpu:{batters:[...cpuHitStats.values()],pitchers:[...cpuPitchStats.values()]},mvp,
+  engineVersion:2
+ }};
 }
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(req)});
