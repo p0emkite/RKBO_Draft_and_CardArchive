@@ -126,6 +126,12 @@
       "baseId": "60-SAM-투-012",
       "kind": "DREAM",
       "createdAt": "2026-10-26T14:52:32.700Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-SAM-타-012",
+      "kind": "DREAM",
+      "createdAt": "2026-10-26T14:52:50.120Z"
     }
   ],
   "backgrounds": {
