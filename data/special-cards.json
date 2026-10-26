@@ -11,11 +11,11 @@
   "backgrounds": {
     "ROY": {
       "path": "assets/special-backgrounds/ROY.webp",
-      "commit": "b6325c9d55a400360353ff7275a8be88c8011c7b",
-      "rev": "mvpcd2no",
+      "commit": "39fa84a598ffcb38f88f19944f11d2921f9d9bf4",
+      "rev": "mvpcdieu",
       "x": 0,
       "y": 0,
-      "zoom": 1,
+      "zoom": 0.35,
       "overlay": 0
     }
   },
