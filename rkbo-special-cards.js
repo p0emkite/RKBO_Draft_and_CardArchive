@@ -120,7 +120,8 @@ async function setCard(base,code,enabled){
    return {...old,version:1,cards};
   },"special "+code);
   editStatus("✓ "+TYPES[code].label+(enabled?" 특수카드 생성":" 지정 해제")+" 완료");
-  // The latest card modal has been rebuilt by refreshSpecial().
+  // Open the newly generated distinct card immediately, not just the normal card.
+  root.RKBOSeason?.showPlayer?.(enabled?suffix(base.id,code):base.id);
  }finally{saving=false}
 }
 function mount(p){
