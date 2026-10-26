@@ -1045,3 +1045,22 @@ body.rkbo-club-open{overflow:hidden}
  .nav-right{gap:4px}
  .nav-right>button:not(#admin-open){font-size:9.5px;padding:6px 1px;min-height:44px}
 }
+
+
+/* RKBO guest guidance and nickname feedback */
+.rkbo-draft-guest-warning{
+ margin:17px 0 2px;padding:12px 15px;border:1px solid #bd9a57;
+ border-radius:9px;background:#382d1c;color:#ffe1aa;
+ font-size:12px;line-height:1.7;
+}
+.rkbo-online-guest-warning{
+ background:#2d291d;border:1px solid #8b7748;border-radius:10px;
+ padding:12px;color:#f3dda9;line-height:1.7;font-size:12px;
+}
+.rkbo-online-nickname-hint{font-size:12px;color:#95dfbc;margin:9px 0 0;line-height:1.5}
+.rkbo-online-nickname-hint.taken{color:#ffafa6}
+.card-download:disabled{
+ opacity:.48;cursor:not-allowed;filter:grayscale(.3);
+ border-color:#556475;box-shadow:none;
+}
+.card-download:disabled:hover{transform:none;filter:grayscale(.3)}
