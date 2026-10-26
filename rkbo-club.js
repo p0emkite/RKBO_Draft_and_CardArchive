@@ -116,7 +116,7 @@ function editor(){
  orderSection("중계 순서","bullpen",lineup.bullpen,(s,i)=>(i+1)+"중계")+'</div>'+
  '<div class="rkbo-club-footer-buttons"><button data-club="save" class="primary" '+(remain?'disabled':'')+'>💾 팀 저장</button>'+
  (teamId?'<button data-club="play" class="primary">⚾ 이 팀으로 경기</button>':'')+
- '<button data-club="pack">🎴 카드팩에서 선수 모으기</button></div>';
+ '<button data-club="pack">🎫 카드팩에서 선수 모으기</button></div>';
 }
 function orderSection(title,group,list,label){
  return '<section class="rkbo-club-order-section"><h4>'+E(title)+'</h4>'+
