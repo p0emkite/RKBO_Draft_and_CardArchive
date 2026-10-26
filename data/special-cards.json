@@ -8,6 +8,16 @@
       "createdAt": "2026-10-26T14:14:34.321Z"
     }
   ],
-  "backgrounds": {},
+  "backgrounds": {
+    "ROY": {
+      "path": "assets/special-backgrounds/ROY.webp",
+      "commit": "b6325c9d55a400360353ff7275a8be88c8011c7b",
+      "rev": "mvpcd2no",
+      "x": 0,
+      "y": 0,
+      "zoom": 1,
+      "overlay": 0
+    }
+  },
   "emblems": {}
 }
