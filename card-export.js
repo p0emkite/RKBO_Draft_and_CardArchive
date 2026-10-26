@@ -26,16 +26,17 @@ function badge(ctx,value,y,accent){
 }
 // PNG exports are hand-drawn, so CSS card upgrades must also be painted on Canvas.
 async function loadSavedEffects(player){
- const none={gold_border:false,prism:false};
- if(!window.RKBOOnline?.isConfigured?.())return none;
+ if(!window.RKBOOnline?.isConfigured?.())throw new Error('Google 로그인이 필요합니다.');
  const client=await window.RKBOOnline.getClient();
  const {data:auth,error:authError}=await client.auth.getUser();
- if(authError||!auth?.user)return none;
+ if(authError||!auth?.user)throw new Error('Google 로그인 후 수집한 카드만 저장할 수 있습니다.');
  const {data,error}=await client.from('rkbo_card_inventory')
-  .select('gold_border,prism')
+  .select('quantity,gold_border,prism')
   .eq('user_id',auth.user.id).eq('card_id',player.id).maybeSingle();
- if(error)throw new Error('강화 정보 조회에 실패했습니다: '+error.message);
- return {gold_border:data?.gold_border===true,prism:data?.prism===true};
+ if(error)throw new Error('카드 보유 여부를 확인하지 못했습니다: '+error.message);
+ if(!data||(Number(data.quantity)||0)<=0&&!data.gold_border&&!data.prism)
+  throw new Error('미수집 카드는 이미지로 저장할 수 없습니다.');
+ return {gold_border:data.gold_border===true,prism:data.prism===true};
 }
 function drawSavedEffects(ctx,effects){
  if(!effects?.gold_border&&!effects?.prism)return;
@@ -175,7 +176,11 @@ async function save(player,button){
   const filename=(player.season+'차_'+player.team+'_'+player.name+'_OVR'+player.ovr).replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/\s+/g,'_');
   a.href=objectURL;a.download=filename+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(objectURL),15000);
  }catch(error){console.error(error);alert('카드 저장 실패: '+error.message)}
- finally{button.disabled=false;button.textContent=before}
+ finally{
+  button.textContent=before;
+  // A card may have been consumed by an upgrade while the export was running.
+  button.disabled=!window.RKBOArchiveCollection?.isOwned?.(player.id);
+ }
 }
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-export-player]');if(!button)return;
