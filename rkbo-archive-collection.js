@@ -86,6 +86,14 @@ function modalState(){
  const card=modal?.querySelector(".player-card[data-id]");
  if(!card)return;
  decorateCard(card);
+ const download=modal.querySelector("[data-export-player]");
+ if(download){
+  const collected=status==="ready"&&!!userId&&owned.has(card.dataset.id);
+  const text=collected?"↓ 카드 저장":status==="loading"?"보유 여부 확인 중…":userId?"🔒 미수집 · 저장 불가":"🔐 로그인 후 저장";
+  download.disabled=!collected;
+  if(download.textContent!==text)download.textContent=text;
+  download.title=collected?"보유한 카드를 PNG로 저장":"수집한 카드만 이미지로 저장할 수 있습니다";
+ }
  const content=modal.querySelector(".dialog-content");
  if(!content)return;
  let panel=content.querySelector(":scope > .rkbo-archive-modal-collection");
