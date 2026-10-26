@@ -1272,7 +1272,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-hint,.rkbo-combo-error{border:1px solid #3f6882;background:#16344a;
  color:#b7d7e4;padding:12px;border-radius:9px;font-size:12px;line-height:1.7}
 .rkbo-combo-error{color:#ffb8af;border-color:#a75b54}
-.rkbo-combo-submit,.rkbo-combo-award button{border:1px solid #d0a46b;border-radius:9px;
+.rkbo-combo-submit,.rkbo-combo-award>.rkbo-combo-actions button{border:1px solid #d0a46b;border-radius:9px;
  background:linear-gradient(120deg,#755028,#a67637);color:#fff4d9;padding:12px 17px;
  font-size:13px;font-weight:900;cursor:pointer}
 .rkbo-combo-submit{width:100%;margin-top:14px}
@@ -1283,8 +1283,8 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
  border-radius:13px;padding:18px;margin-bottom:18px;text-align:center;box-shadow:0 0 24px #cc995430}
 .rkbo-combo-award small{color:#ffdf9e;letter-spacing:.1em}
 .rkbo-combo-award h3{margin:6px 0;font-size:23px;color:#ffde8f}
-.rkbo-combo-award strong{font-size:16px}
-.rkbo-combo-award p{font-size:12px;color:#d1e4e8}
+.rkbo-combo-award>strong{font-size:16px}
+.rkbo-combo-award>p{font-size:12px;color:#d1e4e8}
 .rkbo-combo-award>.rkbo-combo-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
 .rkbo-combo-history{margin-top:17px;border-top:1px solid #395368;padding-top:17px}
 .rkbo-combo-history>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
