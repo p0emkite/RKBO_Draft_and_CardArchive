@@ -280,14 +280,14 @@ function renderLadder(){
  if(ladderGame){
   const g=ladderGame;
   el.innerHTML+='<section class="rkbo-club-match-score rkbo-ladder-result"><small>'+
-   E(g.season)+'차 · '+E(g.opponentRank)+'위 '+E(g.opponentName||g.opponentCode)+'</small>'+
+   E(g.season)+'차 · '+E(g.opponentRank)+'위 '+E(g.opponentCode?ladderTeamName(g.opponentCode):g.opponentName)+'</small>'+
    '<h3>'+resultBadge(g.result)+'</h3>'+
-   '<div><strong>'+E(g.opponentName||g.opponentCode)+' '+g.cpuRuns+'</strong><span>:</span>'+
+   '<div><strong>'+E(g.opponentCode?ladderTeamName(g.opponentCode):g.opponentName)+' '+g.cpuRuns+'</strong><span>:</span>'+
    '<strong>'+g.ourRuns+' '+E(g.teamName)+'</strong></div>'+
    '<p>'+ (g.result==="WIN"?'승리! 다음 구단이 해금됐어.':'다음 순위에 가려면 승리해야 해.')+'</p></section>'+
    '<div class="rkbo-club-inning-scroll"><table class="rkbo-club-innings"><thead><tr><th>팀</th>'+
    g.innings.map(x=>'<th>'+x.inning+'</th>').join("")+'<th>R</th></tr></thead><tbody>'+
-   '<tr><th>'+E(g.opponentName||g.opponentCode)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
+   '<tr><th>'+E(g.opponentCode?ladderTeamName(g.opponentCode):g.opponentName)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
    '<tr><th>'+E(g.teamName)+'</th>'+g.innings.map(x=>'<td>'+x.ours+'</td>').join("")+'<td>'+g.ourRuns+'</td></tr></tbody></table></div>'+
    ladderMvpMarkup(g)+ladderStatsMarkup(g.playerStats)+
    '<h3>📋 주요 플레이 · 투수 교체</h3><div class="rkbo-club-events">'+(g.events||[])
