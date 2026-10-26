@@ -116,7 +116,7 @@ function init(){
   await refresh();
  });
  root.addEventListener("focus",()=>{if(userId)refresh()});
- root.RKBOArchiveCollection={refresh,isOwned:id=>owned.has(id),getProgress};
+ root.RKBOArchiveCollection={refresh,isOwned:id=>owned.has(id),getEffects:id=>upgrades.get(id)||null,getProgress};
  refresh();
  root.RKBOOnline?.getClient?.().then(c=>{
   c.auth.onAuthStateChange((_event,_session)=>{setTimeout(refresh,0)});
