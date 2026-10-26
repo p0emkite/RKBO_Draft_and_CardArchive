@@ -1,6 +1,13 @@
 {
   "version": 1,
-  "cards": [],
+  "cards": [
+    {
+      "season": 60,
+      "baseId": "60-SAM-타-012",
+      "kind": "ROY",
+      "createdAt": "2026-10-26T14:14:34.321Z"
+    }
+  ],
   "backgrounds": {},
   "emblems": {}
 }
