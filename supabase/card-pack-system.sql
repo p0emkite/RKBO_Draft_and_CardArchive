@@ -1,4 +1,4 @@
--- RKBO ONLINE card packs v1: 60 season, five cards: 1 guaranteed bronze + 4 tier draws.
+-- RKBO ONLINE card packs v1: 60 season, five independent rarity draws (50/30/15/4/1).
 -- No purchases, no currency. Atomic, server-only draws and owner-only inventory.
 create table if not exists public.rkbo_pack_cards(
  card_id text primary key,
@@ -52,7 +52,7 @@ create policy rkbo_pack_state_own_read on public.rkbo_pack_state for select to a
 drop policy if exists rkbo_pack_history_own_read on public.rkbo_pack_history;
 create policy rkbo_pack_history_own_read on public.rkbo_pack_history for select to authenticated using((select auth.uid())=user_id);
 
-create or replace function public.rkbo_open_card_pack(p_season integer default 59)
+create or replace function public.rkbo_open_card_pack(p_season integer default 60)
 returns jsonb language plpgsql security definer set search_path=''
 as $$
 declare
@@ -90,10 +90,11 @@ begin
    pg_catalog.get_byte(v_bytes,1)::numeric*65536+
    pg_catalog.get_byte(v_bytes,2)::numeric*256+
    pg_catalog.get_byte(v_bytes,3)::numeric)/4294967296;
-  v_grade:=case when i=1 then '브론즈' when v_force and i=5 then '다이아몬드'
-   when v_roll < 0.72 then '실버'
-   when v_roll < 0.92 then '골드'
-   when v_roll < 0.97 then '코랄'
+  v_grade:=case when v_force and i=5 then '다이아몬드'
+   when v_roll < 0.50 then '브론즈'
+   when v_roll < 0.80 then '실버'
+   when v_roll < 0.95 then '골드'
+   when v_roll < 0.99 then '코랄' -- RKBO's existing Coral tier is the pack's Platinum slot (4%).
    else '다이아몬드' end;
   select card_id,name,team,position,ovr into v_card
   from public.rkbo_pack_cards
