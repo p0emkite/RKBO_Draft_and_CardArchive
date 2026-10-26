@@ -154,7 +154,8 @@ function drawAccount(){
  if(!authUser){
   el.innerHTML='<div class="rkbo-online-login">'+
    '<button type="button" class="rkbo-online-social rkbo-online-social-google" data-online="google-signin"><span aria-hidden="true">G</span> Google 계정으로 로그인</button>'+
-   '<p>별도의 인증 메일이나 RKBO 비밀번호는 필요하지 않아요. 로그인 없이도 드래프트는 플레이할 수 있어요.</p></div>';
+   '<p>별도의 RKBO 비밀번호 없이 Google 계정으로 연결할 수 있어요.</p>'+ 
+   '<p class="rkbo-online-guest-warning"><strong>로그인하지 않고 이용하면?</strong> 드래프트는 플레이할 수 있지만 기록은 현재 브라우저에만 남아 계정·온라인 랭킹·MY RKBO에 저장되지 않아요. 카드팩은 Google 로그인 전에는 개봉하거나 수집할 수 없어요.</p></div>';
   return;
  }
  const nickname=profile?.nickname||"",defaultNickname="RKBO_"+authUser.id.slice(0,8);
@@ -258,6 +259,18 @@ document.addEventListener("DOMContentLoaded",()=>{
  // Restore account screen on return from Google OAuth.
  let returned=false;
  try{returned=sessionStorage.getItem("rkbo-online-google-return")==="1";if(returned)sessionStorage.removeItem("rkbo-online-google-return")}catch{}
- if(returned&&isConfigured())open("account");
+ if(returned&&isConfigured()){open("account");return}
+ if(!isConfigured())return;
+ // Show the existing account/Google sign-in dialog on a fresh, logged-out visit.
+ // Don't redirect to Google without a user gesture; OAuth starts when they press the button.
+ // Do not interrupt an already logged-in visitor or another game dialog.
+ const promptGuest=()=>{
+  if(!overlay?.hidden)return;
+  if(document.querySelector('#rkbo-draft-overlay:not([hidden]),#rkbo-pack-overlay:not([hidden]),#rkbo-club-overlay:not([hidden]),#rkbo-my-overlay:not([hidden])'))return;
+  open("account");
+ };
+ getClient().then(c=>c.auth.getUser())
+  .then(({data,error})=>{if(error||!data?.user)promptGuest()})
+  .catch(err=>{console.warn("[RKBO ONLINE] Initial auth status unavailable",err);promptGuest()});
 });
 })(window);
