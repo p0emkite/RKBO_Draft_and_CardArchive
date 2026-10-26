@@ -253,6 +253,7 @@ function makePanel(){
   finally{saving=false}
  };
  q("rkbo-special-zip-upload").addEventListener("click",()=>perform(uploadEmblemZip));
+ q("rkbo-special-zip").addEventListener("change",e=>{if(e.target.files?.length)perform(uploadEmblemZip)});
  q("rkbo-special-bg-save").addEventListener("click",()=>perform(saveBackground));
  q("rkbo-special-bg-remove").addEventListener("click",()=>perform(removeBackground));
  q("rkbo-special-background-file").addEventListener("change",e=>{
