@@ -18,17 +18,23 @@ function getProgress(){
  }
  return {collected,total,groups:[...groups.values()].sort((a,b)=>a.label.localeCompare(b.label,"ko"))};
 }
+function decorateCard(card){
+ if(!card?.dataset?.id)return;
+ const effects=upgrades.get(card.dataset.id);
+ const locked=status==="ready"&&!!userId&&!owned.has(card.dataset.id);
+ card.classList.toggle("rkbo-gold-border",!!effects?.gold_border&&!locked);
+ card.classList.toggle("rkbo-prism",!!effects?.prism&&!locked);
+}
 function paintCardStates(){
  if(!cardList)return;
  cardList.querySelectorAll(".player-card[data-id]").forEach(card=>{
   const locked=status==="ready"&&!!userId&&!owned.has(card.dataset.id);
   card.classList.toggle("rkbo-uncollected",locked);
-  const effects=upgrades.get(card.dataset.id);
-  card.classList.toggle("rkbo-gold-border",!!effects?.gold_border&&!locked);
-  card.classList.toggle("rkbo-prism",!!effects?.prism&&!locked);
+  decorateCard(card);
   if(locked)card.setAttribute("data-collection-status","미수집");
   else card.removeAttribute("data-collection-status");
  });
+ document.querySelectorAll("#modal-body .player-card[data-id]").forEach(decorateCard);
 }
 function markup(){
  if(!container)return;
@@ -94,6 +100,15 @@ function init(){
  container.addEventListener("click",e=>{if(e.target.closest("[data-collection-refresh]"))refresh()});
  observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.addedNodes.length||m.removedNodes.length))paintCardStates()});
  observer.observe(cardList,{childList:true});
+ const detail=document.getElementById("modal-body");
+ if(detail){
+  const detailObserver=new MutationObserver(changes=>{
+   if(changes.some(c=>c.addedNodes.length||c.removedNodes.length)){
+    detail.querySelectorAll(".player-card[data-id]").forEach(decorateCard);
+   }
+  });
+  detailObserver.observe(detail,{childList:true,subtree:true});
+ }
  root.addEventListener("rkbo-season-change",redraw);
  root.addEventListener("rkbo-player-data-updated",redraw);
  root.addEventListener("rkbo-collection-updated",refresh);
