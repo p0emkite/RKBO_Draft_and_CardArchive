@@ -26,6 +26,15 @@
       "y": 0,
       "zoom": 1,
       "overlay": 16
+    },
+    "RELIEF": {
+      "path": "assets/special-backgrounds/RELIEF.webp",
+      "commit": "f41024de8044427d5e42a619526d0e2bd5384cf0",
+      "rev": "mvpcfblk",
+      "x": 0,
+      "y": 0,
+      "zoom": 1,
+      "overlay": 17
     }
   },
   "emblems": {}
