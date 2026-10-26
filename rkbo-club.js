@@ -213,18 +213,43 @@ function ladderSeasonOptions(){
  return Array.from({length:60},(_,i)=>60-i).map(n=>
   '<option value="'+n+'"'+(ladderSeason===n?' selected':'')+'>'+n+'차 시즌</option>').join("");
 }
+function ladderPlayerName(p){
+ return official.get(p?.cardId||p?.batterCardId||p?.pitcherCardId)||p?.name||p?.batter||p?.pitcher||p?.cardId||"선수";
+}
+function ladderTeamName(code){return root.RKBOTeamBrand?.name?.({team:code,season:ladderSeason})||code}
+function ladderTeamLogo(code){return root.RKBOTeamBrand?.logo?.({team:code,season:ladderSeason})||"assets/teams/"+String(code)+".svg"}
 function ladderStatsMarkup(obj){
  if(!obj)return "";
- const batters=(obj.batters||[]),pitchers=(obj.pitchers||[]);
+ const our=obj.ours||obj,cpu=obj.cpu;
  const rows=(columns,items,keys)=>'<div class="rkbo-club-inning-scroll"><table class="rkbo-club-innings rkbo-ladder-stats"><thead><tr>'+
  columns.map(k=>'<th>'+E(k)+'</th>').join("")+'</tr></thead><tbody>'+
- items.map(p=>'<tr>'+keys.map(k=>'<td>'+E(p[k]??0)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
- return '<h3>📊 우리 팀 타자 기록</h3>'+
- rows(['선수','타석','타수','안타','2루타','3루타','홈런','볼넷','삼진','득점','타점'],batters,
-  ['name','PA','AB','H','twob','threeb','HR','BB','K','R','RBI'])+
- '<h3>⚾ 우리 팀 투수 기록</h3>'+
- rows(['선수','이닝','피안타','볼넷','삼진','실점'],pitchers.map(p=>({...p,IP:Math.floor(p.outs/3)+'.'+p.outs%3})),
-  ['name','IP','H','BB','K','ER']);
+ (items.length?items.map(p=>'<tr>'+keys.map(k=>'<td>'+E(k==="name"?ladderPlayerName(p):p[k]??"—")+'</td>').join("")+'</tr>').join("") :
+ '<tr><td colspan="'+columns.length+'">기록 없음</td></tr>')+'</tbody></table></div>';
+ const box=(title,side)=>{
+  const pit=(side?.pitchers||[]).map(p=>({...p,IP:Math.floor(Number(p.outs||0)/3)+'.'+Number(p.outs||0)%3,
+   rem:p.remaining==null?"—":p.remaining+"%"}));
+  return '<h3>📊 '+E(title)+' 타자 기록</h3>'+
+  rows(['선수','타석','타수','안타','2루타','3루타','홈런','볼넷','삼진','득점','타점'],side?.batters||[],
+   ['name','PA','AB','H','twob','threeb','HR','BB','K','R','RBI'])+
+  '<h3>⚾ '+E(title)+' 투수 기록</h3>'+
+  rows(['선수','이닝','투구 수','피안타','볼넷','삼진','실점','잔여 체력'],pit,
+   ['name','IP','pitches','H','BB','K','ER','rem']);
+ };
+ return '<div class="rkbo-ladder-both-stats">'+box("MY TEAM",our)+
+  (cpu?box("상대팀",cpu):'<p class="rkbo-club-instructions">예전 경기 기록에는 상대팀 선수별 기록이 없어.</p>')+'</div>';
+}
+function ladderMvpMarkup(g){
+ const m=g.playerStats?.mvp;if(g.result!=="WIN"||!m?.cardId)return "";
+ const card=owned.get(m.cardId),name=ladderPlayerName({cardId:m.cardId,name:card?.name});
+ if(!card)return '<section class="rkbo-ladder-mvp"><h3>🏅 MATCH MVP · '+E(name)+'</h3></section>';
+ const p={...card,id:card.card_id,name,type:card.card_type,pos:card.position};
+ root.RKBOTeamBrand?.decorate?.([p]);
+ let html="";
+ try{html=root.RKBOCardView?.render?.(p,true)||""}catch(err){console.warn("[RKBO MATCH] MVP card",err)}
+ return '<section class="rkbo-ladder-mvp"><div class="rkbo-ladder-mvp-text"><small>🏆 MATCH MVP</small>'+
+ '<h3>'+E(name)+'</h3><p>'+E(m.role)+' · 활약도 '+E(m.score)+'</p>'+
+ '<p>승리를 이끈 오늘의 선수!</p></div><div class="rkbo-ladder-mvp-card">'+
+ (html||'<div class="rkbo-ladder-mvp-fallback">'+E(name)+' · OVR '+E(card.ovr)+'</div>')+'</div></section>';
 }
 function renderLadder(){
  const el=$("#rkbo-club-content");if(!el)return;
