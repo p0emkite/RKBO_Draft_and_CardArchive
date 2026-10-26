@@ -330,6 +330,16 @@
       "rev": "mvpezwpg",
       "commit": "98d435bc10ca4bb1ff3d9ffed087ccc3ac4e6755",
       "blobSha": "f9858008c930eee969855e4792f2223d467100cf"
+    },
+    "60-SAM-투-007-SPECIAL-DREAM": {
+      "path": "assets/cards/60-SAM-투-007-SPECIAL-DREAM.webp",
+      "x": 9.287925696594428,
+      "y": 16.483516483516482,
+      "zoom": 1.4933767731249405,
+      "fit": "contain",
+      "rev": "mvpf08ln",
+      "commit": "78b3af5edc99d93711cc2884a0459e0b84d38a33",
+      "blobSha": "cccc678eafd4ad2f39dcb717ad18091cb049c68e"
     }
   }
 }
