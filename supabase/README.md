@@ -80,15 +80,13 @@ Limitation: in v1 the browser shuffles random offers; the server does not know w
 - Edge Function `draft-submit` remains the sole path for posting *public* leaderboard results, with server-side OVR and native-position validation.
 
 
-## Card packs & collection (v1)
-- Reference: [p0emkite/RKBO-](https://github.com/p0emkite/RKBO-) pack visuals and flow, including the existing `pack.webp`.
-- One free pack awards **5 cards**. Available seasons in v1 are **59 and 60** (281 Silver/Gold/Coral/Diamond cards combined). Bronze is outside this four-tier pool, following the reference game's design.
-- Exact **tier-level probabilities per draw**: Silver 72%, Gold 20%, Coral 5%, Diamond 3%. The original reference weighted *individual cards*, which did not produce these exact aggregate probabilities. Our RPC first rolls the tier, then picks a card in that tier.
-- **50-pack pity**: if the previous 49 packs contain no Diamond, the fifth draw of the 50th pack is guaranteed Diamond. Any pack with a Diamond resets the streak. The streak is tracked **per account across seasons**.
-- **Server-only draw**: `public.rkbo_open_card_pack(p_season)` is an authenticated-only, `SECURITY DEFINER` Postgres RPC (using crypto-strength random bytes for tier selection). It selects from a server-controlled catalog, updates inventory counters, increments pity state and records five draws atomically. A per-user 5-second cooldown and row locking prevent rapid/concurrent duplicate submissions.
-- `rkbo_pack_cards`: curated four-tier catalog, readable publicly but writable by neither `anon` nor `authenticated`.
-- `rkbo_card_inventory`, `rkbo_pack_state`, `rkbo_pack_history`: only the owner can SELECT via RLS; browser roles have **no INSERT/UPDATE/DELETE grants**. Inventory updates can occur only inside the RPC. The RPC validates `auth.uid()`, authenticated role and non-anonymous session; EXECUTE is granted only to authenticated.
-- Frontend: `rkbo-card-packs.js` shows the reference pack art, tap-to-reveal five cards, high-rarity prelude, results, per-user card collection with locked unowned entries, and recent opening history.
-- Setup: run `supabase/card-pack-system.sql`, then `supabase/card-pack-seed-59-60.sql`. Source/catalog changes need new server seeds as seasons are expanded. The main public archive continues to display *all* cards regardless of ownership.
-- This is a free collectible prototype, not an economy: no sales, currency, trading or consumption of card inventory. No purchases or monetary rewards.
-
+## Card packs & personal collection (60th season v1, 2026-10-26)
+- Exactly **5 independent draws per pack**. Tier-level rates: Bronze **50%**, Silver **30%**, Gold **15%**, Platinum **4%**, Diamond **1%**. Platinum is displayed as a pack rarity and uses existing **Coral** tier player cards without changing their archive grading. No guaranteed Bronze card.
+- **50-pack Diamond pity**: following 49 packs with no Diamond, the 5th card of pack 50 is guaranteed Diamond. A pack containing a Diamond resets the streak. Pity overrides the base draw rate only where active. These are per-account counts.
+- Initially available pack contents are **60th-season cards only**, all **181** season 60 cards including 43 Bronze cards. The previous 59th-season inventory, if any, is preserved in the DB but 59th-season pack opening is disabled.
+- `supabase/card-pack-system.sql` creates the catalog, account-owned inventory and pack state, open history, and transactional `public.rkbo_open_card_pack(60)` RPC. Random tier selection and inventory writes only occur server-side; never accept user-submitted card ID or grade.
+- `rkbo_pack_cards` is publicly readable, not client-writable. `rkbo_card_inventory`, `rkbo_pack_state`, `rkbo_pack_history` are owner-readable under RLS but not client-writable. `rkbo_open_card_pack` EXECUTE is granted only to authenticated. It validates `auth.uid()` and `auth.jwt()->>'role'` (not legacy `request.jwt.claim.role`) plus non-anonymous status.
+- On GitHub Pages `rkbo-card-packs.js` uses the same Supabase client and login session as `rkbo-online.js`. **Each browser/device needs its own login**. A missing session brings up a direct Google login button.
+- `rkbo-archive-collection.js` adds collection percentage for the selected season and each team, using official player IDs and authenticated inventory counts. Logged-in users see a 50%-black visual overlay on unowned cards in the main archive; owned cards render unobstructed. When signed out, the public archive remains unobstructed.
+- After successful pack opening the collection refreshes via `rkbo-pack-opened`. When the season changes, the progress widgets recalculate for that season. At present only season 60 cards can be newly acquired.
+- Free-to-play prototype. No payment, trading, transfers or real-money rewards. The public overall card archive and draft game are unaffected.
