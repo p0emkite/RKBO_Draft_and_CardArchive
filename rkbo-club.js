@@ -91,8 +91,10 @@ function rowHtml(slot,label,role){
 function orderedRow(group,slot,label){
  const p=owned.get(picks[slot]),active=focusedSwap?.group===group&&focusedSwap.slot===slot;
  return '<button type="button" draggable="true" class="rkbo-club-order-row'+(active?' selected':'')+'" data-club-group="'+group+'" data-club-order-slot="'+slot+'">'+
- '<span>⠿</span><b>'+E(label)+'</b><strong>'+(p?E(display(p)):'미배치')+'</strong>'+
- (p?'<small>OVR '+p.ovr+'</small>':'')+'</button>';
+ '<span class="rkbo-club-order-handle" aria-hidden="true">⠿</span><b class="rkbo-club-order-position">'+E(label)+'</b>'+
+ '<span class="rkbo-club-order-person"><strong>'+ (p?E(display(p)):'미배치')+'</strong>'+
+ (p?'<span class="rkbo-club-order-metrics">'+stats(p)+'</span>':'')+'</span>'+
+ (p?'<small class="rkbo-club-order-overall">OVR <b style="color:'+statColor(Number(p.ovr))+'">'+p.ovr+'</b></small>':'')+'</button>';
 }
 function editor(){
  const el=$("#rkbo-club-content");if(!el)return;
@@ -106,7 +108,7 @@ function editor(){
  '<p class="rkbo-club-instructions">선수는 실제 획득한 카드만 선택할 수 있어. 각 포지션은 본래 수비 위치를 적용하고 DH에는 아무 타자나 배치할 수 있어. 카드 한 장은 한 자리에만 배치 가능!</p>'+
  '<h3>타자 9명</h3><div class="rkbo-club-slot-grid">'+SLOTS.slice(0,9).map(([id,label,role])=>rowHtml(id,label,role)).join("")+'</div>'+
  '<h3>선발 5명 · 중계 3명 · 마무리 1명</h3><div class="rkbo-club-slot-grid">'+SLOTS.slice(9).map(([id,label,role])=>rowHtml(id,label,role)).join("")+'</div>'+
- '<h3>✎ 라인업 세부 편집</h3><p class="rkbo-club-instructions">PC에서는 드래그, 모바일에서는 두 선수를 차례로 눌러 교체해. 수비 포지션은 본래 카드 위치와 DH만 허용해.</p>'+
+ '<h3>✎ 라인업 세부 편집</h3><p class="rkbo-club-instructions">선수 이름 아래 주요 스탯 5개를 확인할 수 있어. PC에서는 드래그, 모바일에서는 두 선수를 차례로 눌러 교체해. 수비 포지션은 본래 카드 위치와 DH만 허용해.</p>'+
  '<div class="rkbo-club-order-grid">'+
  orderSection("타순 · 1~9번","batting",lineup.battingOrder,(s,i)=>(i+1)+"번")+
  orderSection("수비 포지션 · DH","defense",HITS.map(pos=>lineup.defense[pos]),(s,i)=>HITS[i])+
