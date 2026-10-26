@@ -704,3 +704,43 @@ body.rkbo-pack-open{overflow:hidden}
 .rkbo-pack-flip-back small{font-size:9px;letter-spacing:.1em;color:#9cc7e0}
 @keyframes rkbo-card-flip{0%,16%{transform:rotateY(0deg) scale(.9)}56%{transform:rotateY(93deg) scale(1.07)}100%{transform:rotateY(180deg) scale(1)}}
 @media(prefers-reduced-motion:reduce){.rkbo-pack-flip-inner{animation-duration:.15s}.rkbo-pack-revealed-card.is-coral:after,.rkbo-pack-revealed-card.is-diamond:after{animation:none;opacity:.95}}
+
+
+/* Permanent collectibles: second gold overlay on top of original tier rim + prism film. */
+.rkbo-pack-collection-card.rkbo-gold-border .player-card,
+#cards .player-card.rkbo-gold-border{outline:3px solid #f6cf6b;outline-offset:0;box-shadow:inset 0 0 0 3px #fff1ab9a,0 0 24px #f5c14b90,0 16px 38px #0009!important}
+.rkbo-pack-collection-card.rkbo-prism .player-card .card-inner,
+#cards .player-card.rkbo-prism .card-inner{position:relative}
+.rkbo-pack-collection-card.rkbo-prism .player-card .card-inner::after,
+#cards .player-card.rkbo-prism .card-inner::after{
+ content:"";position:absolute;inset:0;z-index:10;pointer-events:none;border-radius:inherit;opacity:.3;
+ background:linear-gradient(115deg,transparent 15%,#ff5980a6 26%,#f2da58b3 36%,#47e8c9b3 49%,#80a1ff9e 63%,#ff71e0b6 78%,transparent 92%);
+ background-size:230% 230%;mix-blend-mode:screen;animation:rkbo-prism-shimmer 5.5s linear infinite
+}
+@keyframes rkbo-prism-shimmer{0%{background-position:0 0}100%{background-position:100% 100%}}
+.rkbo-pack-upgrade-actions{display:flex;flex-direction:column;gap:5px;margin-top:7px}
+.rkbo-pack-upgrade-actions button{background:#2a3d54;border:1px solid #b5a27d;color:#ffe4ab;font-size:11px;font-weight:850;padding:8px 4px;border-radius:6px;cursor:pointer}
+.rkbo-pack-upgrade-actions button:nth-child(2){border-color:#a59bda;color:#d3caff}
+.rkbo-pack-upgrade-actions button:disabled{cursor:not-allowed;opacity:.42}
+.rkbo-pack-season-toggle label{align-self:center;font-weight:900;color:#e7f1ff;font-size:13px}
+.rkbo-pack-season-toggle select{min-width:210px}
+.rkbo-pack-admin h3{font-size:21px;color:#f2e5b8;margin:0 0 10px}
+.rkbo-pack-admin>p{font-size:12px;color:#a5c4d8;line-height:1.75}
+.rkbo-pack-admin-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#142c40;border:1px solid #466d83;padding:17px;border-radius:12px}
+.rkbo-pack-admin-form label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:800;color:#e7eff9}
+.rkbo-pack-admin-form input:not([type=checkbox]),.rkbo-pack-admin-form select{width:100%;border:1px solid #6187a7;color:#fff;background:#0b1f31;border-radius:8px;padding:10px}
+.rkbo-pack-admin-active{flex-direction:row!important;align-items:center}
+.rkbo-pack-admin-active input{width:21px;height:21px}
+.rkbo-pack-admin-art{grid-column:1/-1;display:flex;align-items:center;gap:19px;flex-wrap:wrap;border:1px solid #36546c;border-radius:10px;padding:12px}
+.rkbo-pack-admin-art img{width:140px;max-height:190px;object-fit:contain}
+.rkbo-pack-admin-art label{flex:1;min-width:205px}
+.rkbo-pack-admin-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+.rkbo-pack-admin-actions button,.rkbo-pack-admin-list button{background:#215c7b;color:#fff;border:1px solid #85bcd9;border-radius:8px;padding:10px 14px;font-weight:900;cursor:pointer}
+.rkbo-pack-admin-actions button:last-child{background:#513544;border-color:#c17d8e}
+.rkbo-pack-admin-actions button:disabled{opacity:.6}
+.rkbo-pack-admin-list{display:grid;gap:7px}
+.rkbo-pack-admin-list>div{display:flex;align-items:center;gap:12px;background:#152b3f;border:1px solid #324e69;padding:10px;border-radius:9px}
+.rkbo-pack-admin-list>div span{flex:1;font-size:13px;color:#fff;font-weight:850}
+.rkbo-pack-admin-list>div small{font-size:11px;color:#aac6d9}
+@media(max-width:580px){.rkbo-pack-admin-form{grid-template-columns:1fr;padding:12px}.rkbo-pack-admin-art,.rkbo-pack-admin-actions{grid-column:1}.rkbo-pack-admin-art img{width:110px}}
+@media(prefers-reduced-motion:reduce){.rkbo-pack-collection-card.rkbo-prism .player-card .card-inner::after,#cards .player-card.rkbo-prism .card-inner::after{animation:none}}
