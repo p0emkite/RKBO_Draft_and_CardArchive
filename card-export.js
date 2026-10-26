@@ -24,7 +24,64 @@ function badge(ctx,value,y,accent){
  round(ctx,230,y,55,20,5);ctx.fillStyle='rgba(5,14,27,.70)';ctx.fill();ctx.strokeStyle=accent;ctx.lineWidth=1;ctx.stroke();
  label(ctx,value,257.5,y+13,'900 9px system-ui, sans-serif',accent,'center');
 }
-async function make(player){
+// PNG exports are hand-drawn, so CSS card upgrades must also be painted on Canvas.
+async function loadSavedEffects(player){
+ const none={gold_border:false,prism:false};
+ if(!window.RKBOOnline?.isConfigured?.())return none;
+ const client=await window.RKBOOnline.getClient();
+ const {data:auth,error:authError}=await client.auth.getUser();
+ if(authError||!auth?.user)return none;
+ const {data,error}=await client.from('rkbo_card_inventory')
+  .select('gold_border,prism')
+  .eq('user_id',auth.user.id).eq('card_id',player.id).maybeSingle();
+ if(error)throw new Error('강화 정보 조회에 실패했습니다: '+error.message);
+ return {gold_border:data?.gold_border===true,prism:data?.prism===true};
+}
+function drawSavedEffects(ctx,effects){
+ if(!effects?.gold_border&&!effects?.prism)return;
+ if(effects.prism){
+  // A static holographic spectrum, readable over the artwork and ratings.
+  ctx.save();
+  round(ctx,7,7,286,406,12);ctx.clip();
+  ctx.globalCompositeOperation='screen';
+  const spectrum=ctx.createLinearGradient(0,5,300,405);
+  [
+   [0,'rgba(255,77,137,.035)'],
+   [.13,'rgba(255,96,163,.18)'],
+   [.28,'rgba(255,207,95,.17)'],
+   [.43,'rgba(87,240,205,.16)'],
+   [.58,'rgba(111,168,255,.18)'],
+   [.74,'rgba(209,123,255,.18)'],
+   [.89,'rgba(245,139,208,.15)'],
+   [1,'rgba(135,242,255,.04)']
+  ].forEach(([stop,color])=>spectrum.addColorStop(stop,color));
+  ctx.fillStyle=spectrum;ctx.fillRect(7,7,286,406);
+  ctx.translate(150,210);ctx.rotate(-Math.PI/5);
+  const sparkle=ctx.createLinearGradient(-55,0,75,0);
+  sparkle.addColorStop(0,'rgba(255,255,255,0)');
+  sparkle.addColorStop(.44,'rgba(250,252,255,.02)');
+  sparkle.addColorStop(.50,'rgba(253,254,255,.13)');
+  sparkle.addColorStop(.56,'rgba(250,252,255,.02)');
+  sparkle.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=sparkle;ctx.fillRect(-75,-270,150,540);
+  ctx.restore();
+ }
+ if(effects.gold_border){
+  // Original rarity rim is at x=1. This extra frame sits inside it.
+  ctx.save();
+  ctx.shadowColor='rgba(245,193,75,.80)';
+  ctx.shadowBlur=12;
+  ctx.lineWidth=3.2;
+  ctx.strokeStyle='#f6cf6b';
+  round(ctx,4.2,4.2,291.6,411.6,15.2);ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.lineWidth=.9;
+  ctx.strokeStyle='rgba(255,246,191,.9)';
+  round(ctx,7.2,7.2,285.6,405.6,12.8);ctx.stroke();
+  ctx.restore();
+ }
+}
+async function make(player,effects){
  const canvas=document.createElement('canvas');canvas.width=WIDTH;canvas.height=HEIGHT;
  const ctx=canvas.getContext('2d');ctx.scale(SCALE,SCALE);
  const grade=grades[player.grade]||grades.실버,brand=window.RKBOTeamBrand?.code(player)||player.team,team=teams[brand]||'#243e61';
@@ -101,6 +158,8 @@ async function make(player){
   label(ctx,short[stat]||stat,x+28.8,403,'800 9px system-ui, sans-serif','#91a9be','center');
  });
  ctx.restore();round(ctx,6,6,288,408,13);ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=.8;ctx.stroke();
+ if(effects===undefined)effects=await loadSavedEffects(player);
+ drawSavedEffects(ctx,effects);
  return canvas;
 }
 async function save(player,button){
@@ -108,7 +167,8 @@ async function save(player,button){
  const before=button.textContent;button.disabled=true;button.textContent='이미지 생성 중…';
  try{
   if(document.fonts?.ready)await document.fonts.ready;
-  const canvas=await make(player);
+  const effects=await loadSavedEffects(player);
+  const canvas=await make(player,effects);
   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
   if(!blob)throw Error('PNG 생성에 실패했습니다.');
   const objectURL=URL.createObjectURL(blob),a=document.createElement('a');
