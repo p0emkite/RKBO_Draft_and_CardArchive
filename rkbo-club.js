@@ -11,7 +11,7 @@ const E=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt
 const initialLineup=()=>({battingOrder:HITS.slice(),defense:Object.fromEntries(HITS.map(s=>[s,s])),rotation:SP.slice(),bullpen:RP.slice()});
 const statColor=n=>n>=90?"#90ecff":n>=85?"#F6909D":n>=80?"#f4cf74":n>=70?"#c9d7df":"#fff";
 const statLabels=p=>p?.card_type==="타자"?["정확","파워","선구","주루","수비"]:["구위","제구","피안타 억제","피홈런 억제","체력"];
-let overlay=null,panel=null,screen="editor",busy=false,loaded=false,teamId=null,teamName="나의 RKBO 팀";
+let overlay=null,panel=null,screen="editor",busy=false,loaded=false,teamId=null,matchTeamId=null,teamName="나의 RKBO 팀";
 let picks={},lineup=initialLineup(),owned=new Map(),official=new Map(),teams=[],matches=[],match=null,focusedSwap=null;
 let navButton=null;
 const $=q=>panel?.querySelector(q);
@@ -172,7 +172,7 @@ function listTeams(){
 }
 async function play(id){
  if(busy)return;
- busy=true;screen="match";show();
+ busy=true;matchTeamId=id;screen="match";show();
  const el=$("#rkbo-club-content");el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 9이닝 경기 중…</h3><p>선수 능력치로 타격과 투구 결과를 계산하고 있어.</p></div>';
  try{
   const {c}=await context();
@@ -281,7 +281,7 @@ function init(){
   if(action==="auto"){auto();editor();message(missingCount()?"보유 카드만으로 완성되지 않은 포지션이 있어. 카드팩에서 선수를 더 모아줘.":"가장 OVR이 높은 보유 카드를 자동 배치했어.");return}
   if(action==="save"){if(busy)return;busy=true;try{await saveTeam()}catch(e){message(e.message)}finally{busy=false}return}
   if(action==="play"){if(!teamId){message("먼저 팀을 저장해야 경기를 시작할 수 있어.");return}await play(teamId);return}
-  if(action==="rematch"){const id=teamId||teams.find(t=>t.name===match?.teamName)?.id;if(id)await play(id);else message("저장한 팀을 다시 선택해 줘.");return}
+  if(action==="rematch"){if(matchTeamId)await play(matchTeamId);else message("저장한 팀을 다시 선택해 줘.");return}
  });
  panel.addEventListener("dragstart",e=>{
   const item=e.target.closest("[data-club-group]");if(!item)return;
