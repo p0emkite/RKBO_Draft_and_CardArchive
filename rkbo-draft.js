@@ -482,14 +482,13 @@ function clicked(e){
   case "close":close();break;
   case "setup":token++;setup();break;
   case "mode-season":case "mode-all":
-   mode=action.dataset.draftAction==="mode-all"?"all":"season";
-   shell.querySelectorAll(".rkbo-draft-mode").forEach(x=>x.classList.toggle("active",x===action));break;
+    mode=action.dataset.draftAction==="mode-all"?"all":"season";setup();break;
   case "start":start();break;
   case "reroll":reroll();break;
   case "again":state=null;start();break;
   case "board":scoreboard();break;
   case "back-to-draft":boardReturn==="result"&&state?.phase==="result"?result():setup();break;
-  case "online-board":root.RKBOOnline?.open?.("leaderboard");break;
+  case "online-board":root.RKBOOnline?.open?.("leaderboard",{season:boardSeason,category:boardTab});break;
   case "publish-online":publishOnline();break;
   case "save-my-team":savePersonal(false);break;
   case "save-my-copy":savePersonal(true);break;
@@ -499,6 +498,16 @@ function clicked(e){
  }
 }
 document.addEventListener("DOMContentLoaded",init);
+document.addEventListener("change",e=>{
+ if(e.target?.id==="rkbo-draft-season-select"){
+  const n=Number(e.target.value);
+  if(Number.isInteger(n)&&n>=1&&n<=60){draftSeason=n;boardSeason=n}
+ }
+ if(e.target?.id==="rkbo-draft-board-season"){
+  const n=Number(e.target.value);
+  if(Number.isInteger(n)&&n>=1&&n<=60){boardSeason=n;renderScoreboard()}
+ }
+});
 document.addEventListener("change",e=>{if(e.target?.id==="rkbo-draft-hide-toggle")hiddenMode=!!e.target.checked});
-root.RKBODraft={open,openScoreboard:scoreboard,loadSavedTeam,localRecords:localScores,resultPayload,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id,hidden:state.hidden}:null};
+root.RKBODraft={open,openScoreboard:scoreboard,loadSavedTeam,localRecords:localScores,resultPayload,selectedSeason:()=>draftSeason,getState:()=>state?{phase:state.phase,picks:state.picks.size,rerolls:state.rerolls,slot:state.slot?.id,hidden:state.hidden}:null};
 })(window);
