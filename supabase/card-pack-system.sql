@@ -68,6 +68,7 @@ declare
  v_grade text;
  v_card record;
  v_quantity integer;
+ v_previously_owned boolean;
  v_draws jsonb := '[]'::jsonb;
  i integer;
 begin
@@ -103,6 +104,7 @@ begin
   where season=p_season and grade=v_grade
   order by random() limit 1;
   if not found then raise exception '시즌별 카드풀이 아직 준비되지 않았습니다' using errcode='22023'; end if;
+  select exists(select 1 from public.rkbo_card_inventory where user_id=v_user and card_id=v_card.card_id) into v_previously_owned;
   insert into public.rkbo_card_inventory(user_id,card_id,quantity)
    values(v_user,v_card.card_id,1)
   on conflict(user_id,card_id) do update
@@ -110,7 +112,7 @@ begin
   returning quantity into v_quantity;
   v_draws:=v_draws||pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
    'cardId',v_card.card_id,'grade',v_grade,'name',v_card.name,'team',v_card.team,
-   'pos',v_card.position,'ovr',v_card.ovr,'quantity',v_quantity,'isNew',v_quantity=1
+   'pos',v_card.position,'ovr',v_card.ovr,'quantity',v_quantity,'isNew',not v_previously_owned
   ));
   if v_grade='다이아몬드' then v_hit:=true;end if;
  end loop;
