@@ -57,6 +57,10 @@ function frame(){
 function renderPack(){
  const body=$("#rkbo-pack-body");
  if(!body)return;
+ if(!packChoices.some(p=>p.active&&p.season===season)){
+  body.innerHTML='<p class="rkbo-pack-loading">현재 공개된 카드팩이 없어요. 제작자가 팩을 활성화하면 개봉할 수 있어요.</p>';
+  return;
+ }
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
