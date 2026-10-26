@@ -13,6 +13,7 @@ const statColor=n=>n>=90?"#90ecff":n>=85?"#F6909D":n>=80?"#f4cf74":n>=70?"#c9d7d
 const statLabels=p=>p?.card_type==="타자"?["정확","파워","선구","주루","수비"]:["구위","제구","피안타 억제","피홈런 억제","체력"];
 let overlay=null,panel=null,screen="editor",busy=false,loaded=false,teamId=null,matchTeamId=null,teamName="나의 RKBO 팀";
 let picks={},lineup=initialLineup(),owned=new Map(),official=new Map(),teams=[],matches=[],match=null,focusedSwap=null;
+let ladderSeason=60,ladderData=null,ladderTeamId=null,ladderGame=null,ladderHistory=[];
 let navButton=null;
 const $=q=>panel?.querySelector(q);
 function context(){
@@ -69,11 +70,12 @@ function stats(p){
 }
 function renderHeader(){
  panel.innerHTML='<div class="rkbo-club-head"><div><small>RKBO · COLLECTED CARD CLUBHOUSE</small><h2>⚾ MY TEAM & MATCH</h2>'+
- '<p>내가 획득한 카드로 선수단을 꾸리고 CPU와 9이닝 경기를 해봐!</p></div>'+
+ '<p>보유 카드 선수단으로 CPU 친선 경기와 시즌별 구단 도장깨기에 도전해 봐!</p></div>'+
  '<button type="button" data-club="close" aria-label="닫기">×</button></div>'+
  '<nav class="rkbo-club-tabs"><button data-club="screen-editor" class="'+(screen==="editor"?"active":"")+'">👕 선수단 편성</button>'+
  '<button data-club="screen-teams" class="'+(screen==="teams"?"active":"")+'">💾 저장한 팀</button>'+
- '<button data-club="screen-match" class="'+(screen==="match"?"active":"")+'">⚾ MATCH</button></nav>'+
+ '<button data-club="screen-match" class="'+(screen==="match"?"active":"")+'">⚾ 친선 경기</button>'+
+ '<button data-club="screen-ladder" class="'+(screen==="ladder"?"active":"")+'">🏆 시즌 도장깨기</button></nav>'+
  '<main id="rkbo-club-content" class="rkbo-club-body"></main><p id="rkbo-club-status" role="status"></p>';
 }
 function message(s){const el=$("#rkbo-club-status");if(el)el.textContent=s}
@@ -167,7 +169,8 @@ function listTeams(){
  '<article class="rkbo-club-team"><div><h4>'+E(t.name)+'</h4><small>18명 · 평균 OVR '+Number(t.average_ovr).toFixed(1)+'</small></div>'+
  '<strong>TPI '+t.tpi+'</strong><div class="rkbo-club-team-actions">'+
  '<button data-club-team="load" data-id="'+E(t.id)+'">✎ 편집</button>'+
- '<button data-club-team="play" data-id="'+E(t.id)+'">⚾ 경기</button>'+
+ '<button data-club-team="play" data-id="'+E(t.id)+'">⚾ 친선</button>'+
+ '<button data-club-team="ladder" data-id="'+E(t.id)+'">🏆 도장깨기</button>'+
  '<button data-club-team="delete" data-id="'+E(t.id)+'">삭제</button></div></article>').join("")+'</div>':
  '<p class="rkbo-club-instructions">저장된 팀이 아직 없어. 먼저 보유 카드로 18명을 편성해 줘!</p>')+
  '<button data-club="screen-editor">← 팀 편성으로 돌아가기</button>';
@@ -205,13 +208,114 @@ function renderMatch(){
  '<div><strong>'+E(m.team_name)+'</strong><span>CPU '+m.cpu_runs+' : '+m.our_runs+' MY TEAM</span><small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small></div>').join("")+'</div>'+
  '<p class="rkbo-club-instructions">현재 MATCH는 AI 대전이 아닌 CPU 확률 기반 전시 경기야. OVR과 능력치는 반영하지만 정교한 야구 엔진이나 보상 시스템은 아직 없어.</p>';
 }
+
+function ladderSeasonOptions(){
+ return Array.from({length:60},(_,i)=>60-i).map(n=>
+  '<option value="'+n+'"'+(ladderSeason===n?' selected':'')+'>'+n+'차 시즌</option>').join("");
+}
+function ladderStatsMarkup(obj){
+ if(!obj)return "";
+ const batters=(obj.batters||[]),pitchers=(obj.pitchers||[]);
+ const rows=(columns,items,keys)=>'<div class="rkbo-club-inning-scroll"><table class="rkbo-club-innings rkbo-ladder-stats"><thead><tr>'+
+ columns.map(k=>'<th>'+E(k)+'</th>').join("")+'</tr></thead><tbody>'+
+ items.map(p=>'<tr>'+keys.map(k=>'<td>'+E(p[k]??0)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
+ return '<h3>📊 우리 팀 타자 기록</h3>'+
+ rows(['선수','타석','타수','안타','2루타','3루타','홈런','볼넷','삼진','득점','타점'],batters,
+  ['name','PA','AB','H','twob','threeb','HR','BB','K','R','RBI'])+
+ '<h3>⚾ 우리 팀 투수 기록</h3>'+
+ rows(['선수','이닝','피안타','볼넷','삼진','실점'],pitchers.map(p=>({...p,IP:Math.floor(p.outs/3)+'.'+p.outs%3})),
+  ['name','IP','H','BB','K','ER']);
+}
+function renderLadder(){
+ const el=$("#rkbo-club-content");if(!el)return;
+ const d=ladderData,all=d?.teams||[],cleared=Number(d?.clearedCount||0),total=Number(d?.total||0);
+ const next=all[cleared],complete=d&&cleared>=total;
+ if(!teams.some(t=>t.id===ladderTeamId))ladderTeamId=teams[0]?.id||null;
+ el.innerHTML='<div class="rkbo-ladder-top"><h3>🏆 시즌별 구단 도장깨기</h3>'+
+ '<label>도전할 시즌<select data-club-ladder-season>'+ladderSeasonOptions()+'</select></label></div>'+
+ '<p class="rkbo-club-instructions">시즌별 공식 선수 카드의 평균 OVR을 기준으로 만든 전력 순위야. 실제 리그 최종 순위는 아니야. 낮은 순위부터 이기고 올라가!</p>'+
+ (!d?'<div class="rkbo-club-loading">시즌별 구단 전력을 불러오는 중…</div>':
+ '<section class="rkbo-ladder-summary"><strong>'+cleared+' / '+total+' 구단 격파</strong>'+
+ '<span>'+ (complete?'🏆 '+ladderSeason+'차 시즌 완전 제패!':next?'다음 상대: '+next.rank+'위 '+E(next.name):'시즌 정보 확인 중')+'</span>'+
+ '<div class="rkbo-ladder-meter"><i style="width:'+(total?100*cleared/total:0)+'%"></i></div></section>'+
+ '<div class="rkbo-ladder-rivals">'+all.map((t,i)=>{
+  const won=i<cleared,active=i===cleared;
+  return '<article class="rkbo-ladder-rival '+(won?'clear':active?'current':'locked')+'">'+
+  '<b>'+t.rank+'위</b><strong>'+E(t.name)+'</strong>'+
+  '<small>평균 OVR '+E(t.strength.toFixed(1))+'</small>'+
+  '<span>'+(won?'✓ 클리어':active?'⚔️ 도전 가능':'🔒 잠김')+'</span></article>';
+ }).join("")+'</div>'+
+ (complete?'<p class="rkbo-ladder-finish">🎉 이 시즌의 모든 구단을 제패했어! 다른 시즌도 도전해 봐.</p>':
+  '<div class="rkbo-ladder-challenge"><label>출전할 MY TEAM<select data-club-ladder-team>'+
+  (teams.length?teams.map(t=>'<option value="'+E(t.id)+'"'+(t.id===ladderTeamId?' selected':'')+'>'+
+   E(t.name)+' · TPI '+t.tpi+'</option>').join(""):'<option value="">저장한 팀이 없습니다</option>')+
+  '</select></label><button type="button" class="primary" data-club="ladder-play"'+(!ladderTeamId||busy?' disabled':'')+'>'+
+  '⚾ '+(next?next.rank+'위 '+E(next.name):'다음 상대')+' 도전</button></div>'));
+ if(ladderGame){
+  const g=ladderGame;
+  el.innerHTML+='<section class="rkbo-club-match-score rkbo-ladder-result"><small>'+
+   E(g.season)+'차 · '+E(g.opponentRank)+'위 '+E(g.opponentName||g.opponentCode)+'</small>'+
+   '<h3>'+resultBadge(g.result)+'</h3>'+
+   '<div><strong>'+E(g.opponentName||g.opponentCode)+' '+g.cpuRuns+'</strong><span>:</span>'+
+   '<strong>'+g.ourRuns+' '+E(g.teamName)+'</strong></div>'+
+   '<p>'+ (g.result==="WIN"?'승리! 다음 구단이 해금됐어.':'다음 순위에 가려면 승리해야 해.')+'</p></section>'+
+   '<div class="rkbo-club-inning-scroll"><table class="rkbo-club-innings"><thead><tr><th>팀</th>'+
+   g.innings.map(x=>'<th>'+x.inning+'</th>').join("")+'<th>R</th></tr></thead><tbody>'+
+   '<tr><th>'+E(g.opponentName||g.opponentCode)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
+   '<tr><th>'+E(g.teamName)+'</th>'+g.innings.map(x=>'<td>'+x.ours+'</td>').join("")+'<td>'+g.ourRuns+'</td></tr></tbody></table></div>'+
+   ladderStatsMarkup(g.playerStats)+
+   '<h3>📋 주요 플레이</h3><div class="rkbo-club-events">'+(g.events||[])
+   .filter(x=>x.rbi>0||x.result==="홈런").slice(-30).reverse().map(x=>
+    '<div><b>'+x.inning+'회'+x.half+'</b><strong>'+E(x.batter)+'</strong><span>'+
+    E(x.result)+(x.rbi?' · '+x.rbi+'타점':'')+'</span></div>').join("")+'</div>';
+ }
+ if(d){
+  el.innerHTML+='<h3>🗂 '+ladderSeason+'차 도전 기록</h3><div class="rkbo-club-match-history">'+
+   (ladderHistory.length?ladderHistory.map(m=>
+    '<div><strong>'+E(m.opponent_rank)+'위 '+E(m.opponent_code)+'</strong>'+
+    '<span>'+resultBadge(m.result)+' · '+m.our_runs+' : '+m.cpu_runs+'</span>'+
+    '<small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small></div>').join(""):
+    '<p class="rkbo-club-instructions">아직 이 시즌의 도전 기록이 없어.</p>')+'</div>';
+ }
+}
+async function loadLadder(){
+ const s=ladderSeason,{c,user}=await context();
+ const [catalog,history]=await Promise.all([
+  c.functions.invoke("season-ladder",{body:{action:"catalog",season:s}}),
+  c.from("rkbo_ladder_matches").select("id,opponent_code,opponent_rank,result,our_runs,cpu_runs,created_at")
+   .eq("user_id",user.id).eq("season",s).order("created_at",{ascending:false}).limit(10)
+ ]);
+ if(catalog.error)throw Error("시즌 조회 실패: "+catalog.error.message);
+ if(history.error)throw Error("도전 기록 조회 실패: "+history.error.message);
+ if(s!==ladderSeason)return;
+ ladderData=catalog.data;ladderHistory=history.data||[];
+ if(screen==="ladder")renderLadder();
+}
+async function openLadder(){
+ screen="ladder";ladderGame=null;ladderData=null;show();
+ try{await loadLadder()}catch(e){const el=$("#rkbo-club-content");if(el)el.innerHTML='<p class="rkbo-club-error">'+E(e.message)+'</p><button data-club="screen-teams">팀 목록으로</button>';}
+}
+async function playLadder(){
+ if(busy||!ladderTeamId||!ladderData)return;
+ busy=true;const id=ladderTeamId,s=ladderSeason;
+ const el=$("#rkbo-club-content");if(!el)return;
+ el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 시즌 도장깨기 경기 진행 중…</h3><p>서버에서 공식 카드 능력치로 9이닝을 계산하고 있어.</p></div>';
+ try{
+  const {c}=await context(),{data,error}=await c.functions.invoke("season-ladder",{body:{action:"play",season:s,teamId:id}});
+  if(error)throw Error("경기 진행 실패: "+error.message);
+  if(s!==ladderSeason)return;
+  ladderGame=data;await loadLadder();
+ }catch(e){el.innerHTML='<p class="rkbo-club-error">'+E(e.message)+'</p><button data-club="screen-ladder">다시 도전하기</button>'}
+ finally{busy=false;if(screen==="ladder"&&ladderData&&ladderGame)renderLadder()}
+}
+
 async function loadMatches(){
  const {c,user}=await context();
  const {data,error}=await c.from("rkbo_owned_matches").select("id,team_name,our_runs,cpu_runs,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(20);
  if(error)throw Error(error.message);
  matches=data||[];
 }
-function show(){renderHeader();if(screen==="editor")editor();else if(screen==="teams")listTeams();else renderMatch()}
+function show(){renderHeader();if(screen==="editor")editor();else if(screen==="teams")listTeams();else if(screen==="ladder")renderLadder();else renderMatch()}
 async function load(){
  const {c,user}=await context();
  const {data:inv,error:ie}=await c.from("rkbo_card_inventory").select("card_id,quantity,gold_border,prism")
@@ -245,6 +349,10 @@ function init(){
  document.body.append(overlay);panel=overlay.firstChild;
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  panel.addEventListener("change",e=>{
+  const seasonSelect=e.target.closest("[data-club-ladder-season]");
+  if(seasonSelect){ladderSeason=Number(seasonSelect.value);openLadder();return}
+  const ladderTeamSelect=e.target.closest("[data-club-ladder-team]");
+  if(ladderTeamSelect){ladderTeamId=ladderTeamSelect.value;renderLadder();return}
   const select=e.target.closest("[data-club-slot]");if(!select)return;
   const slot=select.dataset.clubSlot,val=select.value;
   if(val&&Object.values(picks).some((id)=>id===val&&picks[slot]!==id)){message("한 카드로 두 포지션을 동시에 채울 수 없어.");editor();return}
@@ -264,6 +372,7 @@ function init(){
    const item=teams.find(ti=>ti.id===t.dataset.id);if(!item)return;
    if(t.dataset.clubTeam==="load")useTeam(item);
    if(t.dataset.clubTeam==="play")await play(item.id);
+   if(t.dataset.clubTeam==="ladder"){ladderTeamId=item.id;await openLadder()}
    if(t.dataset.clubTeam==="delete"){
     if(!confirm('"'+item.name+'" MY TEAM을 삭제할까? 경기 기록은 같이 삭제돼.'))return;
     const {c}=await context(),{data,error}=await c.rpc("rkbo_delete_owned_team",{p_id:item.id});
@@ -279,6 +388,8 @@ function init(){
   if(action==="screen-editor"){screen="editor";show();return}
   if(action==="screen-teams"){await loadTeams();screen="teams";show();return}
   if(action==="screen-match"){await Promise.all([loadTeams(),loadMatches()]);screen="match";show();return}
+  if(action==="screen-ladder"){await loadTeams();await openLadder();return}
+  if(action==="ladder-play"){await playLadder();return}
   if(action==="reset"){reset();editor();return}
   if(action==="auto"){auto();editor();message(missingCount()?"보유 카드만으로 완성되지 않은 포지션이 있어. 카드팩에서 선수를 더 모아줘.":"가장 OVR이 높은 보유 카드를 자동 배치했어.");return}
   if(action==="save"){if(busy)return;busy=true;try{await saveTeam()}catch(e){message(e.message)}finally{busy=false}return}
