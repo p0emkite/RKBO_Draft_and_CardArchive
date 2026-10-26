@@ -6,9 +6,9 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&
 const cfg=()=>root.RKBOOnlineConfig||{};
 const isConfigured=()=>Boolean(cfg().enabled&&/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg().url||"")&&String(cfg().publishableKey||"").length>10);
 const CATS=[
- {id:"season",mode:"season",hidden:false,label:"현재 시즌"},
+ {id:"season",mode:"season",hidden:false,label:"시즌별"},
  {id:"all",mode:"all",hidden:false,label:"올타임"},
- {id:"season-hidden",mode:"season",hidden:true,label:"현재 시즌 (숨기기)"},
+ {id:"season-hidden",mode:"season",hidden:true,label:"시즌별 (숨기기)"},
  {id:"all-hidden",mode:"all",hidden:true,label:"올타임 (숨기기)"}
 ];
 let client=null,clientPromise=null,overlay=null,panel=null,screen="leaderboard",category="season",records=[],selected=null,authUser=null,profile=null,busy=false,editingNickname=false;
@@ -16,7 +16,10 @@ const DUPLICATE_NICKNAME="이미 사용 중인 닉네임입니다. 다른 닉네
 let nicknameTimer=null,nicknameCheckId=0;
 const q=s=>overlay?.querySelector(s);
 const koreanCache=new Map();
-const season=()=>Number(root.RKBOSeason?.current?.()||60);
+let leaderboardSeason=60;
+const season=()=>leaderboardSeason;
+const seasonOptions=()=>Array.from({length:60},(_,i)=>60-i).map(n=>
+ '<option value="'+n+'"'+(n===leaderboardSeason?' selected':'')+'>'+n+'차 시즌</option>').join("");
 async function getClient(){
  if(!isConfigured())throw Error("아직 Supabase 프로젝트가 연결되지 않았습니다.");
  if(client)return client;
@@ -62,6 +65,8 @@ function scoreboardView(){
  const tabs=CATS.map(cat=>'<button type="button" data-online-board="'+cat.id+'" class="'+(cat.id===category?"active":"")+'">'+esc(cat.label)+'</button>').join("");
  shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>전체 접속자 드래프트 랭킹</h3><small>기록은 서버에서 공식 카드/OVR을 검증한 뒤 등록됩니다.</small></div>'+
  '<div class="rkbo-online-categories">'+tabs+'</div>'+
+ ((CATS.find(c=>c.id===category)?.mode==="season")?
+  '<label class="rkbo-online-season-label">랭킹 시즌 선택<select id="rkbo-online-season-select">'+seasonOptions()+'</select></label>':'')+
  '<div class="rkbo-online-board" id="rkbo-online-board"><p class="rkbo-online-wait">온라인 랭킹을 불러오는 중…</p></div>'+
  '<div class="rkbo-online-hint">※ 시즌 랭킹은 현재 선택한 '+season()+'차 기준. 동률이면 평균 OVR, 등록 시각 순으로 정렬합니다. 랜덤 후보 추첨의 서버 검증은 차후 업데이트 예정입니다.</div>'+
  '<p class="rkbo-online-message" id="rkbo-online-message" role="status"></p>');
@@ -253,7 +258,12 @@ async function submitDraft(payload){
  open("leaderboard");
  return data;
 }
-function open(view="leaderboard"){
+function open(view="leaderboard",options={}){
+ if(options&&typeof options==="object"){
+  const n=Number(options.season);
+  if(Number.isInteger(n)&&n>=1&&n<=60)leaderboardSeason=n;
+  if(CATS.some(x=>x.id===options.category))category=options.category;
+ }
  if(!overlay)init();
  if(!overlay)return;
  screen=view==="account"?"account":"leaderboard";
@@ -274,6 +284,12 @@ function init(){
  document.body.append(overlay);panel=overlay.querySelector(".rkbo-online-panel");
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  panel.addEventListener("input",e=>{if(e.target?.id==="rkbo-online-nickname")nicknameTyping()});
+ panel.addEventListener("change",e=>{
+  if(e.target?.id==="rkbo-online-season-select"){
+   const n=Number(e.target.value);
+   if(Number.isInteger(n)&&n>=1&&n<=60){leaderboardSeason=n;scoreboardView()}
+  }
+ });
  panel.addEventListener("click",async e=>{
   const board=e.target.closest("[data-online-board]");
   if(board){category=board.dataset.onlineBoard;scoreboardView();return}
