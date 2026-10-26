@@ -1,4 +1,4 @@
--- RKBO ONLINE card packs v1: 60 season, five independent rarity draws (50/30/15/4/1).
+-- RKBO ONLINE card packs v1: 60 season, five independent rarity draws (45/30/15/7/3).
 -- No purchases, no currency. Atomic, server-only draws and owner-only inventory.
 create table if not exists public.rkbo_pack_cards(
  card_id text primary key,
@@ -91,10 +91,10 @@ begin
    pg_catalog.get_byte(v_bytes,2)::numeric*256+
    pg_catalog.get_byte(v_bytes,3)::numeric)/4294967296;
   v_grade:=case when v_force and i=5 then '다이아몬드'
-   when v_roll < 0.50 then '브론즈'
-   when v_roll < 0.80 then '실버'
-   when v_roll < 0.95 then '골드'
-   when v_roll < 0.99 then '코랄' -- RKBO's existing Coral tier is the pack's Platinum slot (4%).
+   when v_roll < 0.45 then '브론즈'
+   when v_roll < 0.75 then '실버'
+   when v_roll < 0.90 then '골드'
+   when v_roll < 0.97 then '코랄'
    else '다이아몬드' end;
   select card_id,name,team,position,ovr into v_card
   from public.rkbo_pack_cards
