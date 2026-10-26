@@ -9,7 +9,7 @@ let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collec
 const $=selector=>dialog?.querySelector(selector);
 const client=()=>root.RKBOOnline?.getClient?.();
 async function context(){
- if(!client())throw Error("RKBO ONLINE 연결이 필요해요.");
+ if(!root.RKBOOnline?.getClient)throw Error("RKBO ONLINE 연결이 필요해요.");
  const c=await client(),{data,error}=await c.auth.getUser();
  if(error||!data?.user)throw Error("Google 계정으로 로그인하면 카드팩과 내 수집 도감을 이용할 수 있어요.");
  return {c,user:data.user};
@@ -59,7 +59,7 @@ function renderPack(){
  '<small>팩당 5장. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
  '<div class="rkbo-pack-season-toggle"><button type="button" data-pack-season="59" class="'+(season===59?"active":"")+'">59차 카드팩</button>'+
  '<button type="button" data-pack-season="60" class="'+(season===60?"active":"")+'">60차 카드팩</button></div>'+
- '<div class="rkbo-pack-stage" id="rkbo-pack-stage"><div class="rkbo-pack-aura"></div>'+
+ '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
   '<button type="button" class="rkbo-pack-cover" data-pack="open"><img src="https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp" alt="RKBO 카드팩 포장">'+
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
@@ -192,6 +192,7 @@ async function loadHistory(){
 }
 async function showTab(next){
  if(!["pack","collection","history"].includes(next))return;
+ if(opening)return;
  tab=next;draws=[];cursor=0;revealToken++;frame();
  try{
   if(tab==="pack"){await refreshStats();if(overlay.hidden||tab!=="pack")return;renderPack()}
