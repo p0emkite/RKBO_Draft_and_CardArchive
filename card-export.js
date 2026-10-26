@@ -26,6 +26,7 @@ function badge(ctx,value,y,accent){
 }
 // PNG exports are hand-drawn, so CSS card upgrades must also be painted on Canvas.
 async function loadSavedEffects(player){
+ if(window.RKBOAdminBridge?.isAuthorized?.())return {gold_border:false,prism:false};
  if(!window.RKBOOnline?.isConfigured?.())throw new Error('Google 로그인이 필요합니다.');
  const client=await window.RKBOOnline.getClient();
  const {data:auth,error:authError}=await client.auth.getUser();
@@ -179,7 +180,7 @@ async function save(player,button){
  finally{
   button.textContent=before;
   // A card may have been consumed by an upgrade while the export was running.
-  button.disabled=!window.RKBOArchiveCollection?.isOwned?.(player.id);
+  button.disabled=!(window.RKBOAdminBridge?.isAuthorized?.()||window.RKBOArchiveCollection?.isOwned?.(player.id));
  }
 }
 document.addEventListener('click',event=>{
