@@ -17,6 +17,15 @@
       "y": 0,
       "zoom": 1,
       "overlay": 16
+    },
+    "MVP": {
+      "path": "assets/special-backgrounds/MVP.webp",
+      "commit": "02e68ecfa7af7a161338454deaae7388cc1714e9",
+      "rev": "mvpcewgl",
+      "x": 0,
+      "y": 0,
+      "zoom": 1,
+      "overlay": 16
     }
   },
   "emblems": {}
