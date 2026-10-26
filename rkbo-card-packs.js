@@ -46,7 +46,9 @@ function renderPlayer(p){
  catch(e){console.warn("[RKBO packs] render",e);return '<div class="rkbo-pack-card-missing">'+esc(p.name)+'</div>'}
 }
 function loginView(error){
- return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"로그인하지 않으면 카드팩을 개봉할 수 없고 카드는 계정에 저장되지 않아요. Google 로그인 후 개봉 및 수집 기록이 계정별로 안전하게 저장됩니다.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
+ return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"Google 로그인 후 카드팩을 이용할 수 있어요.")+'</p>'+ 
+ '<p class="rkbo-pack-guest-warning">로그인하지 않으면 카드팩을 개봉할 수 없으며, 카드 획득·수집 기록도 저장되지 않아요.</p>'+ 
+ '<button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
  dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎫 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
