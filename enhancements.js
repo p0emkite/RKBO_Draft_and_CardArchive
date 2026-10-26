@@ -38,7 +38,12 @@ const teamMeta={DOO:['#202f6c','#a9bee8'],HAN:['#d97521','#ffd08f'],KIA:['#bd344
 const gradeMeta={브론즈:{metal:'#d39a73',dark:'#684335',label:'브론즈'},실버:{metal:'#c9d7df',dark:'#617b8d',label:'실버'},골드:{metal:'#f4cf74',dark:'#a57532',label:'골드'},코랄:{metal:'#F6909D',dark:'#ab5e67',label:'코랄'},다이아몬드:{metal:'#90ecff',dark:'#417baa',label:'다이아몬드'}};
 const styleVars=p=>{const g=gradeMeta[p.grade],tm=teamMeta[p.displayTeamCode||p.team]||teamMeta[p.team];return `--rim:${g.metal};--metal:${g.metal};--glow:${g.dark}44;--jersey:${tm[0]};--team-dim:${tm[0]}78`};
 const photoFit=entry=>entry?.fit==='cover'?'cover':'contain';
-function photoHtml(p){const temp=previewCache[p.id];const entry=temp||imgConfig.images?.[p.id];if(!entry)return '';
+function resolvedPhoto(p){
+ // Award cards keep a separate photo entry; until one is uploaded, show their original's photo.
+ const own=previewCache[p.id]||imgConfig.images?.[p.id];
+ return own||(p.baseCardId?(previewCache[p.baseCardId]||imgConfig.images?.[p.baseCardId]):null);
+}
+function photoHtml(p){const entry=resolvedPhoto(p);if(!entry)return '';
  const x=Number(entry.x)||0,y=Number(entry.y)||0,zoom=Number(entry.zoom)||1;
  const url=photoUrl(entry);
  if(!url)return '';
@@ -48,7 +53,7 @@ function poseHtml(p){
  const file=p.type==='투수'?'assets/default-pitcher.png':'assets/default-batter.png';
  return `<img class="player-pose" src="${h(imgSrc(file))}" draggable="false" alt="${h(p.type==='투수'?'투구':'타격')} 동작 기본 실루엣">`;
 }
-const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} 사진 편집">✎ 사진 편집</button>`:''}`},refresh,imageState(p){const entry=previewCache[p.id]||imgConfig.images?.[p.id]||null;if(!entry)return null;return {...entry,url:photoUrl(entry)}}};
+const art={render(p){return `${photoHtml(p)||poseHtml(p)}${authorized?`<button class="edit-photo" type="button" data-photo-edit="${h(p.id)}" aria-label="${h(p.name)} 사진 편집">✎ 사진 편집</button>`:''}`},refresh,imageState(p){const entry=resolvedPhoto(p);if(!entry)return null;return {...entry,url:photoUrl(entry)}}};
 window.RKBOArt=art;
 function refresh(){const sort=q('sort');if(sort)sort.dispatchEvent(new Event('change',{bubbles:true}));if(activeEditor)renderEditor()}
 function setStatus(s){if(q('admin-status'))q('admin-status').textContent=s}
@@ -215,8 +220,16 @@ async function imageToWebp(file){if(!file.type.startsWith('image/'))throw Error(
 }
 function imgUrlFromBlob(blob){return URL.createObjectURL(blob)}
 function startEdit(id){if(!authorized)return;const p=window.RKBOSeason?.players()?.find(x=>x.id===id);if(!p)return;
- const pending=previewCache[id];activeEditor={p,blob:pending?.blob||null,url:pending?.url||null,entry:{x:0,y:0,zoom:1,fit:'contain',...(imgConfig.images[id]||{}),...(pending||{})}};
- q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';q('editor-title').textContent=p.name+' · 카드 사진';q('photo-file').value='';renderEditor()}
+ const pending=previewCache[id],own=imgConfig.images[id]||null;
+ const inherited=p.baseCardId&&!own&&!pending?(previewCache[p.baseCardId]||imgConfig.images[p.baseCardId]):null;
+ activeEditor={p,blob:pending?.blob||null,url:pending?.url|| (inherited?photoUrl(inherited):null),
+  entry:{x:0,y:0,zoom:1,fit:'contain',
+   ...(inherited?{x:inherited.x,y:inherited.y,zoom:inherited.zoom,fit:inherited.fit}:{}),
+   ...(own||{}),...(pending||{})},inherited:!!inherited};
+ q('photo-editor-bg').hidden=false;document.body.style.overflow='hidden';
+ q('editor-title').textContent=p.name+' · '+(p.specialKind?p.grade+' 특수카드 전용 사진':'일반 카드 사진');
+ q('photo-file').value='';renderEditor();
+ if(inherited)q('editor-photo-status').textContent='현재 원본 카드 사진을 표시 중입니다. 새 사진을 선택하면 특수카드에만 저장됩니다.';}
 function editorImageSource(e){return e.url||photoUrl(e.entry)}
 function updateEditorTransform(){const e=activeEditor;if(!e)return;const stage=q('editor-stage'),img=stage?.querySelector('.headshot .player-photo');if(img){img.style.setProperty('--photo-x',clamp(Number(e.entry.x)||0,-150,150)+'%');img.style.setProperty('--photo-y',clamp(Number(e.entry.y)||0,-150,150)+'%');img.style.setProperty('--photo-zoom',clamp(Number(e.entry.zoom)||1,.3,5));img.style.setProperty('--photo-fit',photoFit(e.entry));}q('editor-zoom').value=clamp(Number(e.entry.zoom)||1,.3,5);q('editor-scale-label').textContent=Math.round(Number(q('editor-zoom').value)*100)+'%';if(q('editor-fit'))q('editor-fit').value=photoFit(e.entry);}
 function collectionCardWidth(){
@@ -242,13 +255,13 @@ function renderEditor(){const e=activeEditor;if(!e)return;const src=editorImageS
  }
  if(src){const head=stage.querySelector('.headshot'),old=head?.querySelector('.player-photo,.player-pose');if(old){const img=document.createElement('img');img.className='player-photo';img.src=src;img.alt='선수 사진 카드 미리보기';img.draggable=false;old.replaceWith(img)}}
  updateEditorTransform();
- q('editor-photo-status').textContent=e.blob?'새 이미지 선택됨 · 도감에 적용하거나 GitHub에 저장할 수 있습니다.':src?'실제 카드 배치를 편집하고 있습니다.':'기본 실루엣을 표시 중입니다.';
+ q('editor-photo-status').textContent=e.blob?'새 이미지 선택됨 · 도감에 적용하거나 GitHub에 저장할 수 있습니다.':e.inherited?'현재는 일반 카드 사진을 사용 중이에요. 특수카드 전용 사진을 새로 업로드해 주세요.':src?'실제 카드 배치를 편집하고 있습니다.':'기본 실루엣을 표시 중입니다.';
 }
 function applyPreview(){if(!activeEditor)return;const e=activeEditor,src=editorImageSource(e);
  if(!src){delete previewCache[e.p.id];refresh();q('editor-photo-status').textContent='등록 이미지가 없어 기본 실루엣으로 표시합니다.';return}
  const old=previewCache[e.p.id];if(old?.url&&old.url.startsWith('blob:')&&old.url!==src)URL.revokeObjectURL(old.url);
  previewCache[e.p.id]={path:e.entry.path||'',rev:e.entry.rev||'',x:clamp(Number(e.entry.x)||0,-150,150),y:clamp(Number(e.entry.y)||0,-150,150),zoom:clamp(Number(e.entry.zoom)||1,.3,5),fit:photoFit(e.entry),url:src,blob:e.blob||null};
- refresh();q('editor-photo-status').textContent='✓ 도감에 즉시 적용됐습니다. 다른 방문자와 공유하려면 GitHub 저장을 누르세요.';
+ refresh();q('editor-photo-status').textContent='✓ 이 카드에만 미리보기 적용했습니다. 다른 방문자와 공유하려면 GitHub 저장을 누르세요.';
 }
 function closeEditor(){if(activeEditor?.url&&activeEditor.url.startsWith('blob:')&&previewCache[activeEditor.p.id]?.url!==activeEditor.url)URL.revokeObjectURL(activeEditor.url);activeEditor=null;q('photo-editor-bg').hidden=true;document.body.style.overflow=q('modal')&&!q('modal').hidden?'hidden':''}
 async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return;
@@ -258,6 +271,7 @@ async function saveImage(reset=false){if(!authorized||busy||!activeEditor)return
  let imageCommit=e.entry.commit||imgConfig.images?.[e.p.id]?.commit||'';
  let imageBlobSha=e.entry.blobSha||imgConfig.images?.[e.p.id]?.blobSha||'';
  if(reset){path='';rev='';imageCommit='';imageBlobSha=''}
+ else if(e.inherited&&!e.blob)throw Error('특수카드에 사용할 별도 사진을 먼저 업로드해 주세요.');
  else if(e.blob){
   path='assets/cards/'+e.p.id+'.webp';
   const arr=new Uint8Array(await e.blob.arrayBuffer());
