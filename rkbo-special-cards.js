@@ -12,7 +12,7 @@ const TYPES={
  MVP:{label:"MVP",bonus:5,metal:"#ffdc91",dark:"#915d1e"},
  RELIEF:{label:"베스트릴리프",bonus:5,metal:"#eabb74",dark:"#604725"}
 };
-const dreamTeams=new Set(["SAM","LOT","DOO","SSG"]);
+const dreamTeams=new Set(["SAM","LOT","DOO","SSG","SK"]);
 const nanumTeams=new Set(["KIA","HAN","LG","NC"]);
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clamp=(x,l,h)=>Math.max(l,Math.min(h,Number(x)||0));
@@ -202,20 +202,25 @@ async function saveBackground(){
  const entry={...image,x:Number(q("rkbo-special-x")?.value||0),y:Number(q("rkbo-special-y")?.value||0),
   zoom:Number(q("rkbo-special-zoom")?.value||1),overlay:Number(q("rkbo-special-shade")?.value||0)};
  await saveManifest(old=>({...old,backgrounds:{...old.backgrounds,[code]:entry}}),"background");
- status("✓ "+TYPES[code].label+" 등급의 공통 배경 설정이 저장되었습니다.");
+ populateBackground();status("✓ "+TYPES[code].label+" 등급의 공통 배경 설정이 저장되었습니다.");
 }
 async function removeBackground(){
  const code=q("rkbo-special-kind")?.value;
  if(!TYPES[code]||!root.confirm(TYPES[code].label+" 특수카드 배경 지정을 삭제할까요?"))return;
  await saveManifest(old=>{const b={...old.backgrounds};delete b[code];return {...old,backgrounds:b}},"delete background");
- status("✓ "+TYPES[code].label+" 배경 삭제 완료");
+ populateBackground();status("✓ "+TYPES[code].label+" 배경 삭제 완료");
 }
 function populateBackground(){
  const code=q("rkbo-special-kind")?.value,e=cfg.backgrounds[code]||{};
  for(const [id,value] of [["rkbo-special-x",e.x??0],["rkbo-special-y",e.y??0],
   ["rkbo-special-zoom",e.zoom??1],["rkbo-special-shade",e.overlay??0]]){if(q(id))q(id).value=value}
  const img=q("rkbo-special-preview");
- if(img){img.src=e.path?fileURL(e.path,e.commit,e.rev):"";img.hidden=!e.path}
+ if(img){
+  if(img.dataset.previewURL){URL.revokeObjectURL(img.dataset.previewURL);delete img.dataset.previewURL}
+  img.src=e.path?fileURL(e.path,e.commit,e.rev):"";
+  img.hidden=!e.path;img.style.objectPosition="center";img.style.transform="scale("+(e.zoom??1)+")";
+  img.style.filter="brightness("+(1-Number(e.overlay||0)/100)+")";
+ }
 }
 function makePanel(){
  if(uiReady)return;
@@ -249,6 +254,18 @@ function makePanel(){
  q("rkbo-special-zip-upload").addEventListener("click",()=>perform(uploadEmblemZip));
  q("rkbo-special-bg-save").addEventListener("click",()=>perform(saveBackground));
  q("rkbo-special-bg-remove").addEventListener("click",()=>perform(removeBackground));
+ q("rkbo-special-background-file").addEventListener("change",e=>{
+  const file=e.target.files?.[0],img=q("rkbo-special-preview");if(!img)return;
+  if(img.dataset.previewURL){URL.revokeObjectURL(img.dataset.previewURL);delete img.dataset.previewURL}
+  if(file){img.dataset.previewURL=URL.createObjectURL(file);img.src=img.dataset.previewURL;img.hidden=false}
+  else populateBackground();
+ });
+ for(const key of ["x","y","zoom","shade"])q("rkbo-special-"+key).addEventListener("input",()=>{
+  const img=q("rkbo-special-preview");if(!img||img.hidden)return;
+  img.style.objectPosition=(50+Number(q("rkbo-special-x").value)/2)+"% "+(50+Number(q("rkbo-special-y").value)/2)+"%";
+  img.style.transform="scale("+q("rkbo-special-zoom").value+")";
+  img.style.filter="brightness("+(1-Number(q("rkbo-special-shade").value)/100)+")";
+ });
  q("rkbo-special-kind").addEventListener("change",populateBackground);
  populateBackground();
 }
