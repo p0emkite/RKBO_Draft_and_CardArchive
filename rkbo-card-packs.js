@@ -2,9 +2,9 @@
  * The browser never chooses cards, determines drops or writes inventory. */
 (function(root){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-const RARITIES=["실버","골드","코랄","다이아몬드"];
+const RARITIES=["브론즈","실버","골드","코랄","다이아몬드"];
 const PRIORITIES={"실버":1,"골드":2,"코랄":3,"다이아몬드":4};
-let overlay=null,dialog=null,tab="pack",season=59,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
+let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
 const $=selector=>dialog?.querySelector(selector);
 const client=()=>root.RKBOOnline?.getClient?.();
@@ -41,10 +41,10 @@ function renderPlayer(p){
  catch(e){console.warn("[RKBO packs] render",e);return '<div class="rkbo-pack-card-missing">'+esc(p.name)+'</div>'}
 }
 function loginView(error){
- return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>Google 로그인 후 이용 가능</h3><p>'+esc(error||"카드팩 개봉 기록과 수집 도감은 계정별로 저장돼요.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
+ return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"카드팩 개봉 기록과 수집 도감은 계정별로 저장돼요.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>59·60차 선수 카드 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>60차 선수 카드 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button></nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
@@ -55,10 +55,9 @@ function renderPack(){
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>등급별 확률</b><span>실버 72% · 골드 20% · 코랄 5% · 다이아몬드 3%</span>'+
+ '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 1장 확정 + 4장 (실버 72% · 골드 20% · 코랄 5% · 다이아몬드 3%)</span>'+
  '<small>팩당 5장. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
- '<div class="rkbo-pack-season-toggle"><button type="button" data-pack-season="59" class="'+(season===59?"active":"")+'">59차 카드팩</button>'+
- '<button type="button" data-pack-season="60" class="'+(season===60?"active":"")+'">60차 카드팩</button></div>'+
+ '<div class="rkbo-pack-season-toggle"><span class="rkbo-pack-current-season">⚾ 60차 시즌 전용</span></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
   '<button type="button" class="rkbo-pack-cover" data-pack="open"><img src="https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp" alt="RKBO 카드팩 포장">'+
@@ -123,18 +122,22 @@ async function openPack(){
  const button=$('[data-pack="open"]');if(button)button.disabled=true;
  try{
   const {c}=await context();
-  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:season});
+  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:60});
   if(error)throw Error(error.message);
   if(!data||!Array.isArray(data.draws)||data.draws.length!==5)throw Error("서버 응답이 올바르지 않아요.");
   await playersFor(season);
   packResult=data;draws=data.draws;cursor=0;message("카드팩 개봉 성공! 카드를 차례로 공개합니다.");
   await refreshStats();
+  root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:60,draws:data.draws}}));
   renderPack();opening=false;
   await showNext();
  }catch(e){
   opening=false;
   message("카드팩 개봉 실패: "+e.message+" · 이미 개봉됐다면 개봉 기록에서 확인해 주세요.");
-  if(!draws.length)renderPack();
+  if(!draws.length){
+   if(/로그인|JWT|Auth session missing|session.*missing/i.test(e.message))$("#rkbo-pack-body").innerHTML=loginView("휴대폰과 PC는 Google 로그인을 각각 해야 해요. 계정은 동일하게 연결됩니다.");
+   else renderPack();
+  }
  }
 }
 async function refreshStats(){
@@ -153,10 +156,10 @@ async function loadCollection(){
  body.innerHTML='<p class="rkbo-pack-loading">도감 불러오는 중…</p>';
  try{
   const {c}=await context();
-  const {data,error}=await c.from("rkbo_pack_cards").select("card_id,season,grade,name,team,position,ovr").in("season",[59,60]).order("season",{ascending:false}).order("ovr",{ascending:false}).limit(1000);
+  const {data,error}=await c.from("rkbo_pack_cards").select("card_id,season,grade,name,team,position,ovr").eq("season",60).order("season",{ascending:false}).order("ovr",{ascending:false}).limit(1000);
   if(error)throw Error(error.message);
   catalog=data||[];
-  await Promise.all([playersFor(59),playersFor(60),refreshStats()]);
+  await Promise.all([playersFor(60),refreshStats()]);
   renderCollection();
  }catch(e){body.innerHTML=loginView(e.message)}
 }
@@ -220,7 +223,7 @@ function init(){
  dialog.addEventListener("click",async e=>{
   const target=e.target.closest("[data-pack-tab],[data-pack-season],[data-pack]");if(!target)return;
   if(target.dataset.packTab){showTab(target.dataset.packTab);return}
-  if(target.dataset.packSeason){if(!opening&&draws.length===0){season=Number(target.dataset.packSeason);renderPack()}return}
+
   const action=target.dataset.pack;
   if(action==="close"){close();return}
   if(action==="login"){close();root.RKBOOnline?.open?.("account");return}
