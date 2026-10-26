@@ -10,6 +10,40 @@ const displayGrade=g=>g;
 let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
 let packChoices=[],adminAuthorized=false,adminSeason=60,adminBusy=false;
+const PACK_COOLDOWN_MS=5500;
+let cooldownUntil=0,cooldownTimer=null;
+function remainingCooldownMs(){return Math.max(0,cooldownUntil-Date.now())}
+function beginCooldown(ms=PACK_COOLDOWN_MS){cooldownUntil=Math.max(cooldownUntil,Date.now()+ms)}
+function absorbServerCooldown(lastOpened){
+ const timestamp=Date.parse(lastOpened||"");
+ if(!Number.isFinite(timestamp))return;
+ const remaining=timestamp+PACK_COOLDOWN_MS-Date.now();
+ if(remaining>0&&remaining<=10000)cooldownUntil=Math.max(cooldownUntil,Date.now()+remaining);
+}
+function cooldownLabel(ms){return (Math.ceil(ms/100)/10).toFixed(1)+"초"}
+function updateCooldownUi(){
+ if(!overlay||overlay.hidden||tab!=="pack"||draws.length)return;
+ const remaining=remainingCooldownMs(),ready=remaining<=0;
+ const cover=$(".rkbo-pack-cover"),primary=$(".rkbo-pack-primary");
+ for(const button of [cover,primary])if(button)button.disabled=opening||!ready;
+ if(!opening){
+  if(primary)primary.textContent=ready?"⚾ 카드팩 5장 개봉":"⏳ "+cooldownLabel(remaining)+" 후 개봉 가능";
+  const caption=cover?.querySelector("span");
+  if(caption)caption.textContent=ready?"터치해서 카드팩 개봉":"다음 카드팩까지 "+cooldownLabel(remaining);
+ }
+ const note=$("#rkbo-pack-cooldown-note");
+ if(note)note.textContent=ready?"✅ 다음 카드팩 개봉 가능":
+  ("⏳ "+cooldownLabel(remaining)+" 후 다시 개봉할 수 있어요. 버튼은 자동으로 활성화됩니다.");
+}
+function startCooldownClock(){
+ if(cooldownTimer!==null)return;
+ cooldownTimer=setInterval(()=>{
+  if(!overlay||overlay.hidden){stopCooldownClock();return}
+  updateCooldownUi();
+ },100);
+}
+function stopCooldownClock(){if(cooldownTimer!==null){clearInterval(cooldownTimer);cooldownTimer=null}}
+
 const defaultPackArt="https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp";
 const packFor=n=>packChoices.find(p=>p.season===n);
 const packArt=()=>packFor(season)?.image_url||defaultPackArt;
@@ -77,10 +111,12 @@ function renderPack(){
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
   '<button type="button" class="rkbo-pack-cover" data-pack="open"><img src="'+esc(packArt())+'" alt="RKBO 카드팩 포장" onerror="this.onerror=null;this.src=\'https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp\'">'+
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
- '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening?'disabled':'')+'>'+
- (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button></div>'+
+ '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening||!draws.length&&remainingCooldownMs()>0?'disabled':'')+'>'+
+ (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button>'+
+ '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+
  '<div class="rkbo-pack-footnote">🔐 Google 로그인 필요 · 개봉 카드와 기록은 로그인한 계정에 저장 · 서버 추첨 · 5초 개봉 간격 · 유료 구매 없음</div>';
  if(draws.length)showCurrentReveal();
+ else updateCooldownUi();
 }
 function renderResult(){
  const body=$("#rkbo-pack-body");if(!body||!packResult)return;
@@ -143,22 +179,58 @@ async function showNext(){
 }
 async function openPack(){
  if(opening||draws.length)return;
+ if(remainingCooldownMs()>0){updateCooldownUi();return}
  opening=true;message("서버에서 카드 5장을 추첨하는 중…");
  const button=$('[data-pack="open"]');if(button)button.disabled=true;
+ const priorCount=packsState?.total_packs??null;
+ const requestedSeason=season;
  try{
   const {c}=await context();
-  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:season});
+  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:requestedSeason});
   if(error)throw Error(error.message);
-  if(!data||!Array.isArray(data.draws)||data.draws.length!==5)throw Error("서버 응답이 올바르지 않아요.");
-  await playersFor(season);
-  packResult=data;draws=data.draws;cursor=0;message("카드팩 개봉 성공! 카드를 차례로 공개합니다.");
-  await refreshStats();
-  root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:data.season,draws:data.draws}}));
+  if(!data||!Array.isArray(data.draws)||data.draws.length!==5)throw Error("서버 개봉 응답을 확인하지 못했습니다.");
+  beginCooldown();
+  // Treat the committed draw as successful even if rendering or inventory refresh fails.
+  packResult=data;draws=data.draws;cursor=0;
+  message("카드팩 개봉 성공! 카드를 차례로 공개합니다.");
+  try{await Promise.all([playersFor(requestedSeason),refreshStats()])}
+  catch(e){console.warn("[RKBO packs] post-open display refresh",e)}
+  try{root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:data.season,draws:data.draws}}))}
+  catch(e){console.warn("[RKBO packs] post-open event",e)}
   renderPack();opening=false;
   await showNext();
  }catch(e){
   opening=false;
-  message("카드팩 개봉 실패: "+e.message+" · 이미 개봉됐다면 개봉 기록에서 확인해 주세요.");
+  if(draws.length){message("✅ 카드 5장 개봉이 완료됐어요. 결과를 확인해 주세요.");renderPack();return}
+  if(/5초 간격|다음 카드팩은 잠시 후/.test(String(e.message))){
+   try{await refreshStats()}catch(refreshError){console.warn("[RKBO packs] cooldown refresh",refreshError)}
+   if(remainingCooldownMs()<=0)beginCooldown(PACK_COOLDOWN_MS);
+   renderPack();
+   message("⏳ 아직 개봉 간격이 남아 있어요. 카운트다운이 끝나면 다시 개봉할 수 있어요.");
+   return;
+  }
+  // A timed-out response can still represent a committed draw. Recover the
+  // already-earned five cards from history rather than making another draw.
+  try{
+   const {c,user}=await context();
+   const {data:state}=await c.from("rkbo_pack_state")
+    .select("total_packs,last_open_at").eq("user_id",user.id).maybeSingle();
+   if(state&&priorCount!==null&&Number(state.total_packs)>Number(priorCount)){
+    const {data:record}=await c.from("rkbo_pack_history")
+     .select("pack_number,season,draws").eq("user_id",user.id)
+     .eq("pack_number",Number(state.total_packs)).maybeSingle();
+    if(record&&Array.isArray(record.draws)&&record.draws.length===5){
+     packResult={packNumber:record.pack_number,season:record.season,draws:record.draws,
+      hitDiamond:record.draws.some(v=>v.grade==="다이아몬드"),recovered:true};
+     draws=record.draws;cursor=0;beginCooldown();
+     try{await Promise.all([playersFor(record.season),refreshStats()])}
+     catch(refreshError){console.warn("[RKBO packs] recovery refresh",refreshError)}
+     message("✅ 서버에서 이미 개봉된 카드 5장을 복구했어요. 추가 개봉은 하지 않았습니다.");
+     renderPack();await showNext();return;
+    }
+   }
+  }catch(recoveryError){console.warn("[RKBO packs] ambiguous RPC recovery",recoveryError)}
+  message("카드팩 개봉을 확인하지 못했어요: "+e.message+" · 개봉 기록도 함께 확인해 주세요.");
   if(!draws.length){
    if(/로그인|JWT|Auth session missing|session.*missing/i.test(e.message))$("#rkbo-pack-body").innerHTML=loginView("휴대폰과 PC는 Google 로그인을 각각 해야 해요. 계정은 동일하게 연결됩니다.");
    else renderPack();
@@ -188,6 +260,7 @@ async function refreshStats(){
  if(state.error)throw Error(state.error.message);
  owned=new Map((inventory.data||[]).map(v=>[v.card_id,v]));
  packsState=state.data||null;
+ absorbServerCooldown(packsState?.last_open_at);
 }
 async function loadCollection(){
  const body=$("#rkbo-pack-body");if(!body)return;
@@ -303,13 +376,13 @@ async function showTab(next){
  if(opening)return;
  tab=next;draws=[];cursor=0;revealToken++;frame();
  try{
-  if(tab==="pack"){await Promise.all([refreshStats(),loadPackChoices()]);if(overlay.hidden||tab!=="pack")return;frame();renderPack()}
+  if(tab==="pack"){await Promise.all([refreshStats(),loadPackChoices()]);if(overlay.hidden||tab!=="pack")return;frame();renderPack();startCooldownClock()}
   if(tab==="collection"){await loadPackChoices();frame();await loadCollection()}
   if(tab==="history")await loadHistory();
   if(tab==="admin")renderAdmin();
  }catch(e){$("#rkbo-pack-body").innerHTML=loginView(e.message)}
 }
-function close(){if(!overlay)return;overlay.hidden=true;revealToken++;document.body.classList.remove("rkbo-pack-open")}
+function close(){if(!overlay)return;overlay.hidden=true;revealToken++;stopCooldownClock();document.body.classList.remove("rkbo-pack-open")}
 function open(){if(!overlay)init();if(!overlay)return;overlay.hidden=false;tab="pack";draws=[];cursor=0;document.body.classList.add("rkbo-pack-open");frame();showTab("pack")}
 function init(){
  if(overlay)return;
