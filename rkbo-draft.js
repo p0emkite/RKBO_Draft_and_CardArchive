@@ -137,6 +137,16 @@ async function allTime(){
 async function start(){
  if(loading)return;
  loading=true;
+ // Draft can be played as a guest, but only the current browser gets a local score.
+ let signedIn=false;
+ try{
+  const c=await root.RKBOOnline?.getClient?.();
+  if(c){const {data,error}=await c.auth.getUser();signedIn=!error&&!!data?.user}
+ }catch(e){console.warn("[RKBO draft] Guest login check",e)}
+ if(document.getElementById("rkbo-draft-overlay")?.hidden){loading=false;return}
+ if(!signedIn&&!confirm("Google 로그인 없이 드래프트를 진행하면 기록이 이 브라우저에만 남고, MY RKBO와 온라인 랭킹에는 저장되지 않아요. 그래도 진행할까요?")){
+  loading=false;return;
+ }
  const t=++token;const useAll=mode==="all";
  render('<div class="rkbo-draft-loading"><div class="rkbo-draft-loading-ball">⚾</div><h3>드래프트 후보 준비 중</h3><p id="rkbo-draft-load-status">'+(useAll?"전체 시즌 카드 불러오는 중…":"이번 시즌 선수 확인 중…")+'</p></div>',"선수 풀 준비");
  try{
