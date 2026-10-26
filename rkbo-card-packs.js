@@ -359,7 +359,7 @@ function init(){
     img.src=url;
    }
   }
-  if(e.target.matches("[data-pack-season]")){if(opening)return;season=Number(e.target.value);if(tab==="collection")loadCollection();else renderPack()}
+  if(e.target.matches("[data-pack-season]")){if(opening||draws.length){e.target.value=String(season);return}season=Number(e.target.value);if(tab==="collection")loadCollection();else renderPack()}
   if(e.target.matches("[data-pack-grade]")){collectionGrade=e.target.value;collectionLimit=36;renderCollection()}
  });
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
