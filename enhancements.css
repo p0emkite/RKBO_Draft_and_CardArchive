@@ -1064,3 +1064,5 @@ body.rkbo-club-open{overflow:hidden}
  border-color:#556475;box-shadow:none;
 }
 .card-download:disabled:hover{transform:none;filter:grayscale(.3)}
+
+.rkbo-pack-guest-warning{font-size:12px;line-height:1.7;color:#ffe0b2;background:#382b1c;border:1px solid #9f7c4e;border-radius:9px;padding:12px;margin:12px 0}
