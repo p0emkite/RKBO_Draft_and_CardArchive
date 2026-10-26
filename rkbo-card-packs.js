@@ -4,7 +4,7 @@
 const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const RARITIES=["브론즈","실버","골드","코랄","다이아몬드"];
 const PRIORITIES={"브론즈":0,"실버":1,"골드":2,"코랄":3,"다이아몬드":4};
-const displayGrade=g=>g==="코랄"?"플래티넘":g;
+const displayGrade=g=>g;
 let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
 const $=selector=>dialog?.querySelector(selector);
@@ -56,8 +56,8 @@ function renderPack(){
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 50% · 실버 30% · 골드 15% · 플래티넘 4% · 다이아몬드 1%</span>'+
- '<small>5장 모두 개별 확률 적용. 플래티넘은 기존 코랄 선수 카드에 해당해요. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
+ '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 45% · 실버 30% · 골드 15% · 코랄 7% · 다이아몬드 3%</span>'+
+ '<small>5장 모두 개별 확률 적용. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
  '<div class="rkbo-pack-season-toggle"><span class="rkbo-pack-current-season">⚾ 60차 시즌 전용</span></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
