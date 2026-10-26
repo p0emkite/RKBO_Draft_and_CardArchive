@@ -346,6 +346,14 @@ function init(){
  dialog.addEventListener("change",e=>{
   if(e.target.matches("[data-pack-filter]")){collectionFilter=e.target.value;collectionLimit=36;renderCollection()}
   if(e.target.matches("[data-admin-season]")){adminSeason=Number(e.target.value);renderAdmin()}
+  if(e.target.matches("#rkbo-admin-image")){
+   const file=e.target.files?.[0],img=$("#rkbo-pack-body .rkbo-pack-admin-art img");
+   if(file&&img){
+    const url=URL.createObjectURL(file);
+    img.onload=()=>URL.revokeObjectURL(url);
+    img.src=url;
+   }
+  }
   if(e.target.matches("[data-pack-season]")){if(opening)return;season=Number(e.target.value);if(tab==="collection")loadCollection();else renderPack()}
   if(e.target.matches("[data-pack-grade]")){collectionGrade=e.target.value;collectionLimit=36;renderCollection()}
  });
