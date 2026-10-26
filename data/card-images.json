@@ -380,6 +380,16 @@
       "rev": "mvpf1zxq",
       "commit": "866a6404d288ab4d9966ed400bcf961ff52e4ef2",
       "blobSha": "db29ad64f05464e3a1b28a801c42c82f4b617a36"
+    },
+    "60-SAM-타-006-SPECIAL-DREAM": {
+      "path": "assets/cards/60-SAM-타-006-SPECIAL-DREAM.webp",
+      "x": -2.476780185758514,
+      "y": 35.8974358974359,
+      "zoom": 2.745512286165831,
+      "fit": "contain",
+      "rev": "mvpf2hmj",
+      "commit": "f5ea81a65d0a9f4c3b94b91b15bca995cd0d4401",
+      "blobSha": "29964c18651473918e863a401d2a1523e88a3236"
     }
   }
 }
