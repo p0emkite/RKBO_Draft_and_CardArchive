@@ -583,3 +583,82 @@ body.rkbo-my-open{overflow:hidden}
 #rkbo-my-status{color:#9edbc0;font-size:12px;margin:14px 0 0}
 .rkbo-draft-my-save{background:#255a4a!important;border-color:#76c39f!important;color:#fff!important;font-weight:900}
 @media(max-width:650px){.rkbo-my-overlay{padding:4px 0}.rkbo-my-panel{border-radius:0;border-left:0;border-right:0;min-height:100vh}.rkbo-my-head{padding:17px 14px}.rkbo-my-head h2{font-size:23px}.rkbo-my-body{padding:14px}.rkbo-my-roster{grid-template-columns:1fr}.rkbo-my-title strong{font-size:16px}}
+
+
+/* RKBO Card Packs: reference-inspired free five-card reveal and personal collection. */
+.rkbo-pack-nav{padding:9px 13px;border:1px solid #9f7ad0;border-radius:9px;background:linear-gradient(120deg,#553b74,#252a54);color:#f8e7ff;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+.rkbo-pack-overlay[hidden]{display:none!important}
+.rkbo-pack-overlay{position:fixed;inset:0;z-index:2300;background:#020711ef;backdrop-filter:blur(13px);display:flex;justify-content:center;align-items:flex-start;overflow:auto;padding:19px 10px 45px;color:#f0f7ff}
+body.rkbo-pack-open{overflow:hidden}
+.rkbo-pack-dialog{width:min(970px,100%);min-height:500px;background:#0b1628;border:1px solid #476180;border-radius:16px;overflow:hidden;box-shadow:0 24px 95px #000e}
+.rkbo-pack-header{display:flex;justify-content:space-between;align-items:center;gap:15px;background:linear-gradient(110deg,#162c4b,#291e4d);padding:19px 22px;border-bottom:1px solid #435b7c}
+.rkbo-pack-header small{letter-spacing:.21em;color:#a3c9ea;font-weight:900;font-size:10px}
+.rkbo-pack-header h2{margin:6px 0;font-size:26px;color:#fff}
+.rkbo-pack-header p{margin:0;color:#abbfdb;font-size:12px}
+.rkbo-pack-header>button{flex:none;font-size:24px;background:#223851;border:1px solid #6b91a8;border-radius:10px;width:45px;height:45px;color:#fff;cursor:pointer}
+.rkbo-pack-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:13px 18px;border-bottom:1px solid #314960}
+.rkbo-pack-tabs button,.rkbo-pack-season-toggle button{border:1px solid #335b7a;color:#b8cde1;background:#152c40;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer}
+.rkbo-pack-tabs button.active,.rkbo-pack-season-toggle button.active{background:#28617e;color:#fff;border-color:#8cd2f7}
+.rkbo-pack-body{padding:18px}
+.rkbo-pack-status{min-height:20px;padding:0 18px 15px;color:#a2d6ef;font-size:12px}
+.rkbo-pack-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rkbo-pack-summary>div{background:#142b44;border:1px solid #3e5772;border-radius:11px;padding:11px 15px;display:flex;flex-direction:column;gap:4px}
+.rkbo-pack-summary small{font-size:11px;color:#a9bdd1}
+.rkbo-pack-summary strong{font-size:21px;color:#ffe0a5;font-variant-numeric:tabular-nums}
+.rkbo-pack-odds{background:#111f34;border:1px solid #324965;border-radius:10px;margin:13px 0;padding:13px 15px;display:flex;flex-wrap:wrap;gap:7px 14px;font-size:12px}
+.rkbo-pack-odds>b{color:#fff5bf}.rkbo-pack-odds>span{color:#cbe8ff}.rkbo-pack-odds>small{display:block;width:100%;color:#93aec5;line-height:1.6}
+.rkbo-pack-season-toggle{display:flex;justify-content:center;gap:9px;margin:15px 0}
+.rkbo-pack-stage{width:min(100%,650px);min-height:460px;margin:0 auto;display:flex;position:relative;align-items:center;justify-content:center;border-radius:16px;border:1px solid #35435f;background:radial-gradient(circle at 50% 38%,#345684 0,#1b2146 34%,#060c1b 80%);overflow:hidden}
+.rkbo-pack-aura{position:absolute;inset:0;background:radial-gradient(circle at 50% 32%,#ba85f61e,transparent 55%);pointer-events:none}
+.rkbo-pack-cover{position:relative;background:transparent;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;color:#ddf0ff;font-weight:900;gap:12px;padding:14px}
+.rkbo-pack-cover img{height:min(335px,45vh);max-width:90%;object-fit:contain;filter:drop-shadow(0 18px 38px #000b);transition:transform .28s ease}
+.rkbo-pack-cover:hover img{transform:translateY(-7px) rotate(-2deg) scale(1.03)}
+.rkbo-pack-cover span{font-size:12px;letter-spacing:.04em}
+.rkbo-pack-controls{text-align:center;margin:17px auto 4px}
+.rkbo-pack-controls button,.rkbo-pack-result-buttons button{padding:13px 21px;border:1px solid #b7b5e8;border-radius:10px;color:#fff;background:linear-gradient(120deg,#4474a3,#7154a4);font-size:14px;font-weight:900;cursor:pointer}
+.rkbo-pack-controls button:disabled{opacity:.55;cursor:default}
+.rkbo-pack-footnote{text-align:center;color:#8faabc;font-size:11px;margin:10px auto}
+.rkbo-pack-prelude{text-align:center;position:relative;animation:rkbo-pack-pop .55s cubic-bezier(.2,1,.35,1) both;display:flex;align-items:center;flex-direction:column;gap:14px;font-weight:900;color:#fff}
+.rkbo-pack-prelude img{height:95px;width:95px;object-fit:contain;filter:drop-shadow(0 0 25px #70d5ffaa)}
+.rkbo-pack-prelude>div{font-size:34px}.rkbo-pack-prelude>strong{font-size:35px;letter-spacing:.12em}
+.rkbo-pack-prelude.rarity-코랄>strong{color:#F6909D;text-shadow:0 0 25px #f6909d}
+.rkbo-pack-prelude.rarity-다이아몬드>strong{color:#90ecff;text-shadow:0 0 26px #90ecff}
+@keyframes rkbo-pack-pop{from{opacity:0;transform:translateY(20px) scale(.7)}to{opacity:1;transform:translateY(0) scale(1)}}
+#rkbo-pack-reveal{display:flex;flex-direction:column;align-items:center;padding:18px;z-index:1}
+.rkbo-pack-reveal-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0e2037d9;color:#fff;border:1px solid #5f849f;border-radius:9px;padding:9px 15px;width:100%;margin-bottom:14px;font-size:12px}
+.rkbo-pack-reveal-heading strong{font-size:17px}
+.rkbo-pack-reveal-heading.rarity-다이아몬드 strong{color:#90ecff}
+.rkbo-pack-reveal-heading.rarity-코랄 strong{color:#F6909D}
+.rkbo-pack-revealed-card{width:min(270px,72vw);animation:rkbo-pack-pop .5s ease}
+.rkbo-pack-revealed-card .player-card{width:100%!important;margin:0;pointer-events:none}
+.rkbo-pack-ready{color:#e7effd;font-size:17px;font-weight:900}
+.rkbo-pack-results h3{font-size:23px;margin:0 0 7px}.rkbo-pack-results>p{color:#b4cce0}
+.rkbo-pack-result-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:16px 0}
+.rkbo-pack-result-tile{display:flex;flex-direction:column;gap:7px;min-height:120px;background:#1a3047;border:1px solid #73819d;border-radius:9px;padding:13px 9px}
+.rkbo-pack-result-tile>span{font-size:11px;color:#cbd9ee;font-weight:900}.rkbo-pack-result-tile>strong{font-size:13px;overflow-wrap:anywhere;color:#fff}.rkbo-pack-result-tile>small{font-size:11px;color:#a4becd}
+.rkbo-pack-result-tile.rarity-다이아몬드{border-color:#90ecff;box-shadow:0 0 21px #90ecff36}
+.rkbo-pack-result-tile.rarity-코랄{border-color:#F6909D;box-shadow:0 0 14px #F6909D36}
+.rkbo-pack-result-tile.rarity-골드{border-color:#f4cf74}
+.rkbo-pack-result-buttons{display:flex;gap:11px;flex-wrap:wrap;margin:18px 0}
+.rkbo-pack-login,.rkbo-pack-loading{text-align:center;padding:48px 18px;color:#c7d6ec}
+.rkbo-pack-login h3{color:#fff}.rkbo-pack-login button{background:#2b6e89;color:#fff;border:1px solid #79bbd2;border-radius:10px;padding:11px 18px}
+.rkbo-pack-lock-icon{font-size:38px}
+.rkbo-pack-collect-head{display:flex;align-items:center;flex-wrap:wrap;gap:9px 16px}
+.rkbo-pack-collect-head h3{margin:0;color:#fff}
+.rkbo-pack-collect-head strong{color:#ffdf9d}
+.rkbo-pack-collect-head p{font-size:12px;color:#abc3d7;width:100%;margin:0}
+.rkbo-pack-collect-controls{display:flex;gap:9px;margin:17px 0}
+.rkbo-pack-collect-controls select{background:#183348;color:#fff;border:1px solid #5882a0;border-radius:8px;padding:10px 13px}
+.rkbo-pack-collection-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.rkbo-pack-collection-item{min-width:0;position:relative}
+.rkbo-pack-collection-card .player-card{width:100%!important;min-width:0!important;pointer-events:none}
+.rkbo-pack-owned-label{display:block;text-align:center;background:#264c62;color:#f2d49b;border-radius:5px;font-size:12px;font-weight:800;padding:6px;margin-top:5px}
+.rkbo-pack-silhouette{height:310px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;color:#9fb5d0;border:1px solid #364764;border-radius:13px;background:radial-gradient(circle,#26354d,#050b17 80%);filter:grayscale(.65)}
+.rkbo-pack-silhouette span{font-size:40px;opacity:.75}.rkbo-pack-silhouette strong{font-size:27px;color:#566980;letter-spacing:.16em}.rkbo-pack-silhouette small{font-size:11px}
+.rkbo-pack-more{background:#233d57;color:#fff;border:1px solid #668ca5;border-radius:9px;padding:10px 20px;margin:16px auto;display:block}
+.rkbo-pack-history-entry{background:#132a3e;border:1px solid #426481;border-radius:12px;padding:13px;margin:11px 0}
+.rkbo-pack-history-entry h3{font-size:14px;margin:0 0 10px;color:#fff}.rkbo-pack-history-entry h3 small{color:#9cb8ca;font-weight:400}
+.rkbo-pack-history-entry>div{display:flex;flex-wrap:wrap;gap:7px}.rkbo-pack-history-entry span{font-size:11px;color:#fff;background:#203c53;border-radius:5px;padding:7px 9px}
+.rkbo-pack-history-entry span.rarity-다이아몬드{color:#90ecff}.rkbo-pack-history-entry span.rarity-코랄{color:#F6909D}.rkbo-pack-history-entry span.rarity-골드{color:#f4cf74}
+@media(max-width:760px){.rkbo-pack-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-pack-result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rkbo-pack-stage{min-height:410px}}
+@media(max-width:540px){.rkbo-pack-overlay{padding:3px 0}.rkbo-pack-dialog{border-radius:0;min-height:100vh;border-left:0;border-right:0}.rkbo-pack-header{padding:17px 12px}.rkbo-pack-header h2{font-size:21px}.rkbo-pack-body{padding:10px}.rkbo-pack-tabs{padding:10px}.rkbo-pack-tabs button{padding:9px 12px;font-size:11px}.rkbo-pack-summary>div{padding:9px}.rkbo-pack-summary strong{font-size:17px}.rkbo-pack-summary small{font-size:10px}.rkbo-pack-collection-grid{gap:7px}.rkbo-pack-silhouette{height:245px}.rkbo-pack-odds{font-size:11px}.rkbo-pack-stage{min-height:395px}}
