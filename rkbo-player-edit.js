@@ -4,6 +4,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const positions={타자:[["C","포수"],["1B","1루수"],["2B","2루수"],["3B","3루수"],["SS","유격수"],["LF","좌익수"],["CF","중견수"],["RF","우익수"]],투수:[["SP","선발"],["RP","중계"],["CP","마무리"]]};
 let saving=false;
 function mount(p){
+ if(p?.specialKind)return; // Award variants inherit the canonical player's original name/position.
  if(!root.RKBOAdminBridge?.isAuthorized?.())return;
  const el=document.querySelector("#modal-body .detail-stats");if(!el||el.querySelector("#rkbo-meta-editor"))return;
  const form=document.createElement("section");form.id="rkbo-meta-editor";form.className="rkbo-meta-editor";
