@@ -170,6 +170,12 @@ begin
  if v_user is null or coalesce(auth.jwt()->>'role','')<>'authenticated'
  or coalesce((auth.jwt()->>'is_anonymous')::boolean,false)
  then raise exception 'Google 로그인이 필요합니다' using errcode='28000';end if;
+ -- Avoid race-condition spam: one server match per account every ten seconds.
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext(v_user::text)::bigint);
+ if exists(select 1 from public.rkbo_owned_matches m
+           where m.user_id=v_user and m.created_at>now()-interval '10 seconds') then
+  raise exception '다음 경기는 10초 후에 시작할 수 있어요' using errcode='22023';
+ end if;
  select * into v_team from public.rkbo_owned_teams where id=p_team_id and user_id=v_user;
  if not found then raise exception '먼저 본인 MY TEAM을 저장해 주세요' using errcode='22023';end if;
  select count(*) into v_validation from jsonb_array_elements(v_team.slots) j
