@@ -6,6 +6,12 @@
       "baseId": "60-SAM-타-012",
       "kind": "ROY",
       "createdAt": "2026-10-26T14:14:34.321Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-KIA-투-003",
+      "kind": "RELIEF",
+      "createdAt": "2026-10-26T14:39:24.588Z"
     }
   ],
   "backgrounds": {
