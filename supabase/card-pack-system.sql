@@ -74,8 +74,10 @@ begin
  if v_user is null or coalesce(v_role,'') <> 'authenticated' or coalesce((auth.jwt()->>'is_anonymous')::boolean,false) then
   raise exception 'Google 로그인이 필요합니다' using errcode='28000';
  end if;
- if p_season <> 60 then
-  raise exception '현재 카드팩은 60차 시즌만 지원합니다' using errcode='22023';
+ if p_season is null or not exists(
+  select 1 from public.rkbo_pack_settings where season=p_season and active
+ ) then
+  raise exception '선택한 시즌의 카드팩은 현재 개봉할 수 없습니다' using errcode='22023';
  end if;
  insert into public.rkbo_pack_state(user_id) values(v_user) on conflict do nothing;
  select * into strict v_state from public.rkbo_pack_state where user_id=v_user for update;
