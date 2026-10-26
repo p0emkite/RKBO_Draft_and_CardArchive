@@ -11,7 +11,7 @@ const hue={"브론즈":"#b8866d","실버":"#b9cbdd","골드":"#efc26b","코랄":
 const fmt=n=>Number(n||0).toLocaleString("ko-KR",{maximumFractionDigits:2,minimumFractionDigits:2});
 let overlay=null,dialog=null,inventory=[],history=[],selected=[],quote=null,result=null;
 let busy=false,loading=false,quoteLoading=false,quoteError="",notice="",filterSeason="all",filterGrade="all",search="";
-let quoteIndex=0,pendingRequest=null;
+let quoteIndex=0,pendingRequest=null,resultArtwork="",artworkCache=new Map();
 const client=()=>root.RKBOOnline?.getClient?.();
 async function context(){
  if(!client())throw Error("RKBO ONLINE Google 로그인이 필요합니다.");
@@ -69,6 +69,7 @@ function resultMarkup(){
  return '<section class="rkbo-combo-success">'+
  '<div class="rkbo-combo-award"><small>⚾ COMBINATION RESULT</small><h3>🎉 '+esc(p.grade)+' 획득!</h3>'+
  '<strong>'+esc(p.season)+'차 '+esc(p.name)+'</strong><p>OVR '+esc(p.ovr)+' · 조합 점수 '+esc(result.points)+'</p>'+
+ '<div class="rkbo-combo-winning-art">'+(resultArtwork||'<span>선수 카드 이미지 불러오는 중…</span>')+'</div>'+
  '<div><button type="button" data-combo-detail="'+esc(p.cardId)+'">선수 카드 상세 보기</button>'+
  '<button type="button" data-combo-again>다시 조합하기</button></div></div></section>';
 }
@@ -172,17 +173,45 @@ async function combine(){
   const {data,error}=await c.rpc("rkbo_combine_cards",{p_card_ids:ingredients,p_request_id:requestId});
   if(error)throw Error(error.message);
   if(!data?.result?.cardId)throw Error("조합 결과를 확인할 수 없습니다.");
-  result=data;pendingRequest=null;selected=[];quote=null;quoteLoading=false;
+  result=data;resultArtwork="";pendingRequest=null;selected=[];quote=null;quoteLoading=false;
   msg(data.replayed?"저장된 조합 결과를 복구했어.":"✅ 조합 성공! 새 카드가 수집 도감에 지급됐어.");
   render();
   root.dispatchEvent(new Event("rkbo-collection-updated"));
   try{await loadData()}catch(e){console.warn("[RKBO combine] inventory refresh",e)}
+  await loadWinningArt(data.result.cardId);
  }catch(e){
   msg("조합 확인 실패: "+e.message+" · 동일 요청으로 다시 시도하면 중복 차감되지 않아.");
   // Keep selection/requestId until manually retried. Avoid misleading users
   // if a server commit succeeded but its HTTP response was lost.
   quote=rated;quoteLoading=false;render();
  }finally{busy=false;render()}
+}
+async function loadWinningArt(cardId){
+ try{
+  const season=Number(String(cardId||"").split("-")[0]);
+  if(!Number.isInteger(season)||season<1||season>60)return;
+  let cards=artworkCache.get(season);
+  if(!cards){
+   if(season===60)cards=(root.RKBOSeason?.builtin?.()||[]).map(p=>({...p}));
+   else{
+    const response=await fetch("./data/seasons/"+season+".json",{cache:"force-cache"});
+    if(!response.ok)throw Error("경기 시즌 카드 데이터를 불러올 수 없습니다");
+    const data=await response.json();
+    cards=(Array.isArray(data)?data:data.players||[]).map(p=>({...p}));
+   }
+   await root.RKBONameMap?.apply?.(cards,null);
+   root.RKBOTeamBrand?.decorate?.(cards);
+   cards=root.RKBOCardSpecials?.addTo?.(cards,season)||cards;
+   artworkCache.set(season,cards);
+  }
+  const player=cards.find(p=>p.id===cardId);
+  if(!player)return;
+  resultArtwork=root.RKBOCardView?.render?.(player,true)||"";
+  if(result?.result?.cardId===cardId)render();
+ }catch(e){console.warn("[RKBO combo] Award card art",e);
+  resultArtwork='<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>';
+  if(result?.result?.cardId===cardId)render();
+ }
 }
 async function detail(cardId){
  const n=Number(String(cardId||"").split("-")[0]);
@@ -197,7 +226,7 @@ function close(){if(!overlay)return;overlay.hidden=true;document.body.classList.
 function open(){
  if(!overlay)init();
  overlay.hidden=false;document.body.classList.add("rkbo-combo-open");
- selected=[];quote=null;result=null;quoteLoading=false;quoteError="";notice="";
+ selected=[];quote=null;result=null;resultArtwork="";quoteLoading=false;quoteError="";notice="";
  filterSeason="all";filterGrade="all";search="";
  render();loadData();
 }
