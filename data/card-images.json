@@ -63,13 +63,13 @@
     },
     "60-KIA-투-006": {
       "path": "assets/cards/60-KIA-투-006.webp",
-      "x": -4,
-      "y": 22.62773722627737,
-      "zoom": 1.8115660699217626,
+      "x": -1.2307692307692308,
+      "y": 21.532846715328464,
+      "zoom": 1.3956792272195706,
       "fit": "contain",
-      "rev": "mvmic2us",
-      "commit": "59152ed353d20f09aceb210567e073dbd460e5c6",
-      "blobSha": "2fd19fd83e7e3c671e4487c107bc4d70848d7973"
+      "rev": "mvpe6nwo",
+      "commit": "20e74e1e2fd190ac62b8cb057eceaeb5c3b50b85",
+      "blobSha": "bddc1d0a50474253ad625a46bde08f5f7bb64c90"
     },
     "60-KIA-투-003": {
       "path": "assets/cards/60-KIA-투-003.webp",
