@@ -203,9 +203,14 @@ function renderCollection(){
  '<option value="owned" '+(collectionFilter==="owned"?"selected":"")+'>보유 카드</option><option value="missing" '+(collectionFilter==="missing"?"selected":"")+'>미보유 카드</option></select>'+
  '<select data-pack-grade aria-label="등급"><option value="all">모든 등급</option>'+RARITIES.map(g=>'<option value="'+esc(g)+'" '+(collectionGrade===g?"selected":"")+'>'+esc(displayGrade(g))+'</option>').join("")+'</select></div>'+
  '<div class="rkbo-pack-collection-grid">'+filtered.slice(0,collectionLimit).map(c=>{
- const count=owned.get(c.card_id)||0,p=cache.get(c.season)?.get(c.card_id);
- return '<div class="rkbo-pack-collection-item '+(count?"is-owned":"is-locked")+'">'+
-  (count?'<div class="rkbo-pack-collection-card">'+renderPlayer(p)+'</div><span class="rkbo-pack-owned-label">보유 ×'+count+'</span>':
+ const inv=owned.get(c.card_id),count=inv?.quantity||0,p=cache.get(c.season)?.get(c.card_id);
+ return '<div class="rkbo-pack-collection-item '+(inv?"is-owned":"is-locked")+'">'+
+  (inv?'<div class="rkbo-pack-collection-card '+(inv.gold_border?'rkbo-gold-border ':'')+(inv.prism?'rkbo-prism ':'')+'">'+renderPlayer(p)+'</div>'+
+   '<span class="rkbo-pack-owned-label">잔여 ×'+count+(inv.gold_border?' · ✨ 금테':'')+(inv.prism?' · 🌈 프리즘':'')+'</span>'+
+   '<div class="rkbo-pack-upgrade-actions">'+
+   (!inv.gold_border?'<button data-pack-upgrade="gold" data-pack-card="'+esc(c.card_id)+'" '+(count<5?'disabled':'')+'>✨ 금테 (5장)</button>':'')+
+   (!inv.prism?'<button data-pack-upgrade="prism" data-pack-card="'+esc(c.card_id)+'" '+(count<10?'disabled':'')+'>🌈 프리즘 (10장)</button>':'')+
+   '</div>':
   '<div class="rkbo-pack-silhouette"><span>🔒</span><strong>???</strong><small>'+esc(c.season)+'차 · 미보유</small></div>')+
  '</div>';
  }).join("")+'</div>'+
@@ -259,6 +264,20 @@ function init(){
   if(action==="reset"){draws=[];cursor=0;packResult=null;await showTab("pack");return}
   if(action==="collection"){await showTab("collection");return}
   if(action==="more"){collectionLimit+=36;renderCollection()}
+ });
+ dialog.addEventListener("click",async e=>{
+  const btn=e.target.closest("[data-pack-upgrade]");if(!btn||opening)return;
+  const kind=btn.dataset.packUpgrade,id=btn.dataset.packCard,cost=kind==="gold"?5:10;
+  if(!confirm("이 선수 카드 "+cost+"장을 소모해 "+(kind==="gold"?"금색 외곽 테두리":"프리즘 표면 효과")+"를 영구 적용할까요?"))return;
+  btn.disabled=true;
+  try{
+   const {c}=await context();
+   const {error}=await c.rpc("rkbo_upgrade_card",{p_card_id:id,p_kind:kind});
+   if(error)throw Error(error.message);
+   await refreshStats();renderCollection();
+   root.dispatchEvent(new Event("rkbo-collection-updated"));
+   message("강화 성공! 카드 "+cost+"장을 소모했어요.");
+  }catch(err){btn.disabled=false;message("강화 실패: "+err.message)}
  });
  dialog.addEventListener("change",e=>{
   if(e.target.matches("[data-pack-filter]")){collectionFilter=e.target.value;collectionLimit=36;renderCollection()}
