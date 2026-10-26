@@ -86,7 +86,8 @@ function setup(){
   '<button type="button" data-draft-action="mode-all" class="rkbo-draft-mode"><strong>올타임 드래프트</strong><small>등록된 모든 시즌을 섞어서</small></button></div>'+
   '<label class="rkbo-draft-hide-option"><input type="checkbox" id="rkbo-draft-hide-toggle" '+(hiddenMode?"checked":"")+'><span><strong>OVR · 등급 숨기기</strong><small>카드 선택 중엔 OVR·등급·모든 능력치가 ??로 보이고 카드 테두리가 검정색으로 바뀝니다. 결과창에서 공개됩니다.</small></span></label>'+
   '<div class="rkbo-draft-rules"><span>포지션 랜덤 추첨</span><span>매번 카드 3장</span><span>다시 뽑기 총 3회</span><span>한 포지션에 1회만</span></div>'+
-  '<div class="rkbo-draft-start-actions"><button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button><button class="rkbo-draft-board-link" data-draft-action="board" type="button">🏆 스코어보드</button></div></div></div>',
+  '<div class="rkbo-draft-start-actions"><button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button><button class="rkbo-draft-board-link" data-draft-action="board" type="button">🏆 스코어보드</button></div>'+ 
+  '<p class="rkbo-draft-guest-warning">🔐 Google 로그인 없이도 체험할 수 있지만, 드래프트 기록은 현재 브라우저에만 저장돼요. 계정별 MY RKBO 팀 저장과 온라인 랭킹 등록은 로그인 후 이용할 수 있어요.</p></div></div>',
   "시즌 선택 · 18인 로스터 구성");
 }
 function selectedCount(){return state?.picks?.size||0}
