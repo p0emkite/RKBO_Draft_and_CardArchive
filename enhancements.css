@@ -1207,3 +1207,102 @@ body.rkbo-pack-open .dialog-bg:not([hidden]){z-index:2700}
  }
  .rkbo-pack-detail-hint{font-size:9px}
 }
+
+
+/* RKBO CARD COMBINATION 1.0 — separate secure collection workflow */
+.rkbo-combo-overlay[hidden]{display:none!important}
+.rkbo-combo-overlay{position:fixed;inset:0;z-index:2500;background:#040b13e8;
+ display:flex;align-items:center;justify-content:center;padding:20px}
+.rkbo-combo-dialog{width:min(1120px,100%);max-height:min(94vh,960px);overflow:auto;
+ border-radius:17px;border:1px solid #436780;background:#0d1c2f;
+ color:#e8f2fc;box-shadow:0 30px 110px #000c}
+body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
+.rkbo-combo-header{display:flex;align-items:center;justify-content:space-between;gap:14px;
+ padding:17px 23px;background:linear-gradient(115deg,#142f43,#34305a);
+ border-bottom:1px solid #55768c}
+.rkbo-combo-header small{font-size:10px;letter-spacing:.14em;color:#a8ccdb;font-weight:900}
+.rkbo-combo-header h2{margin:4px 0;font-size:23px;color:#ffdc98}
+.rkbo-combo-header p{font-size:12px;color:#a9c7db;margin:0}
+.rkbo-combo-header button{border:1px solid #6d8da4;background:#224155;color:#e6f3fa;border-radius:8px;
+ font-size:23px;width:39px;height:39px}
+.rkbo-combo-content{padding:20px}
+.rkbo-combo-rules{padding:12px 15px;background:#152e42;border:1px solid #3c6981;border-radius:10px;
+ color:#c2dcea;font-size:12px;line-height:1.9;margin-bottom:17px}
+.rkbo-combo-rules b{color:#ffe0a5}
+.rkbo-combo-layout{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(290px,.93fr);gap:14px}
+.rkbo-combo-list,.rkbo-combo-config{background:#10273a;border:1px solid #385c73;
+ border-radius:12px;min-width:0;padding:15px}
+.rkbo-combo-list h3,.rkbo-combo-config h3,.rkbo-combo-history h3{color:#eefaff;font-size:15px;
+ margin:0 0 13px}
+.rkbo-combo-list h3 small,.rkbo-combo-config h3 small{color:#94b4c9;font-size:11px}
+.rkbo-combo-filters{display:flex;gap:8px;margin-bottom:9px}
+.rkbo-combo-filters select,.rkbo-combo-list input{padding:10px;border-radius:8px;border:1px solid #537f99;
+ background:#091c2e;color:#edf8ff;font-size:12px;min-width:0;width:100%}
+.rkbo-combo-filters select{width:50%}
+.rkbo-combo-candidates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+ margin-top:11px;max-height:390px;overflow:auto;align-content:start}
+.rkbo-combo-candidate{background:#142c42;color:#edf7ff;border:1px solid #466882;
+ padding:10px;border-radius:9px;display:flex;flex-direction:column;gap:4px;
+ text-align:left;min-width:0;min-height:106px;cursor:pointer}
+.rkbo-combo-candidate strong{font-size:13px;overflow:hidden;text-overflow:ellipsis}
+.rkbo-combo-candidate span{color:#a7c2d5;font-size:11px}
+.rkbo-combo-candidate .rkbo-combo-grade{font-weight:950;color:#f4c980}
+.rkbo-combo-candidate small{font-size:10px;color:#86e7ce}
+.rkbo-combo-candidate:disabled{opacity:.43;cursor:not-allowed}
+.rkbo-combo-candidate:not(:disabled):hover{border-color:#f0bd76;background:#243a4a}
+.rkbo-combo-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.rkbo-combo-slots button{min-height:91px;min-width:0;border-radius:8px;padding:7px 4px;
+ background:#081b2c;border:1px dashed #56728b;color:#e8f5ff;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.rkbo-combo-slots button.filled{background:#2b3440;border:1px solid #c89a60;cursor:pointer}
+.rkbo-combo-slots button small{font-size:9px;line-height:1.2;text-align:center;color:#b5d0da}
+.rkbo-combo-slots button strong{font-size:10px;text-align:center;word-break:keep-all;overflow-wrap:anywhere}
+.rkbo-combo-slots button span{font-size:10px;color:#e5b567}
+.rkbo-combo-slots .rkbo-combo-plus{font-size:24px;color:#6889a2}
+.rkbo-combo-points{display:flex;justify-content:space-between;align-items:center;
+ margin:14px 0;padding:10px 12px;background:#1c3950;border-radius:9px}
+.rkbo-combo-points span{font-size:12px;color:#c5dcec}
+.rkbo-combo-points strong{font-size:24px;color:#ffe0a5;font-variant-numeric:tabular-nums}
+.rkbo-combo-odds{display:grid;gap:10px;margin:13px 0}
+.rkbo-combo-odd>div:first-child{display:flex;justify-content:space-between;
+ font-size:12px;color:#d4e6f0;margin-bottom:4px}
+.rkbo-combo-odd strong{font-variant-numeric:tabular-nums}
+.rkbo-combo-meter{width:100%;height:7px;background:#071421;overflow:hidden;border-radius:999px}
+.rkbo-combo-meter i{height:100%;display:block;border-radius:999px;transition:width .2s}
+.rkbo-combo-hint,.rkbo-combo-error{border:1px solid #3f6882;background:#16344a;
+ color:#b7d7e4;padding:12px;border-radius:9px;font-size:12px;line-height:1.7}
+.rkbo-combo-error{color:#ffb8af;border-color:#a75b54}
+.rkbo-combo-submit,.rkbo-combo-award button{border:1px solid #d0a46b;border-radius:9px;
+ background:linear-gradient(120deg,#755028,#a67637);color:#fff4d9;padding:12px 17px;
+ font-size:13px;font-weight:900;cursor:pointer}
+.rkbo-combo-submit{width:100%;margin-top:14px}
+.rkbo-combo-submit:disabled{opacity:.5;cursor:not-allowed}
+.rkbo-combo-note{color:#9ebacb;line-height:1.7;font-size:11px;margin:10px 0 0}
+.rkbo-combo-status{font-size:12px;color:#ffe3b7;line-height:1.6;min-height:20px}
+.rkbo-combo-success{border:1px solid #e2b46a;background:linear-gradient(130deg,#493722,#19374c);
+ border-radius:13px;padding:18px;margin-bottom:18px;text-align:center;box-shadow:0 0 24px #cc995430}
+.rkbo-combo-award small{color:#ffdf9e;letter-spacing:.1em}
+.rkbo-combo-award h3{margin:6px 0;font-size:23px;color:#ffde8f}
+.rkbo-combo-award strong{font-size:16px}
+.rkbo-combo-award p{font-size:12px;color:#d1e4e8}
+.rkbo-combo-award div{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.rkbo-combo-history{margin-top:17px;border-top:1px solid #395368;padding-top:17px}
+.rkbo-combo-history>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+ padding:11px 8px;border-bottom:1px solid #2d4b62;font-size:12px}
+.rkbo-combo-history>div span{flex:1;color:#9db7ca}
+.rkbo-combo-history>div strong{color:#e9d8af}
+.rkbo-combo-history button{border:1px solid #5882a4;border-radius:7px;background:#19415b;
+ color:#d9f2ff;padding:6px 9px;font-size:11px;cursor:pointer}
+.rkbo-combo-history p{color:#adc1d0;font-size:12px}
+@media(max-width:760px){
+ .rkbo-combo-overlay{padding:7px;align-items:stretch}
+ .rkbo-combo-dialog{max-height:calc(100dvh - 14px);border-radius:11px}
+ .rkbo-combo-layout{grid-template-columns:1fr}
+ .rkbo-combo-content{padding:11px}
+ .rkbo-combo-header{padding:12px}
+ .rkbo-combo-header h2{font-size:19px}
+ .rkbo-combo-slots{gap:4px}
+ .rkbo-combo-slots button{min-height:75px}
+ .rkbo-combo-candidates{max-height:280px}
+}
+@media(max-width:370px){.rkbo-combo-candidates{grid-template-columns:1fr}}
