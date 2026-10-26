@@ -102,7 +102,7 @@ function modalState(){
  const id=card.dataset.id,inv=inventory.get(id);
  const key=[id,owned.has(id),inv?.quantity??"",!!inv?.gold_border,!!inv?.prism,upgrading.has(id)].join("|");
  if(panel.dataset.renderKey!==key){
-  panel.innerHTML='<h3>🎴 내 카드 보유 · 강화</h3>'+inventoryMarkup(id,true);
+  panel.innerHTML='<h3>🎫 내 카드 보유 · 강화</h3>'+inventoryMarkup(id,true);
   panel.dataset.renderKey=key;
  }
 }
