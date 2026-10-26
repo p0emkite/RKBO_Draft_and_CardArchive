@@ -81,7 +81,7 @@ Limitation: in v1 the browser shuffles random offers; the server does not know w
 
 
 ## Card packs & personal collection (60th season v1, 2026-10-26)
-- Exactly **5 independent draws per pack**. Tier-level rates: Bronze **50%**, Silver **30%**, Gold **15%**, Platinum **4%**, Diamond **1%**. Platinum is displayed as a pack rarity and uses existing **Coral** tier player cards without changing their archive grading. No guaranteed Bronze card.
+- Exactly **5 independent draws per pack**. Tier-level rates: Bronze **45%**, Silver **30%**, Gold **15%**, Coral **7%**, Diamond **3%**. Pack names use the existing **Coral** grading (no Platinum alias). No guaranteed Bronze card.
 - **50-pack Diamond pity**: following 49 packs with no Diamond, the 5th card of pack 50 is guaranteed Diamond. A pack containing a Diamond resets the streak. Pity overrides the base draw rate only where active. These are per-account counts.
 - Initially available pack contents are **60th-season cards only**, all **181** season 60 cards including 43 Bronze cards. The previous 59th-season inventory, if any, is preserved in the DB but 59th-season pack opening is disabled.
 - `supabase/card-pack-system.sql` creates the catalog, account-owned inventory and pack state, open history, and transactional `public.rkbo_open_card_pack(60)` RPC. Random tier selection and inventory writes only occur server-side; never accept user-submitted card ID or grade.
