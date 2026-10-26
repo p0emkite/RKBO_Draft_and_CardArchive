@@ -49,7 +49,7 @@ function loginView(error){
  return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"카드팩 개봉 기록과 수집 도감은 계정별로 저장돼요.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎫 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
@@ -309,7 +309,7 @@ function open(){if(!overlay)init();if(!overlay)return;overlay.hidden=false;tab="
 function init(){
  if(overlay)return;
  const nav=document.querySelector(".nav-right")||document.querySelector(".nav");
- const button=document.createElement("button");button.id="rkbo-pack-open";button.type="button";button.className="rkbo-pack-nav";button.textContent="🎴 카드팩";
+ const button=document.createElement("button");button.id="rkbo-pack-open";button.type="button";button.className="rkbo-pack-nav";button.textContent="🎫 카드팩";
  nav?.prepend(button);button.addEventListener("click",open);
  overlay=document.createElement("div");overlay.className="rkbo-pack-overlay";overlay.hidden=true;overlay.id="rkbo-pack-overlay";
  overlay.innerHTML='<section class="rkbo-pack-dialog" role="dialog" aria-modal="true" aria-label="RKBO 카드팩"></section>';
