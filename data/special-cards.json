@@ -102,6 +102,12 @@
       "baseId": "60-KIA-타-007",
       "kind": "NANUM",
       "createdAt": "2026-10-26T14:51:42.064Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-SAM-투-001",
+      "kind": "DREAM",
+      "createdAt": "2026-10-26T14:52:03.413Z"
     }
   ],
   "backgrounds": {
