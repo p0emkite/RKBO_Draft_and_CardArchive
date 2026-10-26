@@ -138,6 +138,12 @@
       "baseId": "60-SAM-타-001",
       "kind": "DREAM",
       "createdAt": "2026-10-26T14:53:02.277Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-SAM-타-011",
+      "kind": "DREAM",
+      "createdAt": "2026-10-26T14:53:10.879Z"
     }
   ],
   "backgrounds": {
