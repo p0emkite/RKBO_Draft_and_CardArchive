@@ -96,10 +96,16 @@ async function showNext(){
  if(PRIORITIES[value.grade]>=3&&stage){
   let logo="";
   try{logo=player?root.RKBOTeamBrand?.logo?.(player)||"":""}catch{}
-  stage.innerHTML='<div class="rkbo-pack-prelude rarity-'+esc(value.grade)+'">'+
-   '<img src="'+esc(logo)+'" alt="" onerror="this.style.display=\'none\'">'+
-   '<div>'+esc(player?.pos||value.pos)+'</div><strong>'+esc(value.grade)+'</strong></div>';
-  await wait(900);
+  const steps=[
+   '<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',
+   '<div>'+esc(player?.pos||value.pos)+'</div>',
+   '<strong>'+esc(value.grade)+'</strong>'
+  ];
+  for(const html of steps){
+   if(token!==revealToken||overlay.hidden){opening=false;return}
+   stage.innerHTML='<div class="rkbo-pack-prelude rarity-'+esc(value.grade)+'">'+html+'</div>';
+   await wait(html.startsWith("<strong")?680:550);
+  }
  }
  if(token!==revealToken||overlay.hidden){opening=false;return}
  cursor++;
