@@ -12,6 +12,8 @@ const CATS=[
  {id:"all-hidden",mode:"all",hidden:true,label:"올타임 (숨기기)"}
 ];
 let client=null,clientPromise=null,overlay=null,panel=null,screen="leaderboard",category="season",records=[],selected=null,authUser=null,profile=null,busy=false,editingNickname=false;
+const DUPLICATE_NICKNAME="이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.";
+let nicknameTimer=null,nicknameCheckId=0;
 const q=s=>overlay?.querySelector(s);
 const koreanCache=new Map();
 const season=()=>Number(root.RKBOSeason?.current?.()||60);
@@ -165,7 +167,8 @@ function drawAccount(){
  (isEditing?'<label for="rkbo-online-nickname">'+(needsNickname?"공개 닉네임 최초 설정 (2~20자)":"공개 닉네임 변경 (2~20자)")+'</label>'+
  '<div class="rkbo-online-rename"><input id="rkbo-online-nickname" maxlength="20" value="'+esc(needsNickname?"":nickname)+'" autocomplete="off" placeholder="공개 닉네임 입력">'+
  '<button data-online="save-nickname" type="button">닉네임 저장</button>'+
- (!needsNickname?'<button data-online="cancel-nickname" type="button">취소</button>':'')+'</div>':
+ (!needsNickname?'<button data-online="cancel-nickname" type="button">취소</button>':'')+'</div>'+ 
+ '<p class="rkbo-online-nickname-hint" id="rkbo-online-nickname-hint" role="status" aria-live="polite">닉네임은 다른 이용자와 중복될 수 없어요.</p>':
  '<div class="rkbo-online-current-nickname"><div><small>내 공개 닉네임</small><strong>'+esc(nickname)+'</strong></div>'+
  '<button type="button" data-online="change-nickname">닉네임 변경</button></div>')+
  '<p>온라인 랭킹에는 이메일이 아닌 공개 닉네임이 표시됩니다.</p>'+
@@ -185,6 +188,34 @@ async function signInGoogle(){
   notice("Google 로그인 실패: "+err.message);
  }finally{busy=false}
 }
+async function nicknameAvailable(value){
+ const c=await getClient();
+ const {data,error}=await c.rpc("rkbo_nickname_available",{p_nickname:value});
+ if(error)throw Error("닉네임 중복 확인 실패: "+error.message);
+ return data===true;
+}
+function nicknameTyping(){
+ const field=q("#rkbo-online-nickname"),hint=q("#rkbo-online-nickname-hint");
+ if(!field||!hint)return;
+ const value=field.value.trim(),id=++nicknameCheckId;
+ if(nicknameTimer!==null){clearTimeout(nicknameTimer);nicknameTimer=null}
+ if(value.length<2||value.length>20||/[<>"\\]/.test(value)){
+  hint.textContent="닉네임은 2~20자의 일반 문자로 입력해 주세요.";
+  hint.classList.remove("taken");return;
+ }
+ hint.textContent="닉네임 중복 확인 중…";hint.classList.remove("taken");
+ nicknameTimer=setTimeout(async()=>{
+  try{
+   const ok=await nicknameAvailable(value);
+   if(id!==nicknameCheckId||q("#rkbo-online-nickname")?.value.trim()!==value)return;
+   hint.textContent=ok?"사용할 수 있는 닉네임입니다.":DUPLICATE_NICKNAME;
+   hint.classList.toggle("taken",!ok);
+  }catch(err){
+   if(id!==nicknameCheckId)return;
+   hint.textContent="중복 확인에 실패했어요. 저장 시 다시 확인할게요.";
+  }
+ },400);
+}
 async function saveNickname(){
  if(busy)return;
  const value=q("#rkbo-online-nickname")?.value.trim()||"";
@@ -193,11 +224,19 @@ async function saveNickname(){
  try{
   const c=await getClient();
   if(!authUser)throw Error("로그인 후 변경할 수 있습니다.");
+  if(!await nicknameAvailable(value))throw Error(DUPLICATE_NICKNAME);
   const {data,error}=await c.from("rkbo_profiles").update({nickname:value}).eq("user_id",authUser.id).select("user_id,nickname").single();
-  if(error)throw Error("닉네임 저장 실패: "+error.message);
+  if(error){
+   if(error.code==="23505"||/duplicate key|unique constraint/i.test(error.message))throw Error(DUPLICATE_NICKNAME);
+   throw Error("닉네임 저장 실패: "+error.message);
+  }
   if(!data||data.nickname!==value)throw Error("서버에서 닉네임 저장을 확인하지 못했습니다.");
   profile=data;editingNickname=false;drawAccount();notice("✓ 공개 닉네임이 저장됐습니다.");
- }catch(err){notice(err.message)}
+ }catch(err){
+  notice(err.message);
+  const hint=q("#rkbo-online-nickname-hint");
+  if(hint&&err.message===DUPLICATE_NICKNAME){hint.textContent=DUPLICATE_NICKNAME;hint.classList.add("taken")}
+ }
  finally{busy=false}
 }
 async function submitDraft(payload){
@@ -234,6 +273,7 @@ function init(){
  overlay.innerHTML='<div class="rkbo-online-panel" role="dialog" aria-modal="true" aria-label="RKBO ONLINE"></div>';
  document.body.append(overlay);panel=overlay.querySelector(".rkbo-online-panel");
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
+ panel.addEventListener("input",e=>{if(e.target?.id==="rkbo-online-nickname")nicknameTyping()});
  panel.addEventListener("click",async e=>{
   const board=e.target.closest("[data-online-board]");
   if(board){category=board.dataset.onlineBoard;scoreboardView();return}
