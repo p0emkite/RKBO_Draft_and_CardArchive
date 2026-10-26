@@ -102,7 +102,7 @@ async function make(player,effects){
  const canvas=document.createElement('canvas');canvas.width=WIDTH;canvas.height=HEIGHT;
  const ctx=canvas.getContext('2d');ctx.scale(SCALE,SCALE);
  const grade=grades[player.grade]||grades.실버,brand=window.RKBOTeamBrand?.code(player)||player.team,team=teams[brand]||'#243e61';
- const photo=window.RKBOArt?.imageState?.(player.baseCardId?{...player,id:player.baseCardId}:player)||{};
+ const photo=window.RKBOArt?.imageState?.(player)||{};
  const teamBg=window.RKBOCardSpecials?.backgroundFor?.(player)||window.RKBOTeamBackground?.imageState?.(player)||{};
  const photoSrc=photo.url||'';
  const [image,logo,silhouette,background,awardIcon]=await Promise.all([
