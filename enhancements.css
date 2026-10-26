@@ -1285,7 +1285,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-award h3{margin:6px 0;font-size:23px;color:#ffde8f}
 .rkbo-combo-award strong{font-size:16px}
 .rkbo-combo-award p{font-size:12px;color:#d1e4e8}
-.rkbo-combo-award div{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.rkbo-combo-award>.rkbo-combo-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
 .rkbo-combo-history{margin-top:17px;border-top:1px solid #395368;padding-top:17px}
 .rkbo-combo-history>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
  padding:11px 8px;border-bottom:1px solid #2d4b62;font-size:12px}
