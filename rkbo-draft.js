@@ -440,6 +440,8 @@ async function loadSavedTeam(saved){
   const lineup=validSavedLineup(saved.lineup,picked)?JSON.parse(JSON.stringify(saved.lineup)):newLineup();
   root.RKBOTeamBrand?.decorate?.([...picked.values()]);
   mode=saved.mode==="all"?"all":"season";hiddenMode=!!saved.hidden;
+  if(mode==="season"&&Number.isInteger(Number(saved.season))&&Number(saved.season)>=1&&Number(saved.season)<=60)draftSeason=Number(saved.season);
+  boardSeason=draftSeason;
   state={phase:"result",mode,hidden:hiddenMode,season:Number(saved.season),pool:[],picks:picked,offered:[],slot:null,
    usedRerollSlots:new Set(),rerolls:0,round:18,recorded:true,score:null,lineup,editLineup:false,swapPick:null,
    onlineSaved:false,savedTeamId:saved.id,savedTeamName:saved.name};
