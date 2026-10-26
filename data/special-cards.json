@@ -24,6 +24,12 @@
       "baseId": "60-DOO-타-001",
       "kind": "MVP",
       "createdAt": "2026-10-26T14:42:37.466Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-KIA-투-006",
+      "kind": "NANUM",
+      "createdAt": "2026-10-26T14:43:03.588Z"
     }
   ],
   "backgrounds": {
