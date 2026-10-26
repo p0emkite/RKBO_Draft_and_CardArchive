@@ -290,17 +290,18 @@ function renderLadder(){
    '<tr><th>'+E(g.opponentName||g.opponentCode)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
    '<tr><th>'+E(g.teamName)+'</th>'+g.innings.map(x=>'<td>'+x.ours+'</td>').join("")+'<td>'+g.ourRuns+'</td></tr></tbody></table></div>'+
    ladderMvpMarkup(g)+ladderStatsMarkup(g.playerStats)+
-   '<h3>📋 주요 플레이</h3><div class="rkbo-club-events">'+(g.events||[])
-   .filter(x=>x.rbi>0||x.result==="홈런").slice(-30).reverse().map(x=>
-    '<div><b>'+x.inning+'회'+x.half+'</b><strong>'+E(x.batter)+'</strong><span>'+
-    E(x.result)+(x.rbi?' · '+x.rbi+'타점':'')+'</span></div>').join("")+'</div>';
+   '<h3>📋 주요 플레이 · 투수 교체</h3><div class="rkbo-club-events">'+(g.events||[])
+   .filter(x=>x.rbi>0||x.result==="홈런"||x.result==="투수 교체").slice(-45).reverse().map(x=>
+    '<div><b>'+x.inning+'회'+x.half+'</b><strong>'+
+    E(x.result==="투수 교체"?(official.get(x.pitcherCardId)||x.pitcher||"투수"):(official.get(x.batterCardId)||x.batter||"선수"))+
+    '</strong><span>'+E(x.result)+(x.rbi?' · '+x.rbi+'타점':'')+'</span></div>').join("")+'</div>';
  }
  if(d){
   el.innerHTML+='<h3>🗂 '+ladderSeason+'차 도전 기록</h3><div class="rkbo-club-match-history">'+
    (ladderHistory.length?ladderHistory.map(m=>
     '<div><strong>'+E(m.opponent_rank)+'위 '+E(ladderTeamName(m.opponent_code))+'</strong>'+
     '<span>'+resultBadge(m.result)+' · '+m.our_runs+' : '+m.cpu_runs+'</span>'+
-    '<small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small></div>').join(""):
+    '<small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small>'+    '<button type="button" class="rkbo-ladder-history-view" data-club-ladder-history="'+E(m.id)+'">경기 기록 보기</button></div>').join(""):
     '<p class="rkbo-club-instructions">아직 이 시즌의 도전 기록이 없어.</p>')+'</div>';
  }
 }
@@ -337,6 +338,22 @@ async function playLadder(){
  finally{busy=false;if(screen==="ladder"&&ladderData&&ladderGame)renderLadder()}
 }
 
+async function loadLadderHistory(id){
+ if(busy)return;
+ try{
+  const {c,user}=await context();
+  const {data,error}=await c.from("rkbo_ladder_matches")
+   .select("id,team_name,season,opponent_code,opponent_rank,our_runs,cpu_runs,result,innings,events,player_stats")
+   .eq("user_id",user.id).eq("season",ladderSeason).eq("id",id).maybeSingle();
+  if(error||!data)throw Error(error?.message||"경기 기록을 찾을 수 없습니다");
+  ladderGame={id:data.id,teamName:data.team_name,season:data.season,opponentCode:data.opponent_code,
+   opponentName:ladderTeamName(data.opponent_code),opponentRank:data.opponent_rank,
+   ourRuns:data.our_runs,cpuRuns:data.cpu_runs,result:data.result,innings:data.innings,
+   events:data.events,playerStats:data.player_stats};
+  renderLadder();
+  $("#rkbo-club-content")?.querySelector(".rkbo-ladder-result")?.scrollIntoView?.({block:"start",behavior:"smooth"});
+ }catch(e){message("기록 불러오기 실패: "+e.message)}
+}
 async function loadMatches(){
  const {c,user}=await context();
  const {data,error}=await c.from("rkbo_owned_matches").select("id,team_name,our_runs,cpu_runs,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(20);
@@ -395,6 +412,8 @@ function init(){
    else swap(focusedSwap.group,focusedSwap.slot,ord.dataset.clubOrderSlot);
    return;
   }
+  const historyButton=e.target.closest("[data-club-ladder-history]");
+  if(historyButton){await loadLadderHistory(historyButton.dataset.clubLadderHistory);return}
   const t=e.target.closest("[data-club-team]");
   if(t){
    const item=teams.find(ti=>ti.id===t.dataset.id);if(!item)return;
