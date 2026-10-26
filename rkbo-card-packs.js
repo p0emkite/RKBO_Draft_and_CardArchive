@@ -2,8 +2,10 @@
  * The browser never chooses cards, determines drops or writes inventory. */
 (function(root){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-const RARITIES=["브론즈","실버","골드","코랄","다이아몬드"];
-const PRIORITIES={"브론즈":0,"실버":1,"골드":2,"코랄":3,"다이아몬드":4};
+const BASE_RARITIES=["브론즈","실버","골드","코랄","다이아몬드"];
+const SPECIAL_RARITIES=["신인왕","드림","나눔","MVP","베스트릴리프"];
+const RARITIES=[...BASE_RARITIES,...SPECIAL_RARITIES];
+const PRIORITIES={"브론즈":0,"실버":1,"골드":2,"코랄":3,"다이아몬드":4,"신인왕":5,"드림":5,"나눔":5,"MVP":5,"베스트릴리프":5};
 const displayGrade=g=>g;
 let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
@@ -33,6 +35,7 @@ async function playersFor(n){
  if(!list.length)throw Error(n+"차 시즌 카드 데이터가 비어 있어요.");
  try{await root.RKBONameMap?.apply?.(list,null)}catch(e){console.warn("[RKBO packs] name map",e)}
  try{root.RKBOTeamBrand?.decorate?.(list)}catch(e){console.warn("[RKBO packs] team metadata",e)}
+ list=root.RKBOCardSpecials?.addTo?.(list,n)||list;
  const map=new Map(list.map(p=>[p.id,p]));cache.set(n,map);return map;
 }
 async function playerFor(cardId){
@@ -66,8 +69,8 @@ function renderPack(){
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>'+esc(packFor(season)?.label||season+'차 카드팩')+'</b><span>브론즈 45% · 실버 30% · 골드 15% · 코랄 7% · 다이아몬드 3%</span>'+
- '<small>5장 모두 개별 확률 적용. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
+ '<div class="rkbo-pack-odds"><b>'+esc(packFor(season)?.label||season+'차 카드팩')+'</b><span>브론즈 45% · 실버 30% · 골드 15% · 코랄 5% · 다이아몬드 2.5% · 특수등급 2.5%</span>'+
+ '<small>정규 시즌팩 기본 비율 · 5장 독립 추첨 · 특수등급 내 등록 카드 균등 무작위 · 50팩 다이아 천장 유지. 특수카드가 없는 시즌은 해당 2.5%를 일반 등급에 비례 재분배.</small></div>'+
  '<div class="rkbo-pack-season-toggle"><label for="rkbo-pack-season">카드팩 선택</label><select id="rkbo-pack-season" data-pack-season>'+
  packChoices.filter(p=>p.active).map(p=>'<option value="'+p.season+'"'+(p.season===season?' selected':'')+'>'+esc(p.label)+'</option>').join("")+'</select></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
@@ -83,7 +86,7 @@ function renderResult(){
  const body=$("#rkbo-pack-body");if(!body||!packResult)return;
  const vals=packResult.draws||[];
  body.innerHTML='<div class="rkbo-pack-results"><h3>🎉 '+packResult.packNumber+'번째 카드팩 개봉 완료!</h3>'+
- '<p>'+(packResult.hitDiamond?'💎 다이아몬드 획득!':'다음 팩에는 더 좋은 카드가 나올지도!')+'</p>'+
+ '<p>'+(packResult.hitDiamond?'💎 다이아몬드 획득!':vals.some(v=>SPECIAL_RARITIES.includes(v.grade))?'🏆 특수카드 획득!':'다음 팩에는 더 좋은 카드가 나올지도!')+'</p>'+
  '<div class="rkbo-pack-result-grid">'+vals.map((v,i)=>'<div class="rkbo-pack-result-tile rarity-'+esc(v.grade)+'"><span>'+esc(displayGrade(v.grade))+'</span>'+
  '<strong>'+esc(cache.get(Number(v.cardId.split("-")[0]))?.get(v.cardId)?.name||v.name)+'</strong>'+
  '<small>OVR '+v.ovr+' · '+(v.isNew?"NEW!":"중복 ×"+v.quantity)+'</small></div>').join("")+'</div>'+
@@ -100,7 +103,7 @@ function showCurrentReveal(){
   '<div class="rkbo-pack-flip-front">'+card+'</div></div></div>':card;
  target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+
- '<div class="rkbo-pack-hover-shell '+(special?'is-floating':'')+'"><div class="rkbo-pack-revealed-card '+(special?'is-'+(draw.grade==="코랄"?"coral":"diamond"):'')+'">'+front+'</div></div>';
+ '<div class="rkbo-pack-hover-shell '+(special?'is-floating':'')+'"><div class="rkbo-pack-revealed-card '+(special?'is-'+(SPECIAL_RARITIES.includes(draw.grade)?"special":draw.grade==="코랄"?"coral":"diamond"):'')+'">'+front+'</div></div>';
 }
 async function showNext(){
  if(opening)return;
@@ -280,7 +283,7 @@ async function saveAdmin(remove=false){
   let cards=null;
   if(active){
    const roster=await playersFor(seasonNo);
-   cards=[...roster.values()].filter(p=>RARITIES.includes(p.grade)).map(p=>({
+   cards=[...roster.values()].filter(p=>BASE_RARITIES.includes(p.grade)).map(p=>({
     id:p.id,grade:p.grade,name:p.name,team:p.team,pos:p.pos,type:p.type,ovr:Number(p.ovr)
    }));
    if(!cards.length)throw Error("공식 시즌 카드 데이터가 없어요.");
@@ -374,5 +377,6 @@ root.addEventListener("rkbo-collection-updated",async event=>{
  catch(error){console.warn("[RKBO packs] inventory sync",error)}
 });
 root.RKBOCardPacks={open};
+root.addEventListener("rkbo-special-updated",()=>cache.clear());
 document.addEventListener("DOMContentLoaded",init);
 })(window);
