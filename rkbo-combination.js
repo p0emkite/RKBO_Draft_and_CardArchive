@@ -70,7 +70,7 @@ function resultMarkup(){
  '<div class="rkbo-combo-award"><small>⚾ COMBINATION RESULT</small><h3>🎉 '+esc(p.grade)+' 획득!</h3>'+
  '<strong>'+esc(p.season)+'차 '+esc(p.name)+'</strong><p>OVR '+esc(p.ovr)+' · 조합 점수 '+esc(result.points)+'</p>'+
  '<div class="rkbo-combo-winning-art">'+(resultArtwork||'<span>선수 카드 이미지 불러오는 중…</span>')+'</div>'+
- '<div><button type="button" data-combo-detail="'+esc(p.cardId)+'">선수 카드 상세 보기</button>'+
+ '<div class="rkbo-combo-actions"><button type="button" data-combo-detail="'+esc(p.cardId)+'">선수 카드 상세 보기</button>'+
  '<button type="button" data-combo-again>다시 조합하기</button></div></div></section>';
 }
 function historyMarkup(){
