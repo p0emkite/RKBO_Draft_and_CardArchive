@@ -103,7 +103,9 @@ function showCurrentReveal(){
 async function showNext(){
  if(opening)return;
  if(cursor>=draws.length){draws=[];cursor=0;renderResult();return}
- opening=true;const token=++revealToken;
+ opening=true;
+ const nextButton=$(".rkbo-pack-controls button");if(nextButton)nextButton.disabled=true;
+ const token=++revealToken;
  const value=draws[cursor],player=cache.get(Number(value.cardId.split("-")[0]))?.get(value.cardId);
  const stage=$("#rkbo-pack-stage"),special=PRIORITIES[value.grade]>=3;
  if(special&&stage){
