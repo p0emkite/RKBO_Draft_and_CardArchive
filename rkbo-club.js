@@ -266,8 +266,9 @@ function renderLadder(){
  '<div class="rkbo-ladder-rivals">'+all.map((t,i)=>{
   const won=i<cleared,active=i===cleared;
   return '<article class="rkbo-ladder-rival '+(won?'clear':active?'current':'locked')+'">'+
-  '<b>'+t.rank+'위</b><strong>'+E(t.name)+'</strong>'+
-  '<small>평균 OVR '+E(t.strength.toFixed(1))+'</small>'+
+  '<b>'+t.rank+'위</b><strong>'+E(ladderTeamName(t.code))+'</strong>'+
+  '<small>평균 OVR '+E(Number(t.strength).toFixed(1))+'</small>'+ 
+  '<img class="rkbo-ladder-teamlogo" src="'+E(ladderTeamLogo(t.code))+'" alt="'+E(ladderTeamName(t.code))+' 로고" loading="lazy">'+
   '<span>'+(won?'✓ 클리어':active?'⚔️ 도전 가능':'🔒 잠김')+'</span></article>';
  }).join("")+'</div>'+
  (complete?'<p class="rkbo-ladder-finish">🎉 이 시즌의 모든 구단을 제패했어! 다른 시즌도 도전해 봐.</p>':
@@ -288,7 +289,7 @@ function renderLadder(){
    g.innings.map(x=>'<th>'+x.inning+'</th>').join("")+'<th>R</th></tr></thead><tbody>'+
    '<tr><th>'+E(g.opponentName||g.opponentCode)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
    '<tr><th>'+E(g.teamName)+'</th>'+g.innings.map(x=>'<td>'+x.ours+'</td>').join("")+'<td>'+g.ourRuns+'</td></tr></tbody></table></div>'+
-   ladderStatsMarkup(g.playerStats)+
+   ladderMvpMarkup(g)+ladderStatsMarkup(g.playerStats)+
    '<h3>📋 주요 플레이</h3><div class="rkbo-club-events">'+(g.events||[])
    .filter(x=>x.rbi>0||x.result==="홈런").slice(-30).reverse().map(x=>
     '<div><b>'+x.inning+'회'+x.half+'</b><strong>'+E(x.batter)+'</strong><span>'+
@@ -297,7 +298,7 @@ function renderLadder(){
  if(d){
   el.innerHTML+='<h3>🗂 '+ladderSeason+'차 도전 기록</h3><div class="rkbo-club-match-history">'+
    (ladderHistory.length?ladderHistory.map(m=>
-    '<div><strong>'+E(m.opponent_rank)+'위 '+E(m.opponent_code)+'</strong>'+
+    '<div><strong>'+E(m.opponent_rank)+'위 '+E(ladderTeamName(m.opponent_code))+'</strong>'+
     '<span>'+resultBadge(m.result)+' · '+m.our_runs+' : '+m.cpu_runs+'</span>'+
     '<small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small></div>').join(""):
     '<p class="rkbo-club-instructions">아직 이 시즌의 도전 기록이 없어.</p>')+'</div>';
@@ -312,6 +313,8 @@ async function loadLadder(){
  ]);
  if(catalog.error)throw Error("시즌 조회 실패: "+catalog.error.message);
  if(history.error)throw Error("도전 기록 조회 실패: "+history.error.message);
+ if(s!==ladderSeason)return;
+ await playerNames([s]);
  if(s!==ladderSeason)return;
  ladderData=catalog.data;ladderHistory=history.data||[];
  if(screen==="ladder")renderLadder();
