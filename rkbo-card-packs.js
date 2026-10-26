@@ -98,7 +98,7 @@ function showCurrentReveal(){
   '<div class="rkbo-pack-flip-front">'+card+'</div></div></div>':card;
  target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+
- '<div class="rkbo-pack-revealed-card '+(special?'is-'+(draw.grade==="코랄"?"coral":"diamond"):'')+'">'+front+'</div>';
+ '<div class="rkbo-pack-hover-shell '+(special?'is-floating':'')+'"><div class="rkbo-pack-revealed-card '+(special?'is-'+(draw.grade==="코랄"?"coral":"diamond"):'')+'">'+front+'</div></div>';
 }
 async function showNext(){
  if(opening)return;
@@ -112,9 +112,9 @@ async function showNext(){
   let logo="";
   try{logo=player?root.RKBOTeamBrand?.logo?.(player)||"":""}catch{}
   const steps=[
-   {html:'<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',duration:1450},
-   {html:'<div>'+esc(player?.pos||value.pos)+'</div>',duration:1350},
-   {html:'<strong>'+esc(displayGrade(value.grade))+'</strong>',duration:1600}
+   {html:'<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',duration:950},
+   {html:'<div>'+esc(player?.pos||value.pos)+'</div>',duration:900},
+   {html:'<strong>'+esc(displayGrade(value.grade))+'</strong>',duration:1050}
   ];
   for(const step of steps){
    if(token!==revealToken||overlay.hidden){opening=false;return}
