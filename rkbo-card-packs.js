@@ -3,7 +3,8 @@
 (function(root){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const RARITIES=["브론즈","실버","골드","코랄","다이아몬드"];
-const PRIORITIES={"실버":1,"골드":2,"코랄":3,"다이아몬드":4};
+const PRIORITIES={"브론즈":0,"실버":1,"골드":2,"코랄":3,"다이아몬드":4};
+const displayGrade=g=>g==="코랄"?"플래티넘":g;
 let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
 const $=selector=>dialog?.querySelector(selector);
@@ -55,8 +56,8 @@ function renderPack(){
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 1장 확정 + 4장 (실버 72% · 골드 20% · 코랄 5% · 다이아몬드 3%)</span>'+
- '<small>팩당 5장. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
+ '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 50% · 실버 30% · 골드 15% · 플래티넘 4% · 다이아몬드 1%</span>'+
+ '<small>5장 모두 개별 확률 적용. 플래티넘은 기존 코랄 선수 카드에 해당해요. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
  '<div class="rkbo-pack-season-toggle"><span class="rkbo-pack-current-season">⚾ 60차 시즌 전용</span></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
@@ -72,7 +73,7 @@ function renderResult(){
  const vals=packResult.draws||[];
  body.innerHTML='<div class="rkbo-pack-results"><h3>🎉 '+packResult.packNumber+'번째 카드팩 개봉 완료!</h3>'+
  '<p>'+(packResult.hitDiamond?'💎 다이아몬드 획득!':'다음 팩에는 더 좋은 카드가 나올지도!')+'</p>'+
- '<div class="rkbo-pack-result-grid">'+vals.map((v,i)=>'<div class="rkbo-pack-result-tile rarity-'+esc(v.grade)+'"><span>'+esc(v.grade)+'</span>'+
+ '<div class="rkbo-pack-result-grid">'+vals.map((v,i)=>'<div class="rkbo-pack-result-tile rarity-'+esc(v.grade)+'"><span>'+esc(displayGrade(v.grade))+'</span>'+
  '<strong>'+esc(cache.get(Number(v.cardId.split("-")[0]))?.get(v.cardId)?.name||v.name)+'</strong>'+
  '<small>OVR '+v.ovr+' · '+(v.isNew?"NEW!":"중복 ×"+v.quantity)+'</small></div>').join("")+'</div>'+
  '<div class="rkbo-pack-result-buttons"><button type="button" data-pack="reset">🎁 다음 카드팩</button><button type="button" data-pack="collection">📚 내 도감 보기</button></div></div>';
@@ -82,7 +83,7 @@ function showCurrentReveal(){
  const draw=draws[cursor-1];
  if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉 완료! 결과를 확인해줘.</div>';return}
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
- target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(draw.grade)+'</strong>'+
+ target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+
  '<div class="rkbo-pack-revealed-card">'+renderPlayer(p)+'</div>';
 }
@@ -98,7 +99,7 @@ async function showNext(){
   const steps=[
    '<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',
    '<div>'+esc(player?.pos||value.pos)+'</div>',
-   '<strong>'+esc(value.grade)+'</strong>'
+   '<strong>'+esc(displayGrade(value.grade))+'</strong>'
   ];
   for(const html of steps){
    if(token!==revealToken||overlay.hidden){opening=false;return}
@@ -174,7 +175,7 @@ function renderCollection(){
  '<div class="rkbo-pack-collect-controls">'+
  '<select data-pack-filter aria-label="보유 여부"><option value="all" '+(collectionFilter==="all"?"selected":"")+'>전체 카드</option>'+
  '<option value="owned" '+(collectionFilter==="owned"?"selected":"")+'>보유 카드</option><option value="missing" '+(collectionFilter==="missing"?"selected":"")+'>미보유 카드</option></select>'+
- '<select data-pack-grade aria-label="등급"><option value="all">모든 등급</option>'+RARITIES.map(g=>'<option value="'+esc(g)+'" '+(collectionGrade===g?"selected":"")+'>'+esc(g)+'</option>').join("")+'</select></div>'+
+ '<select data-pack-grade aria-label="등급"><option value="all">모든 등급</option>'+RARITIES.map(g=>'<option value="'+esc(g)+'" '+(collectionGrade===g?"selected":"")+'>'+esc(displayGrade(g))+'</option>').join("")+'</select></div>'+
  '<div class="rkbo-pack-collection-grid">'+filtered.slice(0,collectionLimit).map(c=>{
  const count=owned.get(c.card_id)||0,p=cache.get(c.season)?.get(c.card_id);
  return '<div class="rkbo-pack-collection-item '+(count?"is-owned":"is-locked")+'">'+
@@ -195,7 +196,7 @@ async function loadHistory(){
   history=data||[];await Promise.all([playersFor(59),playersFor(60)]);
   body.innerHTML=history.length?'<div class="rkbo-pack-history">'+history.map(h=>
    '<section class="rkbo-pack-history-entry"><h3>📦 '+h.pack_number+'번째 개봉 · '+h.season+'차 <small>'+new Date(h.opened_at).toLocaleString("ko-KR")+'</small></h3>'+
-    '<div>'+h.draws.map(v=>'<span class="rarity-'+esc(v.grade)+'">'+esc(cache.get(h.season)?.get(v.cardId)?.name||v.name||v.cardId)+' · '+esc(v.grade)+'</span>').join("")+'</div></section>'
+    '<div>'+h.draws.map(v=>'<span class="rarity-'+esc(v.grade)+'">'+esc(cache.get(h.season)?.get(v.cardId)?.name||v.name||v.cardId)+' · '+esc(displayGrade(v.grade))+'</span>').join("")+'</div></section>'
   ).join("")+'</div>':'<p class="rkbo-pack-loading">아직 개봉한 카드팩이 없어!</p>';
  }catch(e){body.innerHTML=loginView(e.message)}
 }
