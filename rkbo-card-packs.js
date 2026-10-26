@@ -49,7 +49,7 @@ function loginView(error){
  return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"카드팩 개봉 기록과 수집 도감은 계정별로 저장돼요.")+'</p><button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>60차 선수 카드 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎴 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
@@ -199,6 +199,7 @@ function renderCollection(){
  '<strong>'+ownedTotal+' / '+all+'종 · '+(all?Math.round(ownedTotal/all*100):0)+'%</strong>'+
  '<p>미보유 카드는 잠금 표시돼요. 기존 전체 선수 도감은 누구나 볼 수 있어요.</p></section>'+
  '<div class="rkbo-pack-collect-controls">'+
+ '<select data-pack-season aria-label="카드팩 시즌">'+packChoices.filter(p=>p.active).map(p=>'<option value="'+p.season+'"'+(p.season===season?' selected':'')+'>'+esc(p.label)+'</option>').join("")+'</select>'+
  '<select data-pack-filter aria-label="보유 여부"><option value="all" '+(collectionFilter==="all"?"selected":"")+'>전체 카드</option>'+
  '<option value="owned" '+(collectionFilter==="owned"?"selected":"")+'>보유 카드</option><option value="missing" '+(collectionFilter==="missing"?"selected":"")+'>미보유 카드</option></select>'+
  '<select data-pack-grade aria-label="등급"><option value="all">모든 등급</option>'+RARITIES.map(g=>'<option value="'+esc(g)+'" '+(collectionGrade===g?"selected":"")+'>'+esc(displayGrade(g))+'</option>').join("")+'</select></div>'+
@@ -224,7 +225,7 @@ async function loadHistory(){
   const {c,user}=await context();
   const {data,error}=await c.from("rkbo_pack_history").select("id,pack_number,season,draws,opened_at").eq("user_id",user.id).order("opened_at",{ascending:false}).limit(30);
   if(error)throw Error(error.message);
-  history=data||[];await Promise.all([playersFor(59),playersFor(60)]);
+  history=data||[];await Promise.all([...new Set(history.map(h=>h.season))].map(n=>playersFor(n).catch(e=>console.warn("[RKBO pack history]",n,e))));
   body.innerHTML=history.length?'<div class="rkbo-pack-history">'+history.map(h=>
    '<section class="rkbo-pack-history-entry"><h3>📦 '+h.pack_number+'번째 개봉 · '+h.season+'차 <small>'+new Date(h.opened_at).toLocaleString("ko-KR")+'</small></h3>'+
     '<div>'+h.draws.map(v=>'<span class="rarity-'+esc(v.grade)+'">'+esc(cache.get(h.season)?.get(v.cardId)?.name||v.name||v.cardId)+' · '+esc(displayGrade(v.grade))+'</span>').join("")+'</div></section>'
