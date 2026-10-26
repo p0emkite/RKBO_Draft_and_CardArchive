@@ -1151,3 +1151,19 @@ body.rkbo-club-open{overflow:hidden}
 .rkbo-special-pack-sync h3{font-size:15px;color:#ffd78f;margin:0 0 8px}
 .rkbo-special-pack-sync button{padding:9px 13px;background:#735528;border:1px solid #b3925e;border-radius:8px;font-size:12px;color:#fff}
 @media(prefers-reduced-motion:reduce){.rkbo-pack-revealed-card.is-special:after{animation:none}}
+
+
+/* Avoid firing server pack RPCs during the five-second rate limit. */
+.rkbo-pack-cooldown-note{
+ min-height:21px;margin:9px 0 0;color:#a9e9d1;
+ font-size:12px;line-height:1.6;text-align:center;
+ font-variant-numeric:tabular-nums;
+}
+.rkbo-pack-primary:disabled,
+.rkbo-pack-cover:disabled{
+ cursor:not-allowed;opacity:.7;filter:saturate(.7);
+}
+.rkbo-pack-cover:disabled:hover{transform:none}
+@media(max-width:540px){
+ .rkbo-pack-cooldown-note{font-size:11px;padding:0 5px}
+}
