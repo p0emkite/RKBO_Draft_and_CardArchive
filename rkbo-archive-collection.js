@@ -8,7 +8,8 @@ const upgrading=new Set();
 const percent=(a,b)=>b?Math.round(a/b*100):0;
 function cards(){return root.RKBOSeason?.players?.()||[]}
 function getProgress(){
- const list=cards(),unique=new Set(list.map(p=>p.id)),total=unique.size;
+ // Special award variants have no acquisition channel yet: preserve standard pack collection-rate denominators.
+ const list=cards().filter(p=>!p.specialKind),unique=new Set(list.map(p=>p.id)),total=unique.size;
  const collected=[...unique].filter(id=>owned.has(id)).length;
  const groups=new Map();
  for(const p of list){
