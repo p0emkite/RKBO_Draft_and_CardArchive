@@ -30,19 +30,30 @@ function badge(ctx,value,y,accent){
 }
 // PNG exports are hand-drawn, so CSS card upgrades must also be painted on Canvas.
 async function loadSavedEffects(player){
- if(window.RKBOAdminBridge?.isAuthorized?.())return {gold_border:false,prism:false};
- if(!window.RKBOOnline?.isConfigured?.())throw new Error('Google 로그인이 필요합니다.');
+ const admin=window.RKBOAdminBridge?.isAuthorized?.()===true;
+ const none={gold_border:false,prism:false};
+ if(!window.RKBOOnline?.isConfigured?.()){
+  if(admin)return none;
+  throw new Error('Google 로그인이 필요합니다.');
+ }
  const client=await window.RKBOOnline.getClient();
  const {data:auth,error:authError}=await client.auth.getUser();
- if(authError||!auth?.user)throw new Error('Google 로그인 후 수집한 카드만 저장할 수 있습니다.');
+ if(authError||!auth?.user){
+  if(admin)return none;
+  throw new Error('Google 로그인 후 수집한 카드만 저장할 수 있습니다.');
+ }
  const {data,error}=await client.from('rkbo_card_inventory')
   .select('quantity,gold_border,prism')
   .eq('user_id',auth.user.id).eq('card_id',player.id).maybeSingle();
- if(error)throw new Error('카드 보유 여부를 확인하지 못했습니다: '+error.message);
- if(!data||(Number(data.quantity)||0)<=0&&!data.gold_border&&!data.prism)
+ if(error){
+  if(admin)return none;
+  throw new Error('카드 보유 여부를 확인하지 못했습니다: '+error.message);
+ }
+ if(!admin&&(!data||(Number(data.quantity)||0)<=0&&!data.gold_border&&!data.prism))
   throw new Error('미수집 카드는 이미지로 저장할 수 없습니다.');
- return {gold_border:data.gold_border===true,prism:data.prism===true};
+ return {gold_border:data?.gold_border===true,prism:data?.prism===true};
 }
+
 function drawSavedEffects(ctx,effects){
  if(!effects?.gold_border&&!effects?.prism)return;
  if(effects.prism){
