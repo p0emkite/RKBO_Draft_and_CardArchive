@@ -83,36 +83,44 @@ function showCurrentReveal(){
  const draw=draws[cursor-1];
  if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉 완료! 결과를 확인해줘.</div>';return}
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
+ const special=PRIORITIES[draw.grade]>=3;
+ const card=renderPlayer(p),front=special?'<div class="rkbo-pack-flip">'+
+  '<div class="rkbo-pack-flip-inner"><div class="rkbo-pack-flip-back"><span>RKBO</span><strong>LEGENDARY CARD</strong><small>✨ CLICK TO REVEAL ✨</small></div>'+
+  '<div class="rkbo-pack-flip-front">'+card+'</div></div></div>':card;
  target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+
- '<div class="rkbo-pack-revealed-card">'+renderPlayer(p)+'</div>';
+ '<div class="rkbo-pack-revealed-card '+(special?'is-'+(draw.grade==="코랄"?"coral":"diamond"):'')+'">'+front+'</div>';
 }
 async function showNext(){
  if(opening)return;
  if(cursor>=draws.length){draws=[];cursor=0;renderResult();return}
  opening=true;const token=++revealToken;
  const value=draws[cursor],player=cache.get(Number(value.cardId.split("-")[0]))?.get(value.cardId);
- const stage=$("#rkbo-pack-stage");
- if(PRIORITIES[value.grade]>=3&&stage){
+ const stage=$("#rkbo-pack-stage"),special=PRIORITIES[value.grade]>=3;
+ if(special&&stage){
   let logo="";
   try{logo=player?root.RKBOTeamBrand?.logo?.(player)||"":""}catch{}
   const steps=[
-   '<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',
-   '<div>'+esc(player?.pos||value.pos)+'</div>',
-   '<strong>'+esc(displayGrade(value.grade))+'</strong>'
+   {html:'<img src="'+esc(logo)+'" alt="팀 심볼" onerror="this.style.display=\'none\'">',duration:1450},
+   {html:'<div>'+esc(player?.pos||value.pos)+'</div>',duration:1350},
+   {html:'<strong>'+esc(displayGrade(value.grade))+'</strong>',duration:1600}
   ];
-  for(const html of steps){
+  for(const step of steps){
    if(token!==revealToken||overlay.hidden){opening=false;return}
-   stage.innerHTML='<div class="rkbo-pack-prelude rarity-'+esc(value.grade)+'">'+html+'</div>';
-   await wait(html.startsWith("<strong")?680:550);
+   stage.innerHTML='<div class="rkbo-pack-prelude rarity-'+esc(value.grade)+'">'+step.html+'</div>';
+   await wait(step.duration);
   }
  }
  if(token!==revealToken||overlay.hidden){opening=false;return}
  cursor++;
  const body=$("#rkbo-pack-body");
- // Rebuild the stage without triggering a new server draw.
- const target=body?.querySelector("#rkbo-pack-stage");if(target)target.innerHTML='<div id="rkbo-pack-reveal"></div>';
+ const target=body?.querySelector("#rkbo-pack-stage");
+ if(target)target.innerHTML='<div id="rkbo-pack-reveal"></div>';
  showCurrentReveal();
+ if(special){
+  await wait(1650); // Complete the 3D back-to-front animation before accepting taps.
+  if(token!==revealToken||overlay.hidden){opening=false;return}
+ }
  const btn=body?.querySelector(".rkbo-pack-controls button");
  if(btn){btn.disabled=false;btn.textContent=cursor<5?"다음 카드 공개 ("+(cursor+1)+"/5)":"5장 결과 확인"}
  opening=false;
