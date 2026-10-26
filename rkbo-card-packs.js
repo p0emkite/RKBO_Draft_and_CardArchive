@@ -7,6 +7,10 @@ const PRIORITIES={"브론즈":0,"실버":1,"골드":2,"코랄":3,"다이아몬�
 const displayGrade=g=>g;
 let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=0,packResult=null,revealToken=0;
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
+let packChoices=[],adminAuthorized=false,adminSeason=60,adminBusy=false;
+const defaultPackArt="https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp";
+const packFor=n=>packChoices.find(p=>p.season===n);
+const packArt=()=>packFor(season)?.image_url||defaultPackArt;
 const $=selector=>dialog?.querySelector(selector);
 const client=()=>root.RKBOOnline?.getClient?.();
 async function context(){
@@ -56,12 +60,13 @@ function renderPack(){
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
  '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>60차 카드팩</b><span>브론즈 45% · 실버 30% · 골드 15% · 코랄 7% · 다이아몬드 3%</span>'+
+ '<div class="rkbo-pack-odds"><b>'+esc(packFor(season)?.label||season+'차 카드팩')+'</b><span>브론즈 45% · 실버 30% · 골드 15% · 코랄 7% · 다이아몬드 3%</span>'+
  '<small>5장 모두 개별 확률 적용. 다이아몬드를 49팩 연속 얻지 못했다면 50번째 팩에 최소 1장 보장. 중복 획득 가능.</small></div>'+
- '<div class="rkbo-pack-season-toggle"><span class="rkbo-pack-current-season">⚾ 60차 시즌 전용</span></div>'+ 
+ '<div class="rkbo-pack-season-toggle"><label for="rkbo-pack-season">카드팩 선택</label><select id="rkbo-pack-season" data-pack-season>'+
+ packChoices.filter(p=>p.active).map(p=>'<option value="'+p.season+'"'+(p.season===season?' selected':'')+'>'+esc(p.label)+'</option>').join("")+'</select></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
  (draws.length?'<div id="rkbo-pack-reveal"></div>':
-  '<button type="button" class="rkbo-pack-cover" data-pack="open"><img src="https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp" alt="RKBO 카드팩 포장">'+
+  '<button type="button" class="rkbo-pack-cover" data-pack="open"><img src="'+esc(packArt())+'" alt="RKBO 카드팩 포장" onerror="this.onerror=null;this.src=\'https://raw.githubusercontent.com/p0emkite/RKBO-/main/pack.webp\'">'+
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
  '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening?'disabled':'')+'>'+
  (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button></div>'+
@@ -131,13 +136,13 @@ async function openPack(){
  const button=$('[data-pack="open"]');if(button)button.disabled=true;
  try{
   const {c}=await context();
-  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:60});
+  const {data,error}=await c.rpc("rkbo_open_card_pack",{p_season:season});
   if(error)throw Error(error.message);
   if(!data||!Array.isArray(data.draws)||data.draws.length!==5)throw Error("서버 응답이 올바르지 않아요.");
   await playersFor(season);
   packResult=data;draws=data.draws;cursor=0;message("카드팩 개봉 성공! 카드를 차례로 공개합니다.");
   await refreshStats();
-  root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:60,draws:data.draws}}));
+  root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:data.season,draws:data.draws}}));
   renderPack();opening=false;
   await showNext();
  }catch(e){
@@ -149,15 +154,28 @@ async function openPack(){
   }
  }
 }
+async function loadPackChoices(){
+ const c=await root.RKBOOnline.getClient();
+ const [result,administrator]=await Promise.all([
+  c.from("rkbo_pack_settings").select("season,label,image_url,active").order("season",{ascending:false}),
+  new URLSearchParams(location.search).get("admin")==="1"?
+   c.rpc("rkbo_is_pack_admin"):Promise.resolve({data:false,error:null})
+ ]);
+ if(result.error)throw Error("카드팩 설정을 불러오지 못했습니다: "+result.error.message);
+ packChoices=result.data||[];
+ adminAuthorized=administrator.error?false:administrator.data===true;
+ const active=packChoices.filter(p=>p.active);
+ if(!active.some(p=>p.season===season))season=active[0]?.season||60;
+}
 async function refreshStats(){
  const {c,user}=await context();
  const [inventory,state]=await Promise.all([
-  c.from("rkbo_card_inventory").select("card_id,quantity").eq("user_id",user.id),
+  c.from("rkbo_card_inventory").select("card_id,quantity,gold_border,prism").eq("user_id",user.id),
   c.from("rkbo_pack_state").select("total_packs,no_diamond_streak,last_open_at").eq("user_id",user.id).maybeSingle()
  ]);
  if(inventory.error)throw Error(inventory.error.message);
  if(state.error)throw Error(state.error.message);
- owned=new Map((inventory.data||[]).map(v=>[v.card_id,v.quantity]));
+ owned=new Map((inventory.data||[]).map(v=>[v.card_id,v]));
  packsState=state.data||null;
 }
 async function loadCollection(){
@@ -165,10 +183,10 @@ async function loadCollection(){
  body.innerHTML='<p class="rkbo-pack-loading">도감 불러오는 중…</p>';
  try{
   const {c}=await context();
-  const {data,error}=await c.from("rkbo_pack_cards").select("card_id,season,grade,name,team,position,ovr").eq("season",60).order("season",{ascending:false}).order("ovr",{ascending:false}).limit(1000);
+  const {data,error}=await c.from("rkbo_pack_cards").select("card_id,season,grade,name,team,position,ovr").eq("season",season).order("season",{ascending:false}).order("ovr",{ascending:false}).limit(1000);
   if(error)throw Error(error.message);
   catalog=data||[];
-  await Promise.all([playersFor(60),refreshStats()]);
+  await Promise.all([playersFor(season),refreshStats()]);
   renderCollection();
  }catch(e){body.innerHTML=loginView(e.message)}
 }
@@ -177,7 +195,7 @@ function renderCollection(){
  const filtered=catalog.filter(c=>(collectionFilter==="all"||collectionFilter==="owned"&&owned.has(c.card_id)||collectionFilter==="missing"&&!owned.has(c.card_id))
   &&(collectionGrade==="all"||c.grade===collectionGrade));
  const ownedTotal=catalog.filter(c=>owned.has(c.card_id)).length,all=catalog.length;
- body.innerHTML='<section class="rkbo-pack-collect-head"><h3>📚 나의 카드 수집 도감</h3>'+
+ body.innerHTML='<section class="rkbo-pack-collect-head"><h3>📚 '+season+'차 나의 카드 수집 도감</h3>'+
  '<strong>'+ownedTotal+' / '+all+'종 · '+(all?Math.round(ownedTotal/all*100):0)+'%</strong>'+
  '<p>미보유 카드는 잠금 표시돼요. 기존 전체 선수 도감은 누구나 볼 수 있어요.</p></section>'+
  '<div class="rkbo-pack-collect-controls">'+
@@ -213,8 +231,8 @@ async function showTab(next){
  if(opening)return;
  tab=next;draws=[];cursor=0;revealToken++;frame();
  try{
-  if(tab==="pack"){await refreshStats();if(overlay.hidden||tab!=="pack")return;renderPack()}
-  if(tab==="collection")await loadCollection();
+  if(tab==="pack"){await Promise.all([refreshStats(),loadPackChoices()]);if(overlay.hidden||tab!=="pack")return;frame();renderPack()}
+  if(tab==="collection"){await loadPackChoices();frame();await loadCollection()}
   if(tab==="history")await loadHistory();
  }catch(e){$("#rkbo-pack-body").innerHTML=loginView(e.message)}
 }
@@ -230,7 +248,7 @@ function init(){
  document.body.append(overlay);dialog=overlay.querySelector(".rkbo-pack-dialog");
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  dialog.addEventListener("click",async e=>{
-  const target=e.target.closest("[data-pack-tab],[data-pack-season],[data-pack]");if(!target)return;
+  const target=e.target.closest("[data-pack-tab],[data-pack]");if(!target)return;
   if(target.dataset.packTab){showTab(target.dataset.packTab);return}
 
   const action=target.dataset.pack;
@@ -244,6 +262,7 @@ function init(){
  });
  dialog.addEventListener("change",e=>{
   if(e.target.matches("[data-pack-filter]")){collectionFilter=e.target.value;collectionLimit=36;renderCollection()}
+  if(e.target.matches("[data-pack-season]")){if(opening)return;season=Number(e.target.value);if(tab==="collection")loadCollection();else renderPack()}
   if(e.target.matches("[data-pack-grade]")){collectionGrade=e.target.value;collectionLimit=36;renderCollection()}
  });
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!overlay.hidden)close()});
