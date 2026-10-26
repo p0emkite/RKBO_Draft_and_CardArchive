@@ -1,9 +1,9 @@
--- RKBO ONLINE card packs v1: 59-60 seasons, 5 cards per pack.
+-- RKBO ONLINE card packs v1: 60 season, five cards: 1 guaranteed bronze + 4 tier draws.
 -- No purchases, no currency. Atomic, server-only draws and owner-only inventory.
 create table if not exists public.rkbo_pack_cards(
  card_id text primary key,
  season integer not null check(season between 1 and 999),
- grade text not null check(grade in ('실버','골드','코랄','다이아몬드')),
+ grade text not null check(grade in ('브론즈','실버','골드','코랄','다이아몬드')),
  name text not null,
  team text not null,
  position text not null,
@@ -74,8 +74,8 @@ begin
  if v_user is null or coalesce(v_role,'') <> 'authenticated' or coalesce((auth.jwt()->>'is_anonymous')::boolean,false) then
   raise exception 'Google 로그인이 필요합니다' using errcode='28000';
  end if;
- if p_season not in (59,60) then
-  raise exception '현재 카드팩은 59차 또는 60차 시즌만 지원합니다' using errcode='22023';
+ if p_season <> 60 then
+  raise exception '현재 카드팩은 60차 시즌만 지원합니다' using errcode='22023';
  end if;
  insert into public.rkbo_pack_state(user_id) values(v_user) on conflict do nothing;
  select * into strict v_state from public.rkbo_pack_state where user_id=v_user for update;
@@ -90,7 +90,7 @@ begin
    pg_catalog.get_byte(v_bytes,1)::numeric*65536+
    pg_catalog.get_byte(v_bytes,2)::numeric*256+
    pg_catalog.get_byte(v_bytes,3)::numeric)/4294967296;
-  v_grade:=case when v_force and i=5 then '다이아몬드'
+  v_grade:=case when i=1 then '브론즈' when v_force and i=5 then '다이아몬드'
    when v_roll < 0.72 then '실버'
    when v_roll < 0.92 then '골드'
    when v_roll < 0.97 then '코랄'
