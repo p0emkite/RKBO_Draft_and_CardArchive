@@ -99,6 +99,20 @@ async function saveManifest(next,message){
  root.dispatchEvent(new CustomEvent("rkbo-special-updated"));
  return saved;
 }
+async function syncSeasonPack(season){
+ const n=Number(season);
+ if(!Number.isInteger(n)||n<1||n>60)throw Error("서버 카드팩 동기화는 1~60차 시즌만 지원합니다.");
+ const online=root.RKBOOnline;
+ if(!online?.getClient)throw Error("Supabase Google 로그인 계정을 연결해 주세요.");
+ const c=await online.getClient();
+ const {data:auth,error:authError}=await c.auth.getUser();
+ if(authError||!auth?.user)throw Error("특수카드 추첨 동기화에는 Google 관리자 로그인이 필요합니다.");
+ const cards=(cfg.cards||[]).filter(x=>Number(x.season)===n)
+  .map(x=>({baseId:x.baseId,kind:x.kind}));
+ const {data,error}=await c.rpc("rkbo_sync_special_cards",{p_season:n,p_cards:cards});
+ if(error)throw Error(error.message);
+ return data;
+}
 function allowed(base,code){
  const club=root.RKBOTeamBrand?.code?.(base)||base.team;
  if(code==="DREAM")return dreamTeams.has(club);
@@ -119,9 +133,12 @@ async function setCard(base,code,enabled){
    if(enabled)cards.push({season:Number(base.season),baseId:base.id,kind:code,createdAt:new Date().toISOString()});
    return {...old,version:1,cards};
   },"special "+code);
-  editStatus("✓ "+TYPES[code].label+(enabled?" 특수카드 생성":" 지정 해제")+" 완료");
-  // Open the newly generated distinct card immediately, not just the normal card.
+  let syncError=null;
+  try{await syncSeasonPack(base.season)}
+  catch(error){syncError=error;console.warn("[RKBO specials] GitHub saved but Supabase pack sync failed",error)}
+  // The new card is already published in GitHub; server pack eligibility needs separate admin identity.
   root.RKBOSeason?.showPlayer?.(enabled?suffix(base.id,code):base.id);
+  if(syncError)root.alert("특수카드는 도감에 저장되었지만 카드팩 동기화에 실패했어요. Google 계정이 Supabase 팩 관리자로 등록되어 있는지 확인하고 관리자 화면의 '특수카드 팩 동기화'를 실행해 주세요.\n"+syncError.message);
  }finally{saving=false}
 }
 function mount(p){
@@ -233,6 +250,11 @@ function makePanel(){
   '<p>신인왕(+5) · 드림/나눔 올스타(+3) · MVP(+5) · 베스트 릴리프(+5). 선수 지정은 선수 카드 상세창의 PLAYER EDIT 바로 아래에서 해주세요.</p>'+
   '<label>첨부된 5개 엠블럼 ZIP을 한 번에 등록<input type="file" id="rkbo-special-zip" accept=".zip,application/zip"></label>'+
   '<div class="admin-actions"><button type="button" id="rkbo-special-zip-upload">🏅 특수카드 엠블럼 5종 GitHub 등록</button></div>'+
+  '<div class="rkbo-special-pack-sync"><h3>🎫 정규 시즌팩 · 특수카드 동기화</h3>'+
+  '<p>도감에 지정한 특수카드를 해당 차수의 서버 추첨 카드풀과 일치시킵니다. GitHub 관리자 토큰과 Supabase 팩 관리자 Google 로그인이 모두 필요합니다.</p>'+
+  '<label>동기화할 시즌<select id="rkbo-special-pack-season">'+Array.from({length:60},(_,i)=>60-i).map(n=>
+   '<option value="'+n+'"'+(n===(root.RKBOSeason?.current?.()||60)?' selected':'')+'>'+n+'차</option>').join("")+'</select></label>'+
+  '<button type="button" id="rkbo-special-pack-sync-btn">특수카드 팩 동기화</button></div>'+
   '<label>등급별 공통 배경 설정<select id="rkbo-special-kind">'+CODES.map(code=>
    '<option value="'+code+'">'+esc(TYPES[code].label)+'</option>').join("")+'</select></label>'+
   '<label>배경 이미지<input type="file" id="rkbo-special-background-file" accept="image/png,image/jpeg,image/webp,image/avif"></label>'+
@@ -252,6 +274,12 @@ function makePanel(){
   try{await fn()}catch(e){console.error("[RKBO specials]",e);status("실패: "+e.message)}
   finally{saving=false}
  };
+ q("rkbo-special-pack-sync-btn").addEventListener("click",()=>perform(async()=>{
+  const n=Number(q("rkbo-special-pack-season").value);
+  status(n+"차 시즌 서버 특수카드풀 확인 중…");
+  const result=await syncSeasonPack(n);
+  status("✓ "+n+"차 서버 특수카드 "+result.activeSpecialCards+"장 동기화 완료. 정규 시즌팩에서 특수 등급 2.5% 추첨에 포함됩니다.");
+ }));
  q("rkbo-special-zip-upload").addEventListener("click",()=>perform(uploadEmblemZip));
  q("rkbo-special-zip").addEventListener("change",e=>{if(e.target.files?.length)perform(uploadEmblemZip)});
  q("rkbo-special-bg-save").addEventListener("click",()=>perform(saveBackground));
@@ -272,7 +300,7 @@ function makePanel(){
  populateBackground();
 }
 root.RKBOCardSpecials={TYPES,CODES,load,addTo,derived,definition,icon,backgroundFor,backgroundMarkup,mount,
- makePanel,refresh:load,getConfig:()=>cfg};
+ makePanel,syncSeasonPack,refresh:load,getConfig:()=>cfg};
 root.document.addEventListener("DOMContentLoaded",makePanel);
 root.addEventListener("rkbo-admin-connected",()=>{
  makePanel();
