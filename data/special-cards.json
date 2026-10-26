@@ -78,6 +78,12 @@
       "baseId": "60-KIA-타-001",
       "kind": "NANUM",
       "createdAt": "2026-10-26T14:50:20.988Z"
+    },
+    {
+      "season": 60,
+      "baseId": "60-KIA-타-006",
+      "kind": "NANUM",
+      "createdAt": "2026-10-26T14:50:29.810Z"
     }
   ],
   "backgrounds": {
