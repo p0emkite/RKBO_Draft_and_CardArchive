@@ -1306,3 +1306,11 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
  .rkbo-combo-candidates{max-height:280px}
 }
 @media(max-width:370px){.rkbo-combo-candidates{grid-template-columns:1fr}}
+
+
+.rkbo-combo-winning-art{display:flex;align-items:center;justify-content:center;
+ margin:15px auto;max-width:320px;min-height:140px;width:100%;
+ color:#c3dbea;font-size:12px}
+.rkbo-combo-winning-art .player-card{width:100%;max-width:300px;margin:0;cursor:default}
+.rkbo-combo-winning-art .player-card:hover{transform:none}
+.rkbo-combo-winning-art .fav{pointer-events:none}
