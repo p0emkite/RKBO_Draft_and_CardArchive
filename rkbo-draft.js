@@ -26,10 +26,12 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
 const identity=p=>String(p.rawName||p.englishName||p.name||p.id).normalize("NFKC").toLowerCase().replace(/[^a-z0-9가-힣]/g,"");
 let shell=null,stage=null,mode="season",hiddenMode=false,state=null,interval=null,timeout=null,token=0,loading=false,previousOverflow="",boardReturn="setup",boardTab="season";
+let draftSeason=60,boardSeason=60;
+const seasonSelectOptions=value=>Array.from({length:60},(_,i)=>60-i).map(n=>'<option value="'+n+'"'+(n===Number(value)?' selected':'')+'>'+n+'차 시즌</option>').join("");
 const BOARD_KEY="rkbo-draft-scores-v2";
 const BOARD_MODES=[
- {key:"season",label:"현재 시즌"},{key:"all",label:"올타임"},
- {key:"season-hidden",label:"현재 시즌 (숨기기)"},{key:"all-hidden",label:"올타임 (숨기기)"}
+ {key:"season",label:"시즌별"},{key:"all",label:"올타임"},
+ {key:"season-hidden",label:"시즌별 (숨기기)"},{key:"all-hidden",label:"올타임 (숨기기)"}
 ];
 const category=x=>x.mode+(x.hidden?"-hidden":"");
 function localScores(){try{const list=JSON.parse(localStorage.getItem(BOARD_KEY)||"[]");return Array.isArray(list)?list:[]}catch{return []}}
@@ -70,7 +72,7 @@ function init(){
 function open(){
  const el=document.getElementById("rkbo-draft-overlay");if(!el)return;
  previousOverflow=document.body.style.overflow;el.hidden=false;document.body.style.overflow="hidden";
- state=null;mode="season";hiddenMode=false;setup();
+ state=null;mode="season";hiddenMode=false;draftSeason=60;boardSeason=60;setup();
 }
 function close(){
  if(loading){token++;loading=false;stopTimers();state=null;document.getElementById("rkbo-draft-overlay").hidden=true;document.body.style.overflow=previousOverflow;return}
@@ -79,11 +81,13 @@ function close(){
 }
 function setup(){
  stopTimers();state=null;
- const season=root.RKBOSeason?.current?.()||60;
+ const season=draftSeason;
  render('<div class="rkbo-draft-intro"><div class="rkbo-draft-big">18<span> PICKS</span></div>'+
   '<div class="rkbo-draft-copy"><h3>18번의 선택, 단 하나의 최강 팀.</h3><p>포지션을 무작위로 추첨하고, 나타나는 선수 카드 3장 중 한 장을 고르세요. 타자 9명·선발 5명·중계 3명·마무리 1명까지 모두 뽑으면 그라운드에 나만의 라인업이 완성됩니다.</p>'+
-  '<div class="rkbo-draft-mode-picker"><button type="button" data-draft-action="mode-season" class="rkbo-draft-mode active"><strong>'+season+'차 시즌</strong><small>현재 선택한 시즌의 카드만</small></button>'+
-  '<button type="button" data-draft-action="mode-all" class="rkbo-draft-mode"><strong>올타임 드래프트</strong><small>등록된 모든 시즌을 섞어서</small></button></div>'+
+  '<div class="rkbo-draft-mode-picker"><button type="button" data-draft-action="mode-season" class="rkbo-draft-mode '+(mode==="season"?"active":"")+'"><strong>시즌별 드래프트</strong><small>원하는 1~60차 시즌을 선택</small></button>'+
+  '<button type="button" data-draft-action="mode-all" class="rkbo-draft-mode '+(mode==="all"?"active":"")+'"><strong>올타임 드래프트</strong><small>등록된 모든 시즌을 섞어서</small></button></div>'+
+ '<label class="rkbo-draft-season-label" for="rkbo-draft-season-select">⚾ 드래프트 시즌 선택'+
+ '<select id="rkbo-draft-season-select" '+(mode==="all"?"disabled":"")+'>'+seasonSelectOptions(season)+'</select></label>'+
   '<label class="rkbo-draft-hide-option"><input type="checkbox" id="rkbo-draft-hide-toggle" '+(hiddenMode?"checked":"")+'><span><strong>OVR · 등급 숨기기</strong><small>카드 선택 중엔 OVR·등급·모든 능력치가 ??로 보이고 카드 테두리가 검정색으로 바뀝니다. 결과창에서 공개됩니다.</small></span></label>'+
   '<div class="rkbo-draft-rules"><span>포지션 랜덤 추첨</span><span>매번 카드 3장</span><span>다시 뽑기 총 3회</span><span>한 포지션에 1회만</span></div>'+
   '<div class="rkbo-draft-start-actions"><button class="rkbo-draft-primary" type="button" data-draft-action="start">드래프트 시작하기 →</button><button class="rkbo-draft-board-link" data-draft-action="board" type="button">🏆 스코어보드</button></div>'+ 
@@ -134,6 +138,24 @@ async function allTime(){
  root.RKBOTeamBrand?.decorate?.(pool);
  return pool;
 }
+async function seasonPool(n){
+ if(!Number.isInteger(n)||n<1||n>60)throw Error("1~60차 시즌 중에서 선택해 주세요.");
+ let list;
+ if(n===60)list=(root.RKBOSeason?.builtin?.()||[]).map(p=>({...p}));
+ else if(Number(root.RKBOSeason?.current?.())===n)
+  list=(root.RKBOSeason?.players?.()||[]).filter(p=>!p.specialKind).map(p=>({...p}));
+ else{
+  const response=await fetch("./data/seasons/"+n+".json",{cache:"force-cache"});
+  if(!response.ok)throw Error(n+"차 시즌 선수 카드 로딩 실패 (HTTP "+response.status+")");
+  const data=await response.json(),entries=Array.isArray(data)?data:data?.players;
+  if(!Array.isArray(entries))throw Error(n+"차 선수 카드 데이터 형식 오류");
+  list=entries.map(p=>({...p}));
+ }
+ if(!list.length)throw Error(n+"차 시즌 선수 카드가 등록되어 있지 않아요.");
+ if(root.RKBONameMap?.apply)await root.RKBONameMap.apply(list,null);
+ root.RKBOTeamBrand?.decorate?.(list);
+ return list;
+}
 async function start(){
  if(loading)return;
  loading=true;
@@ -150,7 +172,7 @@ async function start(){
  const t=++token;const useAll=mode==="all";
  render('<div class="rkbo-draft-loading"><div class="rkbo-draft-loading-ball">⚾</div><h3>드래프트 후보 준비 중</h3><p id="rkbo-draft-load-status">'+(useAll?"전체 시즌 카드 불러오는 중…":"이번 시즌 선수 확인 중…")+'</p></div>',"선수 풀 준비");
  try{
-  let pool=useAll?await allTime():[...(root.RKBOSeason?.players?.()||[])];
+  let pool=useAll?await allTime():await seasonPool(draftSeason);
   if(t!==token)return;
   pool=pool.filter(p=>!p.specialKind&&Number(p.ovr)>0&&p.ratings&&(p.type==="타자"||p.type==="투수"));
   const stock={};
@@ -160,7 +182,7 @@ async function start(){
   }
   const scarce=Object.entries(stock).filter(([,count])=>count<3);
   if(scarce.length)throw Error("드래프트 후보가 부족한 포지션: "+scarce.map(([id,count])=>id+" ("+count+"명)").join(", "));
-  state={phase:"roulette",mode,hidden:hiddenMode,season:Number(root.RKBOSeason?.current?.()||60),pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0,recorded:false,score:null,lineup:newLineup(),editLineup:false,swapPick:null,onlineSaved:false};
+  state={phase:"roulette",mode,hidden:hiddenMode,season:useAll?60:draftSeason,pool,picks:new Map(),offered:[],slot:null,usedRerollSlots:new Set(),rerolls:3,round:0,recorded:false,score:null,lineup:newLineup(),editLineup:false,swapPick:null,onlineSaved:false};
   loading=false;roulette();
  }catch(err){loading=false;console.error("[RKBO draft]",err);
   if(t===token)render('<div class="rkbo-draft-error"><h3>드래프트를 시작하지 못했습니다</h3><p>'+esc(err.message)+'</p><button data-draft-action="setup" type="button">방식 선택으로 돌아가기</button></div>',"선수 데이터 오류");
@@ -429,12 +451,13 @@ async function loadSavedTeam(saved){
  }
 }
 
-function scoreboard(){stopTimers();boardReturn=state?.phase==="result"?"result":"setup";boardTab=category({mode:state?.mode||mode,hidden:state?.hidden??hiddenMode});renderScoreboard()}
+function scoreboard(){stopTimers();boardReturn=state?.phase==="result"?"result":"setup";boardTab=category({mode:state?.mode||mode,hidden:state?.hidden??hiddenMode});boardSeason=state?.mode==="season"?state.season:draftSeason;renderScoreboard()}
 function renderScoreboard(){
- const season=Number(root.RKBOSeason?.current?.()||60),choice=BOARD_MODES.find(x=>x.key===boardTab)||BOARD_MODES[0];
+ const season=boardSeason,choice=BOARD_MODES.find(x=>x.key===boardTab)||BOARD_MODES[0];
  const rows=leaderboardRows(choice.key,season);
  render('<div class="rkbo-draft-result-title"><span class="rkbo-draft-kicker">RKBO · SCOREBOARD</span><h3>드래프트 스코어보드</h3><p>내 브라우저에 저장된 기록입니다. 온라인 연결이 완료되면 모든 접속자 순위표도 볼 수 있어요.</p></div>'+
   '<div class="rkbo-draft-leader-tabs">'+BOARD_MODES.map(m=>'<button type="button" data-draft-board="'+m.key+'" class="'+(boardTab===m.key?'active':'')+'">'+esc(m.label)+'</button>').join("")+'</div>'+
+ (choice.key.startsWith("season")?'<label class="rkbo-draft-season-label rkbo-draft-board-season-label">랭킹을 볼 시즌<select id="rkbo-draft-board-season">'+seasonSelectOptions(season)+'</select></label>':'')+
   '<div class="rkbo-draft-board-table"><div class="rkbo-draft-board-head"><span>순위</span><span>기록 / 시즌</span><span>TPI</span><span>평균 OVR</span></div>'+
   (rows.length?rows.map((r,i)=>'<div class="rkbo-draft-board-row"><b>'+(i+1)+'</b><div><strong>'+(r.mode==="season"?r.season+"차":"올타임")+(r.hidden?" · 숨기기":"")+'</strong><small>'+esc(new Date(r.at).toLocaleString("ko-KR"))+'</small></div><strong>'+r.power+'</strong><span>'+Number(r.avg).toFixed(1)+'</span></div>').join(""):'<p class="rkbo-draft-board-empty">아직 이 모드의 기록이 없어요. 첫 번째 팀을 완성해 보세요!</p>')+'</div>'+
   '<div class="rkbo-draft-end-actions"><button type="button" data-draft-action="back-to-draft">← 돌아가기</button>'+
