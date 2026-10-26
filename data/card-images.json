@@ -413,13 +413,13 @@
     },
     "60-SAM-투-004-SPECIAL-DREAM": {
       "path": "assets/cards/60-SAM-투-004-SPECIAL-DREAM.webp",
-      "x": -1.238390092879257,
-      "y": -1.8315018315018317,
-      "zoom": 1.5822919642953643,
+      "x": -0.3095975232198144,
+      "y": 27.106227106227106,
+      "zoom": 1.8294507622792968,
       "fit": "contain",
-      "rev": "mvpfqeoo",
-      "commit": "638b4ce7ee7b2deb9f510481b9d027447085619d",
-      "blobSha": "271a462647cbf309dbd627303abb5d61291a0522"
+      "rev": "mvpfqvzf",
+      "commit": "13a1635d8fdf1ae47d0e3c484d88368a29b28930",
+      "blobSha": "1c9a9f624e1cf853a7bf7446739c6b09b82b7730"
     },
     "60-SAM-투-002": {
       "path": "assets/cards/60-SAM-투-002.webp",
