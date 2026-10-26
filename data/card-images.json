@@ -430,6 +430,16 @@
       "rev": "mvpfbn0b",
       "commit": "a136db3d534c41aee2db78b724f5b0b0551b6d32",
       "blobSha": "c0451401beb935f72c9f895dea1c8755ce1346c3"
+    },
+    "60-DOO-타-001-SPECIAL-MVP": {
+      "path": "assets/cards/60-DOO-타-001-SPECIAL-MVP.webp",
+      "x": -2.1671826625386994,
+      "y": 25.274725274725277,
+      "zoom": 1.5900833728221928,
+      "fit": "contain",
+      "rev": "mvpfcy22",
+      "commit": "95a9ee32e30af7fe9a7b98f98d9b63b8c4fdc055",
+      "blobSha": "d93ec65193de3c81b6915e371069ee3c44c09208"
     }
   }
 }
