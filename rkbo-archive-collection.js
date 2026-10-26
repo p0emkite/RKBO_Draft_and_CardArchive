@@ -88,7 +88,7 @@ function modalState(){
  decorateCard(card);
  const download=modal.querySelector("[data-export-player]");
  if(download){
-  const collected=status==="ready"&&!!userId&&owned.has(card.dataset.id);
+  const collected=root.RKBOAdminBridge?.isAuthorized?.()||(status==="ready"&&!!userId&&owned.has(card.dataset.id));
   const text=collected?"↓ 카드 저장":status==="loading"?"보유 여부 확인 중…":userId?"🔒 미수집 · 저장 불가":"🔐 로그인 후 저장";
   download.disabled=!collected;
   if(download.textContent!==text)download.textContent=text;
@@ -234,6 +234,8 @@ function init(){
   });
   detailObserver.observe(detail,{childList:true,subtree:true});
  }
+ root.addEventListener("rkbo-admin-connected",modalState);
+ root.addEventListener("rkbo-admin-disconnected",modalState);
  root.addEventListener("rkbo-season-change",redraw);
  root.addEventListener("rkbo-player-data-updated",redraw);
  root.addEventListener("rkbo-collection-updated",e=>{if(e.detail?.origin!=="main-archive")refresh()});
