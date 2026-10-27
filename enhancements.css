@@ -1252,7 +1252,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
  padding:10px;border-radius:9px;display:flex;flex-direction:column;gap:4px;
  text-align:left;min-width:0;min-height:106px;cursor:pointer}
 .rkbo-combo-candidate > strong{font-size:13px;overflow:hidden;text-overflow:ellipsis}
-.rkbo-combo-candidate > span:not(.rkbo-combo-card-art){color:#a7c2d5;font-size:11px}
+.rkbo-combo-candidate > .rkbo-combo-grade{color:#a7c2d5;font-size:11px}
 .rkbo-combo-candidate .rkbo-combo-grade{font-weight:950;color:#f4c980}
 .rkbo-combo-candidate small{font-size:10px;color:#86e7ce}
 .rkbo-combo-candidate:disabled{opacity:.43;cursor:not-allowed}
