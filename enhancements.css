@@ -1322,3 +1322,95 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-winning-art .player-card:hover{transform:none}
 .rkbo-combo-winning-art .fav{pointer-events:none}
 
+
+
+/* Card Combination 2.0 cinematic overlay: client visuals only. */
+.rkbo-combo-cinema[hidden]{display:none!important}
+.rkbo-combo-cinema{position:fixed;inset:0;z-index:5;display:flex;justify-content:center;align-items:center;
+ padding:18px;background:radial-gradient(ellipse at center,#182c4aee 0%,#030912fc 72%);
+ color:#fff;overflow:auto}
+.rkbo-combo-cinema-panel{width:min(920px,100%);max-height:96dvh;display:flex;flex-direction:column;
+ align-items:center;text-align:center;gap:14px}
+.rkbo-combo-cinema-panel header small{display:block;color:#9bc5dc;font-size:11px;font-weight:800;letter-spacing:.13em}
+.rkbo-combo-cinema-panel h2{font-size:clamp(18px,3.5vw,30px);color:#ffdda2;margin:9px 0 0;
+ text-shadow:0 0 24px #eac57d70}
+.rkbo-combo-cinema-scene{width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;position:relative}
+.rkbo-combo-cinema-caption{margin:0;color:#d1e0ea;font-size:12px;line-height:1.7}
+.rkbo-combo-cinema-skip{background:#183248;border:1px solid #7292a8;color:#eaf4ff;
+ border-radius:999px;padding:9px 19px;font-weight:800;cursor:pointer}
+.rkbo-combo-cinema-skip:hover,.rkbo-combo-cinema-skip:focus-visible{border-color:#ffd38f}
+.rkbo-combo-merge-stage{position:relative;width:100%;height:235px;display:flex;
+ align-items:center;justify-content:center;isolation:isolate}
+.rkbo-combo-merge-tile{width:116px;height:160px;border:2px solid var(--merge-accent);border-radius:12px;
+ position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:space-around;
+ padding:12px 7px;background:linear-gradient(145deg,#314863,#091524);box-shadow:0 10px 36px #0009;
+ transform:translateX(var(--merge-x)) rotate(var(--merge-r));transition:transform .82s cubic-bezier(.55,0,.2,1),opacity .82s,filter .82s;
+ overflow:hidden;word-break:keep-all}
+.rkbo-combo-merge-tile small{font-size:10px;color:var(--merge-accent);font-weight:900}
+.rkbo-combo-merge-tile strong{font-size:14px}
+.rkbo-combo-merge-tile span{font-size:11px;color:#bfd1e5}
+.rkbo-combo-merge-core{font-size:85px;color:#ffeec0;opacity:0;transform:scale(.3);
+ text-shadow:0 0 60px #fff6bf;transition:opacity .65s,transform .65s;pointer-events:none}
+.rkbo-combo-cinema.is-fusing .rkbo-combo-merge-tile{transform:translateX(0) rotate(0) scale(.05);
+ opacity:0;filter:brightness(3)}
+.rkbo-combo-cinema.is-fusing .rkbo-combo-merge-core{opacity:1;transform:scale(1.15)}
+.rkbo-combo-loader{width:90px;height:90px;border-radius:50%;border:7px solid #496278;
+ border-top-color:#ffe7a5;box-shadow:0 0 36px #d4ac6880;animation:rkboComboSpinner 1s linear infinite}
+@keyframes rkboComboSpinner{to{transform:rotate(360deg)}}
+.rkbo-combo-roulette{width:100%;padding:45px 0 35px;overflow:hidden}
+.rkbo-combo-roulette-window{position:relative;overflow:hidden;width:100%;
+ padding:18px 0;min-height:176px;
+ background:linear-gradient(90deg,#071320,#1b2c40,#071320);border-block:1px solid #68869d;
+ box-shadow:inset 0 0 35px #020b17}
+.rkbo-combo-roulette-window:before,.rkbo-combo-roulette-window:after{content:"";position:absolute;
+ top:0;bottom:0;width:15%;z-index:2;pointer-events:none}
+.rkbo-combo-roulette-window:before{left:0;background:linear-gradient(90deg,#071320,transparent)}
+.rkbo-combo-roulette-window:after{right:0;background:linear-gradient(-90deg,#071320,transparent)}
+.rkbo-combo-roulette-track{display:flex;gap:8px;width:max-content;will-change:transform}
+.rkbo-combo-roulette-tile{width:109px;min-width:109px;height:137px;display:flex;flex-direction:column;
+ align-items:center;justify-content:space-between;gap:6px;padding:12px 5px 10px;overflow:hidden;
+ border:2px solid #7f92aa;border-radius:10px;
+ background:linear-gradient(140deg,#263b55,#0d192b);text-align:center;
+ box-shadow:0 5px 18px #02040b;color:#f4f8ff}
+.rkbo-combo-roulette-tile.tier-coral{border-color:#ff989b;background:linear-gradient(140deg,#773f61,#1b263a)}
+.rkbo-combo-roulette-tile.tier-diamond{border-color:#9cecff;background:linear-gradient(140deg,#396580,#183148)}
+.rkbo-combo-roulette-tile.tier-special{border-color:#ffdd88;background:linear-gradient(140deg,#78582f,#31233e)}
+.rkbo-combo-roulette-tile small{font-size:11px;font-weight:900;color:#ffe8a0}
+.rkbo-combo-roulette-tile strong{font-size:12px;line-height:1.3;overflow:hidden;max-height:3em;
+ word-break:keep-all;overflow-wrap:anywhere}
+.rkbo-combo-roulette-tile span{font-size:9px;color:#b8cde0}
+.rkbo-combo-roulette-marker{position:absolute;top:0;bottom:0;left:50%;width:3px;
+ z-index:4;transform:translateX(-50%);background:linear-gradient(#ffe6a5,transparent 20%,transparent 80%,#ffe6a5);
+ filter:drop-shadow(0 0 5px #ffca68);pointer-events:none}
+.rkbo-combo-cinema.is-landed .rkbo-combo-roulette-tile.is-winner{animation:rkboComboWinnerGlow .8s ease-in-out both;z-index:1}
+@keyframes rkboComboWinnerGlow{0%{box-shadow:0 0 0 #fff0;filter:brightness(1)}
+ 60%{box-shadow:0 0 32px 13px #ffe7aa;filter:brightness(1.6)}
+ 100%{box-shadow:0 0 38px 6px #ffd87e;filter:brightness(1.2)}}
+.rkbo-combo-flip-scene{perspective:900px;display:grid;place-items:center;width:100%;height:240px}
+.rkbo-combo-flip-card{height:180px;width:134px;display:flex;flex-direction:column;
+ align-items:center;justify-content:space-evenly;border:2px solid #d9af72;border-radius:14px;
+ background:linear-gradient(135deg,#413a44,#101e32);box-shadow:0 12px 38px #0009;
+ transform:rotateY(180deg);transition:transform .9s ease}
+.rkbo-combo-flip-card strong{font-size:65px;color:#ffd999;text-shadow:0 0 28px #efac74}
+.rkbo-combo-flip-card span{font-size:13px;letter-spacing:.15em}
+.rkbo-combo-cinema.is-revealing .rkbo-combo-flip-card{transform:rotateY(0)}
+.rkbo-combo-success .rkbo-combo-winning-art .player-card{animation:rkboComboAwardPop .68s ease-out both}
+.rkbo-combo-success.tier-coral{border-color:#ff999e;box-shadow:0 0 28px #f47ca254}
+.rkbo-combo-success.tier-diamond{border-color:#8ae5ff;box-shadow:0 0 38px #83d3ff65}
+.rkbo-combo-success.tier-special{border-color:#ffe194;box-shadow:0 0 42px #ffdc806b}
+@keyframes rkboComboAwardPop{0%{transform:perspective(700px) rotateY(75deg) scale(.8);opacity:0}
+ 80%{transform:perspective(700px) rotateY(-7deg) scale(1.05);opacity:1}
+ 100%{transform:perspective(700px) rotateY(0deg) scale(1);opacity:1}}
+@media(max-width:760px){
+ .rkbo-combo-cinema{padding:10px}
+ .rkbo-combo-cinema-panel{gap:10px}
+ .rkbo-combo-merge-stage{transform:scale(.75);height:200px;width:130%}
+ .rkbo-combo-roulette{padding:18px 0}
+ .rkbo-combo-roulette-tile{width:91px;min-width:91px;height:122px}
+ .rkbo-combo-roulette-window{min-height:158px}
+ .rkbo-combo-cinema-scene{min-height:170px}
+}
+@media(max-width:400px){.rkbo-combo-merge-stage{transform:scale(.54);width:175%}}
+@media(prefers-reduced-motion:reduce){
+ .rkbo-combo-cinema *, .rkbo-combo-success .player-card{animation:none!important;transition:none!important}
+}

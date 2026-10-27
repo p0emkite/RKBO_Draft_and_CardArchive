@@ -71,10 +71,130 @@ function percentMarkup(){
  ' 등록되지 않은 등급의 확률은 가까운 하위 등급에 합산돼(하위가 없으면 최저 등록 등급). 특수카드가 없는 시즌은 다이아몬드에 합산돼.'+
  ' 보존은 같은 등급의 새 카드 1장 획득을 뜻해. 혼합 등급은 합산 점수로 계산하므로 최고 등급 보존율이 낮아질 수 있어.</p>';
 }
+
+/* Purely cosmetic 2.0 animations. The server response is the ONLY winner. */
+const premiumGrades=new Set(["코랄","다이아몬드","특수","신인왕","드림","나눔","MVP","베스트릴리프"]);
+const displayGrades=["브론즈","실버","골드","코랄","다이아몬드","신인왕","드림","나눔","MVP","베스트릴리프"];
+let cinema=null,cinemaSkip=false,cinemaAdvance=null;
+const reducedMotion=()=>Boolean(root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+function cinematicStop(){
+ if(cinemaAdvance)cinemaAdvance();
+ if(cinema){cinema.hidden=true;cinema.innerHTML="";cinema.className="rkbo-combo-cinema";}
+ cinemaSkip=false;
+}
+function skipCinematic(){
+ cinemaSkip=true;
+ if(cinemaAdvance)cinemaAdvance();
+}
+function cinematicPause(ms){
+ if(cinemaSkip||reducedMotion())return Promise.resolve();
+ return new Promise(resolve=>{
+  let doneOnce=false;
+  const done=()=>{
+   if(doneOnce)return;
+   doneOnce=true;root.clearTimeout(timer);
+   if(cinemaAdvance===done)cinemaAdvance=null;
+   resolve();
+  };
+  const timer=root.setTimeout(done,ms);
+  cinemaAdvance=done;
+ });
+}
+function cinematicScreen(title,content,subtitle){
+ if(!cinema)return;
+ cinema.hidden=false;
+ cinema.className="rkbo-combo-cinema";
+ cinema.innerHTML='<div class="rkbo-combo-cinema-panel">'+
+  '<header><small>RKBO ONLINE · CARD COMBINATION 2.0</small><h2>'+esc(title)+'</h2></header>'+
+  '<div class="rkbo-combo-cinema-scene">'+content+'</div>'+
+  '<p class="rkbo-combo-cinema-caption">'+esc(subtitle||"")+'</p>'+
+  '<button type="button" class="rkbo-combo-cinema-skip" data-combo-fx-skip>연출 건너뛰기</button>'+
+  '</div>';
+}
+async function gatherCinematic(cards){
+ const merge=cards.map((p,i)=>{
+  const shift=Math.round((i-(cards.length-1)/2)*143);
+  return '<div class="rkbo-combo-merge-tile" style="--merge-x:'+shift+'px;--merge-r:'+((i%2?1:-1)*9)+'deg;--merge-accent:'+(hue[p.grade]||"#f5d186")+'">'+
+   '<small>'+esc(p.grade)+' · '+esc(p.season)+'차</small><strong>'+esc(p.name)+'</strong>'+
+   '<span>OVR '+esc(p.ovr)+'</span></div>';
+ }).join("");
+ cinematicScreen("선수 카드 조합 중",'<div class="rkbo-combo-merge-stage">'+merge+
+  '<span class="rkbo-combo-merge-core" aria-hidden="true">✦</span></div>',"카드가 하나로 합쳐집니다.");
+ if(!reducedMotion()&&!cinemaSkip){
+  root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
+   if(cinema?.querySelector(".rkbo-combo-merge-stage"))cinema.classList.add("is-fusing");
+  }));
+ }
+ await cinematicPause(920);
+ cinematicScreen("결과 확인 중",'<div class="rkbo-combo-loader" aria-hidden="true"></div>',
+  "서버에서 확정한 카드 결과를 안전하게 불러오는 중입니다.");
+}
+function rouletteTile(p,isWinner){
+ const tier=p.grade==="코랄"?"coral":p.grade==="다이아몬드"?"diamond":
+   premiumGrades.has(p.grade)?"special":"regular";
+ return '<div class="rkbo-combo-roulette-tile tier-'+tier+(isWinner?' is-winner':'')+'">'+
+  '<small>'+esc(p.grade||"선수")+'</small>'+
+  '<strong>'+esc(p.name||"선수 카드")+'</strong>'+
+  '<span>'+esc(p.season||"?")+'차 · OVR '+esc(p.ovr??"?")+'</span></div>';
+}
+async function rouletteCinematic(winner){
+ const season=Number(winner.season);
+ const roster=(artworkCache.get(season)||[]).filter(p=>p&&p.grade&&p.name);
+ const pools=new Map(displayGrades.map(g=>[g,roster.filter(p=>p.grade===g)]));
+ const items=[];
+ const targetIndex=60,total=65;
+ for(let i=0;i<total;i++){
+  if(i===targetIndex){items.push(rouletteTile({...winner,name:resultDisplayName||winner.name},true));continue}
+  // Display real catalog cards when available; these tiles do not represent further draws.
+  const wanted=displayGrades[(i*7+Math.floor(i/3))%displayGrades.length];
+  const group=pools.get(wanted)||[];
+  const p=group.length?group[i%group.length]:(roster.length?roster[(i*23+Math.floor(i/4)*7)%roster.length]:
+   {grade:wanted,name:"선수 카드",season:winner.season,ovr:"?"});
+  items.push(rouletteTile(p,false));
+ }
+ cinematicScreen("HIGH GRADE · 카드 룰렛",
+  '<div class="rkbo-combo-roulette"><div class="rkbo-combo-roulette-window">'+
+  '<div class="rkbo-combo-roulette-track">'+items.join("")+'</div>'+
+  '<span class="rkbo-combo-roulette-marker" aria-hidden="true"></span></div></div>',
+  "가로로 달리던 카드가 서서히 느려져 서버에서 확정된 결과에 멈춥니다. (연출 전용)");
+ const windowEl=cinema?.querySelector(".rkbo-combo-roulette-window");
+ const track=cinema?.querySelector(".rkbo-combo-roulette-track");
+ const winnerEl=cinema?.querySelector(".rkbo-combo-roulette-tile.is-winner");
+ if(!windowEl||!track||!winnerEl||cinemaSkip||reducedMotion())return;
+ const destination=Math.round(windowEl.clientWidth/2-winnerEl.offsetLeft-winnerEl.offsetWidth/2);
+ // No random stopping position: the exact server-awarded card is always centered.
+ track.style.transition="none";
+ track.style.transform="translate3d(0,0,0)";
+ void track.offsetWidth;
+ root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
+  if(!cinema?.hidden&&cinema.querySelector(".rkbo-combo-roulette-track")===track){
+   track.style.transition="transform 4900ms cubic-bezier(.08,.64,.12,1)";
+   track.style.transform="translate3d("+destination+"px,0,0)";
+  }
+ }));
+ await cinematicPause(5080);
+ if(cinemaSkip)return;
+ cinema.classList.add("is-landed");
+ await cinematicPause(850);
+}
+async function standardCinematic(winner){
+ const tier=winner.grade==="골드"?"gold":"ordinary";
+ cinematicScreen("조합 결과 공개",'<div class="rkbo-combo-flip-scene tier-'+tier+'">'+
+  '<div class="rkbo-combo-flip-card"><span>RKBO</span><strong>✦</strong>'+
+  '<small>'+esc(winner.grade)+'</small></div></div>',
+  esc(winner.season)+"차 "+esc(winner.grade)+" 카드 등장!");
+ if(!cinemaSkip&&!reducedMotion()){
+  root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
+   if(cinema?.querySelector(".rkbo-combo-flip-scene"))cinema.classList.add("is-revealing");
+  }));
+ }
+ await cinematicPause(1050);
+}
+
 function resultMarkup(){
  if(!result)return "";
  const p=result.result||{};
- return '<section class="rkbo-combo-success">'+
+ return '<section class="rkbo-combo-success tier-'+(p.grade==="코랄"?"coral":p.grade==="다이아몬드"?"diamond":premiumGrades.has(p.grade)?"special":"regular")+'">'+
  '<div class="rkbo-combo-award"><small>⚾ COMBINATION RESULT</small><h3>🎉 '+esc(p.grade)+' 획득!</h3>'+
  '<strong>'+esc(p.season)+'차 '+esc(resultDisplayName||p.name)+'</strong><p>OVR '+esc(p.ovr)+' · 조합 점수 '+esc(result.points)+'</p>'+
  '<div class="rkbo-combo-winning-art">'+(resultArtwork||'<span>선수 카드 이미지 불러오는 중…</span>')+'</div>'+
@@ -177,31 +297,54 @@ function mutate(action,idOrIndex){
 }
 async function combine(){
  if(busy||selected.length<3||selected.length>5||!quote||quoteLoading)return;
- const ingredients=selected.slice(),rated=quote;
+ const ingredients=selected.slice(),materials=ingredients.map(selectionCard),rated=quote;
  const seasonMsg=rated.mode==="same"?rated.season+"차 고정":"혼합 시즌 랜덤";
  if(!root.confirm("카드 "+ingredients.length+"장("+rated.points+"점)을 소모하고 새로운 카드 1장을 얻을까요?\n"+
  seasonMsg+" · 결과가 낮은 등급일 수도 있으며 조합 후 되돌릴 수 없습니다."))return;
  busy=true;quoteIndex++;render();
  const requestId=pendingRequest||root.crypto?.randomUUID?.();
  if(!requestId){busy=false;msg("보안 연결에서 요청 ID를 생성할 수 없습니다.");render();return}
- pendingRequest=requestId;
+ pendingRequest=requestId;cinemaSkip=reducedMotion();
+ let awarded=null;
  try{
-  const {c}=await context();
-  const {data,error}=await c.rpc("rkbo_combine_cards",{p_card_ids:ingredients,p_request_id:requestId});
-  if(error)throw Error(error.message);
+  // Start the RPC at once, while the material cards visually converge.
+  // Suppress early promise rejections until the merge animation ends.
+  const rpcTask=context().then(({c})=>c.rpc("rkbo_combine_cards",
+   {p_card_ids:ingredients,p_request_id:requestId}))
+   .then(value=>({value}),error=>({error}));
+  await gatherCinematic(materials);
+  const response=await rpcTask;
+  if(response.error)throw response.error;
+  if(response.value.error)throw Error(response.value.error.message);
+  const data=response.value.data;
   if(!data?.result?.cardId)throw Error("조합 결과를 확인할 수 없습니다.");
-  result=data;resultArtwork="";resultDisplayName="";pendingRequest=null;selected=[];quote=null;quoteLoading=false;
-  msg(data.replayed?"저장된 조합 결과를 복구했어.":"✅ 조합 성공! 새 카드가 수집 도감에 지급됐어.");
-  render();
-  root.dispatchEvent(new Event("rkbo-collection-updated"));
-  try{await loadData()}catch(e){console.warn("[RKBO combine] inventory refresh",e)}
+  awarded=data;resultArtwork="";resultDisplayName="";
+  // This only loads existing local card assets; it never performs another draw.
   await loadWinningArt(data.result.cardId);
+  try{
+   if(premiumGrades.has(data.result.grade))await rouletteCinematic(data.result);
+   else await standardCinematic(data.result);
+  }catch(animationError){
+   console.warn("[RKBO combination] Cosmetic effect failed",animationError);
+  }
+  result=data;selected=[];quote=null;quoteLoading=false;pendingRequest=null;
+  msg(data.replayed?"저장된 조합 결과를 복구했어.":"✅ 조합 성공! 새 카드가 수집 도감에 지급됐어.");
  }catch(e){
-  msg("조합 확인 실패: "+e.message+" · 동일 요청으로 다시 시도하면 중복 차감되지 않아.");
-  // Keep selection/requestId until manually retried. Avoid misleading users
-  // if a server commit succeeded but its HTTP response was lost.
-  quote=rated;quoteLoading=false;render();
- }finally{busy=false;render()}
+  if(awarded){
+   result=awarded;selected=[];quote=null;pendingRequest=null;
+   msg("✅ 조합은 정상 지급됐어. 연출 중 문제가 발생했지만 카드는 수집 도감에서 확인할 수 있어.");
+  }else{
+   // Preserve the same UUID so that a lost response cannot double-spend inventory.
+   quote=rated;quoteLoading=false;
+   msg("조합 확인 실패: "+e.message+" · 동일 요청으로 다시 시도하면 중복 차감되지 않아.");
+  }
+ }finally{
+  cinematicStop();busy=false;render();
+ }
+ if(awarded){
+  root.dispatchEvent(new Event("rkbo-collection-updated"));
+  await loadData();
+ }
 }
 async function loadWinningArt(cardId){
  try{
@@ -240,8 +383,9 @@ async function detail(cardId){
   root.RKBOSeason.showPlayer(cardId);
  }catch(e){msg("상세 카드 열기 실패: "+e.message)}
 }
-function close(){if(!overlay)return;overlay.hidden=true;document.body.classList.remove("rkbo-combo-open")}
+function close(){if(!overlay)return;if(busy){skipCinematic();return}cinematicStop();overlay.hidden=true;document.body.classList.remove("rkbo-combo-open")}
 function open(){
+ if(busy){if(overlay)overlay.hidden=false;return}
  if(!overlay)init();
  overlay.hidden=false;document.body.classList.add("rkbo-combo-open");
  selected=[];quote=null;result=null;resultArtwork="";resultDisplayName="";quoteLoading=false;quoteError="";notice="";
@@ -258,6 +402,9 @@ function init(){
  overlay=document.createElement("div");overlay.id="rkbo-combo-overlay";overlay.className="rkbo-combo-overlay";overlay.hidden=true;
  overlay.innerHTML='<div class="rkbo-combo-dialog" role="dialog" aria-modal="true" aria-label="RKBO 카드 조합"></div>';
  document.body.appendChild(overlay);dialog=overlay.querySelector(".rkbo-combo-dialog");
+ cinema=document.createElement("div");cinema.className="rkbo-combo-cinema";cinema.hidden=true;
+ cinema.setAttribute("role","region");cinema.setAttribute("aria-label","카드 조합 연출");overlay.appendChild(cinema);
+ cinema.addEventListener("click",e=>{if(e.target.closest("[data-combo-fx-skip]"))skipCinematic()});
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  dialog.addEventListener("click",async e=>{
   const add=e.target.closest("[data-combo-add]");if(add){mutate("add",add.dataset.comboAdd);return}
