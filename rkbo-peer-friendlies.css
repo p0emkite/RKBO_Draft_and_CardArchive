@@ -1,0 +1,58 @@
+/* RKBO online: member friendlies invitations and saved 9-inning scores. */
+.rkbo-pvp-nav{position:relative;display:inline-flex;align-items:center;gap:4px;
+ background:#294d5e;color:#fff3df;border:1px solid #a99c76;border-radius:8px;
+ padding:8px 10px;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+.rkbo-pvp-badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 4px;
+ background:#f6ae81;color:#1c2b3b;border-radius:15px;font-size:11px}
+.rkbo-pvp-badge[hidden],.rkbo-pvp-overlay[hidden]{display:none!important}
+.rkbo-pvp-overlay{position:fixed;inset:0;z-index:2890;background:#030914e8;
+ padding:14px;display:flex;justify-content:center;align-items:center;color:#eaf6ff}
+.rkbo-pvp-panel{width:min(990px,100%);max-height:94dvh;overflow-y:auto;
+ background:#0e1e31;border:1px solid #4d718a;border-radius:14px;
+ box-shadow:0 20px 80px #000c}
+.rkbo-pvp-header{display:flex;align-items:start;justify-content:space-between;
+ padding:17px 21px;background:linear-gradient(120deg,#173d50,#343856);gap:12px}
+.rkbo-pvp-header small{font-size:10px;letter-spacing:.12em;color:#9dc9dd}
+.rkbo-pvp-header h2{font-size:23px;color:#ffe0a7;margin:5px 0}
+.rkbo-pvp-header p{font-size:12px;color:#bdd1df;margin:0}
+.rkbo-pvp-header>button{width:39px;height:39px;border:1px solid #658297;
+ background:#203e53;color:white;border-radius:8px;font-size:22px;cursor:pointer}
+.rkbo-pvp-notice{padding:0 19px;margin:10px 0;min-height:18px;
+ font-size:12px;color:#ffdea7}
+.rkbo-pvp-body{padding:13px 19px 24px;display:grid;grid-template-columns:minmax(270px,.95fr) minmax(0,1.35fr);gap:18px;align-items:start}
+.rkbo-pvp-body h3{color:#ffdb9d;font-size:17px;margin:4px 0 10px}
+.rkbo-pvp-start{display:flex;flex-direction:column;gap:10px;background:#19364b;border:1px solid #547b8b;
+ border-radius:12px;padding:15px}
+.rkbo-pvp-start p,.rkbo-pvp-muted{font-size:12px;color:#a7c0cf;line-height:1.65;margin:0}
+.rkbo-pvp-start label,.rkbo-pvp-match label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#c6dbe9}
+.rkbo-pvp-start select,.rkbo-pvp-match select{width:100%;min-width:0;background:#0b2235;
+ color:#eaf5ff;border:1px solid #5c8094;border-radius:7px;padding:10px;font-size:12px}
+.rkbo-pvp-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.rkbo-pvp-actions button{padding:8px 11px;font-size:12px;font-weight:900;
+ border:1px solid #85a1a5;background:#2d5870;color:#fff7e7;border-radius:8px;cursor:pointer}
+.rkbo-pvp-actions button:first-child{border-color:#e1c08a;background:#73532e}
+.rkbo-pvp-actions button:disabled{opacity:.4;cursor:not-allowed}
+.rkbo-pvp-actions p{font-size:11px;color:#b9cfe0;margin:3px 0}
+.rkbo-pvp-list{min-width:0;display:flex;flex-direction:column;gap:12px}
+.rkbo-pvp-match{display:flex;flex-direction:column;gap:10px;background:#142c3f;
+ border:1px solid #426b83;border-radius:11px;padding:13px}
+.rkbo-pvp-entry-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.rkbo-pvp-entry-top small{font-size:10px;color:#b0c5d5}
+.rkbo-pvp-entry-top span{font-size:10px;color:#eecb89}
+.rkbo-pvp-versus{display:flex;gap:8px;align-items:center;justify-content:space-between;text-align:center}
+.rkbo-pvp-versus strong{font-size:12px;flex:1;overflow-wrap:anywhere}
+.rkbo-pvp-versus b{color:#f8ca85;font-size:12px}
+.rkbo-pvp-score{text-align:center;font-size:32px;font-weight:1000;color:#ffe2a7}
+.rkbo-pvp-verdict{text-align:center;color:#b9e5d8;font-weight:900;font-size:12px}
+.rkbo-pvp-match details summary{color:#cadcec;font-size:12px;cursor:pointer}
+.rkbo-pvp-score-scroll{overflow-x:auto;margin:9px 0}
+.rkbo-pvp-match table{border-collapse:collapse;width:100%;min-width:360px;font-size:11px}
+.rkbo-pvp-match th,.rkbo-pvp-match td{border:1px solid #3e627b;padding:6px 4px;text-align:center}
+.rkbo-pvp-match th{background:#1f4055;color:#f2e0b8}
+@media(max-width:830px){.rkbo-pvp-body{display:flex;flex-direction:column}
+.rkbo-pvp-start,.rkbo-pvp-list{width:100%}}
+@media(max-width:600px){.rkbo-pvp-overlay{padding:5px}
+.rkbo-pvp-panel{max-height:calc(100dvh - 10px)}
+.rkbo-pvp-header{padding:11px}.rkbo-pvp-header h2{font-size:18px}
+.rkbo-pvp-body{padding:11px}
+.rkbo-pvp-nav{font-size:11px;padding:7px}}
