@@ -64,3 +64,59 @@
  .rkbo-cm-members,.rkbo-cm-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
  .rkbo-cm-nav{font-size:11px;padding:8px}
 }
+
+
+/* Persistent RKBO chat dock, independent of the full-screen community dialog. */
+.rkbo-chat-dock{position:fixed;right:18px;bottom:16px;z-index:3500;
+ width:min(370px,calc(100vw - 28px));color:#eaf6ff;
+ border:1px solid #598aa0;border-radius:13px;
+ background:#0e2034;box-shadow:0 12px 50px #000a;
+ font-family:"Noto Sans KR",system-ui,sans-serif;overflow:hidden}
+.rkbo-chat-dock [hidden]{display:none!important}
+.rkbo-chat-header{height:52px;padding:0 16px;width:100%;display:flex;align-items:center;justify-content:space-between;
+ cursor:pointer;outline-offset:-3px;border:0;color:#fcf5e7;
+ background:linear-gradient(100deg,#224d64,#2e345d);font-size:14px;font-weight:950;text-align:left}
+.rkbo-chat-header:hover{background:linear-gradient(100deg,#2a6075,#373d6a)}
+.rkbo-chat-header:focus-visible{outline:2px solid #ffe29c}
+.rkbo-chat-header-title,.rkbo-chat-header-actions{display:flex;align-items:center;gap:9px}
+.rkbo-chat-header-actions{font-size:21px;color:#e5d3ad}
+.rkbo-chat-unread{display:grid;place-items:center;min-width:22px;height:22px;
+ border-radius:20px;padding:0 6px;background:#f59c6a;color:#1d2533;font-size:11px;font-weight:950}
+.rkbo-chat-panel{height:min(482px,calc(100dvh - 104px));
+ display:flex;flex-direction:column;border-top:1px solid #55758f;background:#0c1b2d;min-height:0}
+.rkbo-chat-stream{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+ display:flex;flex-direction:column;gap:9px;padding:14px 11px 10px}
+.rkbo-chat-empty{color:#a9bfd1;text-align:center;font-size:12px;line-height:1.7;margin:auto 0}
+.rkbo-chat-entry{max-width:90%;align-self:flex-start;min-width:60px;
+ background:#203d58;border:1px solid #3c6581;border-radius:11px;padding:9px 11px}
+.rkbo-chat-entry.is-mine{align-self:flex-end;background:#235448;border-color:#3f8a75}
+.rkbo-chat-entry-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rkbo-chat-entry-meta strong{font-size:11px;color:#f9d9a1;overflow-wrap:anywhere}
+.rkbo-chat-entry-meta time{font-size:9px;color:#aec9d9}
+.rkbo-chat-entry p{font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;
+ margin:6px 0 4px;color:#edf6fe}
+.rkbo-chat-entry button{border:0;background:none;color:#a9c7d6;font-size:10px;
+ padding:0;cursor:pointer}
+.rkbo-chat-entry button:hover{text-decoration:underline}
+.rkbo-chat-status{padding:0 12px;color:#b8d8e5;font-size:11px;line-height:1.45;min-height:0}
+.rkbo-chat-status:not(:empty){padding:8px 12px;background:#17334a}
+.rkbo-chat-status.is-error{color:#ffbaa9}
+.rkbo-chat-compose{display:flex;gap:7px;padding:11px;background:#172e44;border-top:1px solid #304d67}
+.rkbo-chat-compose textarea{flex:1;min-width:0;resize:none;max-height:100px;
+ border:1px solid #51758d;background:#091a2a;color:#eff8ff;border-radius:8px;
+ padding:9px 10px;font-size:12px;line-height:1.5}
+.rkbo-chat-compose textarea:focus{outline:2px solid #63c2c3;outline-offset:0}
+.rkbo-chat-compose>button,.rkbo-chat-auth button{background:#295f71;color:#eefaff;
+ border:1px solid #70aeb2;border-radius:8px;font-weight:850;padding:8px 12px;
+ font-size:12px;cursor:pointer}
+.rkbo-chat-compose>button:disabled{opacity:.5;cursor:wait}
+.rkbo-chat-auth{padding:16px;text-align:center;background:#10283e}
+.rkbo-chat-auth p{font-size:12px;color:#bdd6e5;line-height:1.7}
+.rkbo-chat-auth button{margin:4px}
+@media(max-width:760px){
+ .rkbo-chat-dock{right:8px;bottom:max(8px,env(safe-area-inset-bottom));
+  width:min(365px,calc(100vw - 16px))}
+ .rkbo-chat-header{height:48px;font-size:13px}
+ .rkbo-chat-panel{height:min(440px,calc(100dvh - 126px))}
+}
+@media(max-width:430px){.rkbo-chat-dock{width:calc(100vw - 16px)}}

@@ -145,12 +145,12 @@ function chatView(){
  return '<div class="rkbo-cm-chat"><div class="rkbo-cm-stream" id="rkbo-cm-stream">'+messagesView()+'</div>'+
  '<div class="rkbo-cm-compose"><textarea id="rkbo-cm-input" maxlength="240" rows="2" placeholder="카페 회원들에게 이야기해 봐!"></textarea>'+
  '<button data-cm-send>전송</button></div>'+
- '<p class="rkbo-cm-muted">3초 간격 · 10분 최대 30개 · 메시지 삭제와 신고 가능</p></div>';
+ '<p class="rkbo-cm-muted">메시지 삭제와 신고 가능</p></div>';
 }
 function render(){
  if(!panel)return;
- panel.innerHTML='<header class="rkbo-cm-head"><div><small>RKBO · COMMUNITY</small><h2>🫂 RKBO 커뮤니티</h2><p>도감 · 교환 · 채팅</p></div><button data-cm-close aria-label="닫기">×</button></header>'+
- '<nav class="rkbo-cm-tabs">'+[["members","👥 도감 구경"],["trades","🔁 카드 교환"],["chat","💬 실시간 채팅"]]
+ panel.innerHTML='<header class="rkbo-cm-head"><div><small>RKBO · COMMUNITY</small><h2>🫂 RKBO 커뮤니티</h2><p>도감 · 카드 교환</p></div><button data-cm-close aria-label="닫기">×</button></header>'+
+ '<nav class="rkbo-cm-tabs">'+[["members","👥 도감 구경"],["trades","🔁 카드 교환"]]
  .map(([t,n])=>'<button data-cm-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+n+'</button>').join("")+'</nav>'+
  '<p class="rkbo-cm-notice" id="rkbo-cm-notice">'+esc(notice)+'</p>'+
  '<main class="rkbo-cm-main">'+(tab==="members"?membersView():tab==="trades"?tradesView():chatView())+'</main>';
