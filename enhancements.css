@@ -1540,3 +1540,45 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
  .rkbo-combo-card-art .player-card .badge-row .metal-label{font-size:5px;padding:1px}
  .rkbo-combo-slots .rkbo-combo-remove-mark{width:14px;height:14px;font-size:12px}
 }
+
+/* Card combination 2.2 — real, enlarged, exact-grade roulette. */
+.rkbo-combo-cinema.is-roulette-mode{padding:clamp(8px,2vw,22px);background:radial-gradient(ellipse at center,#1a304af2,#030a15fc 76%)}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-panel{width:min(1480px,100%);max-height:calc(100dvh - 20px);gap:17px}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-scene{min-height:0;width:100%}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette{width:100%;padding:0;overflow:hidden;--combo-wheel-card-width:clamp(188px,20vw,268px)}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-window{position:relative;min-height:0;padding:17px 0;border-block:1px solid #7094ad;background:linear-gradient(90deg,#06121f,#193048,#06121f);box-shadow:inset 0 0 48px #020b17}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{display:flex;align-items:center;gap:14px;width:max-content;position:relative;will-change:transform}
+.rkbo-combo-roulette-card{position:relative;display:block;flex:none;width:var(--combo-wheel-card-width);height:calc(var(--combo-wheel-card-width)*1.56);pointer-events:none}
+.rkbo-combo-roulette-card>.player-card{width:100%;height:100%;min-height:0;aspect-ratio:auto;margin:0;transform:none!important;pointer-events:none;border-radius:12px;box-shadow:0 10px 30px #000b}
+.rkbo-combo-roulette-card>.player-card:hover{transform:none!important;box-shadow:0 10px 30px #000b}
+.rkbo-combo-roulette-card .card-inner{height:100%;min-height:0;overflow:hidden}
+.rkbo-combo-roulette-card .card-top{padding:9px 9px 0}
+.rkbo-combo-roulette-card .headshot{min-height:0;flex:1 1 30%;margin:0}
+.rkbo-combo-roulette-card .headshot .player-photo{width:100%;height:100%;object-fit:contain}
+.rkbo-combo-roulette-card .headshot .team-ghost{font-size:clamp(38px,5vw,70px)}
+.rkbo-combo-roulette-card .card-mid{padding:0 11px 6px}
+.rkbo-combo-roulette-card .ovrnum{font-size:clamp(33px,4vw,53px)}
+.rkbo-combo-roulette-card .card-name{padding:7px 11px;min-height:0}
+.rkbo-combo-roulette-card .card-name h3{font-size:clamp(12px,1.4vw,19px)}
+.rkbo-combo-roulette-card .metric-grid{padding:5px 6px 7px}
+.rkbo-combo-roulette-card .m b{font-size:clamp(10px,1.1vw,16px)}
+.rkbo-combo-roulette-card .m span{font-size:clamp(7px,.7vw,9px)}
+.rkbo-combo-roulette-card .fav,.rkbo-combo-roulette-card .edit-photo{display:none!important}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-marker{z-index:4;box-shadow:0 0 14px #eabf6c9e;pointer-events:none}
+.rkbo-combo-cinema.is-roulette-mode.is-landed .rkbo-combo-roulette-card.is-winner{animation:rkboComboWheelWin .82s ease-out both;z-index:3}
+@keyframes rkboComboWheelWin{0%{filter:brightness(1);transform:scale(1)}60%{filter:brightness(1.36) drop-shadow(0 0 29px #ffe2a5a8);transform:scale(1.035)}100%{filter:brightness(1.15) drop-shadow(0 0 19px #ffdc8ba8);transform:scale(1.02)}}
+@media(max-width:760px){
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette{--combo-wheel-card-width:clamp(148px,38vw,218px)}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-window{padding:10px 0}
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{gap:9px}
+.rkbo-combo-roulette-card .card-top{padding:5px 6px 0}
+.rkbo-combo-roulette-card .card-name{padding:5px 7px}
+.rkbo-combo-roulette-card .card-name h3{font-size:clamp(10px,2.3vw,16px)}
+.rkbo-combo-roulette-card .ovrnum{font-size:clamp(23px,6vw,38px)}
+.rkbo-combo-roulette-card .metric-grid{display:none}
+.rkbo-combo-roulette-card .team-badge{width:36px;height:23px}
+}
+@media(max-height:650px){
+.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette{--combo-wheel-card-width:clamp(138px,23vh,198px)}
+}
+@media(prefers-reduced-motion:reduce){.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{transition:none!important}.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-card{animation:none!important}}

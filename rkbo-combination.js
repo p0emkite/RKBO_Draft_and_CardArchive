@@ -221,47 +221,82 @@ async function gatherCinematic(cards){
  cinematicScreen("결과 확인 중",'<div class="rkbo-combo-loader" aria-hidden="true"></div>',
   "서버에서 확정한 카드 결과를 안전하게 불러오는 중입니다.");
 }
-function rouletteTile(p,isWinner){
- const tier=p.grade==="코랄"?"coral":p.grade==="다이아몬드"?"diamond":
-   premiumGrades.has(p.grade)?"special":"regular";
- return '<div class="rkbo-combo-roulette-tile tier-'+tier+(isWinner?' is-winner':'')+'">'+
-  '<small>'+esc(p.grade||"선수")+'</small>'+
-  '<strong>'+esc(p.name||"선수 카드")+'</strong>'+
-  '<span>'+esc(p.season||"?")+'차 · OVR '+esc(p.ovr??"?")+'</span></div>';
+/* Roulette cards are real catalog entries of the server-awarded exact grade. */
+const rouletteSpecialKinds={"신인왕":"ROY","드림":"DREAM","나눔":"NANUM","MVP":"MVP","베스트릴리프":"RELIEF"};
+function rouletteActualCard(p,isWinner){
+ const rendered=root.RKBOCardView?.render?.(p,true);
+ if(!rendered)throw Error("RKBO card artwork renderer is unavailable");
+ return '<div class="rkbo-combo-roulette-card'+(isWinner?' is-winner':'')+
+  '" data-card-id="'+esc(p.id)+'" data-grade="'+esc(p.grade)+'">'+
+  rendered.replace(/<button\b[^>]*>[\s\S]*?<\/button>/gi,"")+'</div>';
+}
+async function rouletteSameGradePool(winner){
+ const winnerSeason=Number(winner.season);
+ const catalog=await ensureSeasonArtwork(winnerSeason);
+ const actual=catalog.find(p=>p.id===winner.cardId);
+ if(!actual||actual.grade!==winner.grade)return null;
+ const pool=new Map();
+ function add(cards){for(const p of cards||[])if(p?.id&&p.grade===winner.grade)pool.set(p.id,p)}
+ add(catalog);
+ for(const cached of artworkCache.values())add(cached);
+ if(pool.size<6){
+  let seasons=[];
+  const specialKind=rouletteSpecialKinds[winner.grade];
+  if(specialKind){
+   try{
+    const res=await fetch("./data/special-cards.json",{cache:"force-cache"});
+    if(res.ok){
+     const manifest=await res.json();
+     seasons=[...new Set((manifest.cards||[]).filter(x=>x.kind===specialKind).map(x=>Number(x.season)))];
+    }
+   }catch(e){console.warn("[RKBO combo] Special roulette manifest unavailable",e)}
+  }else{
+   seasons=Array.from({length:60},(_,i)=>60-i);
+  }
+  let loads=0;
+  for(const season of seasons){
+   if(pool.size>=6||loads>=10||cinemaSkip)break;
+   if(season===winnerSeason||artworkCache.has(season))continue;
+   loads++;
+   add(await ensureSeasonArtwork(season));
+  }
+ }
+ return {actual,alternatives:[...pool.values()].filter(p=>p.id!==winner.cardId)};
 }
 async function rouletteCinematic(winner){
- const season=Number(winner.season);
- const roster=(artworkCache.get(season)||[]).filter(p=>p&&p.grade&&p.name);
- const pools=new Map(displayGrades.map(g=>[g,roster.filter(p=>p.grade===g)]));
- const items=[];
- const targetIndex=60,total=65;
- for(let i=0;i<total;i++){
-  if(i===targetIndex){items.push(rouletteTile({...winner,name:resultDisplayName||winner.name},true));continue}
-  // Display real catalog cards when available; these tiles do not represent further draws.
-  const wanted=displayGrades[(i*7+Math.floor(i/3))%displayGrades.length];
-  const group=pools.get(wanted)||[];
-  const p=group.length?group[i%group.length]:(roster.length?roster[(i*23+Math.floor(i/4)*7)%roster.length]:
-   {grade:wanted,name:"선수 카드",season:winner.season,ovr:"?"});
-  items.push(rouletteTile(p,false));
- }
- cinematicScreen("HIGH GRADE · 카드 룰렛",
-  '<div class="rkbo-combo-roulette"><div class="rkbo-combo-roulette-window">'+
-  '<div class="rkbo-combo-roulette-track">'+items.join("")+'</div>'+
-  '<span class="rkbo-combo-roulette-marker" aria-hidden="true"></span></div></div>',
-  "가로로 달리던 카드가 서서히 느려져 서버에서 확정된 결과에 멈춥니다. (연출 전용)");
- const windowEl=cinema?.querySelector(".rkbo-combo-roulette-window");
- const track=cinema?.querySelector(".rkbo-combo-roulette-track");
- const winnerEl=cinema?.querySelector(".rkbo-combo-roulette-tile.is-winner");
- if(!windowEl||!track||!winnerEl||cinemaSkip||reducedMotion())return;
- const destination=Math.round(windowEl.clientWidth/2-winnerEl.offsetLeft-winnerEl.offsetWidth/2);
- // No random stopping position: the exact server-awarded card is always centered.
- track.style.transition="none";
- track.style.transform="translate3d(0,0,0)";
- void track.offsetWidth;
+ if(!cinema)return;
+ const group=await rouletteSameGradePool(winner);
+ if(!group){console.warn("[RKBO combo] Award has no matching catalog image",winner.cardId);return}
+ const {actual,alternatives}=group;
+ const total=58,targetIndex=53;
+ const items=Array.from({length:total},(_,i)=>
+  rouletteActualCard(i===targetIndex?actual:
+   (alternatives.length?alternatives[i%alternatives.length]:actual),i===targetIndex));
+ cinema.hidden=false;
+ cinema.className="rkbo-combo-cinema is-roulette-mode";
+ cinema.innerHTML='<div class="rkbo-combo-cinema-panel rkbo-combo-roulette-panel">'+
+  '<div class="rkbo-combo-cinema-scene rkbo-combo-roulette-scene">'+
+   '<div class="rkbo-combo-roulette rkbo-combo-large-roulette">'+
+    '<div class="rkbo-combo-roulette-window rkbo-combo-large-roulette-window">'+
+     '<div class="rkbo-combo-roulette-track rkbo-combo-large-roulette-track">'+items.join("")+'</div>'+
+     '<span class="rkbo-combo-roulette-marker" aria-hidden="true"></span>'+
+    '</div></div></div>'+
+  '<button type="button" class="rkbo-combo-cinema-skip" data-combo-fx-skip>연출 건너뛰기</button></div>';
+ const viewport=cinema.querySelector(".rkbo-combo-large-roulette-window");
+ const rail=cinema.querySelector(".rkbo-combo-large-roulette-track");
+ const winnerEl=rail?.querySelector(".rkbo-combo-roulette-card.is-winner");
+ const startEl=rail?.children[3];
+ if(!viewport||!rail||!winnerEl||!startEl||cinemaSkip||reducedMotion())return;
+ const center=viewport.clientWidth/2;
+ const origin=Math.round(center-startEl.offsetLeft-startEl.offsetWidth/2);
+ const finish=Math.round(center-winnerEl.offsetLeft-winnerEl.offsetWidth/2);
+ rail.style.transition="none";
+ rail.style.transform="translate3d("+origin+"px,0,0)";
+ void rail.offsetWidth;
  root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
-  if(!cinema?.hidden&&cinema.querySelector(".rkbo-combo-roulette-track")===track){
-   track.style.transition="transform 4900ms cubic-bezier(.08,.64,.12,1)";
-   track.style.transform="translate3d("+destination+"px,0,0)";
+  if(!cinema?.hidden&&cinema.querySelector(".rkbo-combo-large-roulette-track")===rail){
+   rail.style.transition="transform 4900ms cubic-bezier(.08,.64,.12,1)";
+   rail.style.transform="translate3d("+finish+"px,0,0)";
   }
  }));
  await cinematicPause(5080);
