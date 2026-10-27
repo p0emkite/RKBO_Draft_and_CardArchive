@@ -12,6 +12,7 @@ let overlay=null,panel=null,room=null,roomId=null,client=null,user=null;
 let people=[],members=[],picks=[],rights=[],trades=[],standings=[],stats=[],games=[],publicRooms=[],message="",code="";
 let channel=null,subscribedId=null,refreshing=false,processing=false,autoRun=false,timer=null;
 let rosterArt=new Map(),rosterLoading=new Map(),memberNames=new Map(),lastState="",view="list";
+let serverClub=null,serverTurn=false;
 const $=s=>panel?.querySelector(s);
 function flash(s){message=s;const el=$("[data-league-message]");if(el)el.textContent=s}
 async function login(){
@@ -41,20 +42,12 @@ async function getPublic(){
 }
 async function acquireRoom(){
  const c=await login();
- const r=await c.from("rkbo_league_rooms").select("*").eq("id",roomId).maybeSingle();
- if(r.error||!r.data)throw Error(r.error?.message||"리그 방에 접근할 수 없어.");
- const queries=[
- c.from("rkbo_league_members").select("club,user_id,is_ai,roster").eq("room_id",roomId),
- c.from("rkbo_league_picks").select("round,pick,club,slot,card_id,auto_selected").eq("room_id",roomId).order("round",{ascending:true}).order("pick",{ascending:true}),
- c.from("rkbo_league_rights").select("round,pick,owner_club,original_club").eq("room_id",roomId),
- c.from("rkbo_league_trades").select("*").eq("room_id",roomId).order("created_at",{ascending:false}).limit(60),
- c.from("rkbo_league_stats").select("*").eq("room_id",roomId),
- c.from("rkbo_league_games").select("game_no,week,home_club,away_club,home_runs,away_runs").eq("room_id",roomId).order("game_no",{ascending:false}).limit(60)
- ];
- const rr=await Promise.all(queries.map(query));
- for(const x of rr)if(x.error)throw Error(x.error.message);
- [members,picks,rights,trades,stats,games]=rr.map(x=>x.data||[]);
- room=r.data;
+ const result=await c.rpc("rkbo_league_state",{p_room:roomId});
+ if(result.error||!result.data?.room)throw Error(result.error?.message||"리그 상태를 불러오지 못했어.");
+ const data=result.data;
+ room=data.room;members=data.members||[];picks=data.picks||[];
+ rights=data.rights||[];trades=data.trades||[];stats=data.stats||[];games=data.games||[];
+ serverClub=data.myClub||null;serverTurn=data.myTurn===true;
  const uu=[...new Set([room.host_id,...members.filter(m=>m.user_id).map(m=>m.user_id)])];
  if(uu.length){
   const prof=await c.from("rkbo_profiles").select("user_id,nickname").in("user_id",uu);
@@ -98,7 +91,7 @@ function optionClubs(exclude=""){
  return CLUBS.filter(c=>c!==exclude).map(c=>'<option value="'+c+'">'+esc(ko(c))+'</option>').join("");
 }
 function member(club){return members.find(x=>x.club===club)}
-function myClub(){return members.find(x=>x.user_id===user)?.club}
+function myClub(){return serverClub||members.find(x=>x.user_id===user)?.club}
 function nickname(club){
  const m=member(club);
  return m?.is_ai?"AI":m?.user_id?memberNames.get(m.user_id)||"회원":"모집 중";
@@ -187,7 +180,7 @@ function hydrateCards(season){
 function renderDraft(){
  const mine=myClub(),r=room.draft_round,t=room.draft_turn;
  const club=room.current_club,slot=room.current_slot;
- const mineTurn=club===mine,host=room.host_id===user;
+ const mineTurn=Boolean(serverTurn&&club===mine),host=room.host_id===user;
  const timerVal=room.expires_at?Math.max(0,Math.ceil((new Date(room.expires_at)-Date.now())/1000)):0;
  const recent=picks.slice(-12).reverse();
  return '<section class="rkbo-league-box"><div class="rkbo-league-draft-head">'+
@@ -304,7 +297,7 @@ function render(){
  status==="lobby"?renderLobby():status==="draft"?renderDraft():renderSeason())+'</main>';
 }
 async function loadRoom(id){
- roomId=id;code="";room=null;message="";await acquireRoom();await subscribe();
+ roomId=id;code="";room=null;message="";serverClub=null;serverTurn=false;await acquireRoom();await subscribe();
 }
 async function doSim(){
  if(autoRun||!roomId)return;
@@ -327,7 +320,7 @@ async function click(button){
  const d=button.dataset;
  if(d.leagueClose!==undefined){close();return}
  if(d.leagueReload!==undefined){await getPublic();return}
- if(d.leagueBack!==undefined){roomId=null;room=null;view="list";code="";await getPublic();return}
+ if(d.leagueBack!==undefined){roomId=null;room=null;view="list";code="";serverClub=null;serverTurn=false;await getPublic();return}
  if(d.leagueSelect){await loadRoom(d.leagueSelect);return}
  if(d.leagueStart!==undefined){
   if(!root.confirm("빈 구단은 AI로 채우고 드래프트를 시작할까?"))return;
