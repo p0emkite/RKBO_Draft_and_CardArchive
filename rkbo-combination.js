@@ -6,7 +6,6 @@
 const $=s=>dialog?.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const grades=["브론즈","실버","골드","코랄","다이아몬드","특수"];
-const weights={"브론즈":1,"실버":3,"골드":7,"코랄":15,"다이아몬드":30};
 const hue={"브론즈":"#b8866d","실버":"#b9cbdd","골드":"#efc26b","코랄":"#e99a9f","다이아몬드":"#9fddf7","특수":"#f5d186"};
 const fmt=n=>Number(n||0).toLocaleString("ko-KR",{maximumFractionDigits:2,minimumFractionDigits:2});
 let overlay=null,dialog=null,inventory=[],history=[],selected=[],quote=null,result=null;
@@ -21,24 +20,116 @@ async function context(){
  return {c,user:data.user};
 }
 function count(id){return selected.filter(x=>x===id).length}
-function scorePreview(){return selected.reduce((sum,id)=>sum+(weights[inventory.find(v=>v.card_id===id)?.grade]||0),0)}
 function msg(s){notice=s;const el=$("#rkbo-combo-status");if(el)el.textContent=s}
 function selectionCard(id){
  const p=inventory.find(x=>x.card_id===id);
  return p||{card_id:id,name:id,grade:"브론즈",season:"?",ovr:"?"};
 }
+
+/* Compact previews reuse the exact player archive rendering and art assets. */
+const artworkLoads=new Map(),artworkFailed=new Set();
+let artworkObserver=null;
+function previewPlayer(id){
+ const season=Number(String(id||"").split("-")[0]);
+ return artworkCache.get(season)?.find(p=>p.id===id)||null;
+}
+function miniatureCard(p){
+ const player=previewPlayer(p.card_id);
+ if(player&&root.RKBOCardView?.render){
+  try{
+   // Strip the archive's favorite button: nested buttons break selection clicks.
+   return root.RKBOCardView.render(player,true)
+    .replace(/<button\b[^>]*>[\s\S]*?<\/button>/gi,"");
+  }catch(error){console.warn("[RKBO combo] Card thumbnail",error)}
+ }
+ const missing=artworkFailed.has(Number(p.season));
+ return '<span class="rkbo-combo-thumb-fallback">'+
+ '<span class="rkbo-combo-thumb-symbol" aria-hidden="true">⚾</span>'+
+ '<small>'+(missing?esc(p.name):"카드 불러오는 중…")+'</small></span>';
+}
+function previewMarkup(p){
+ return '<span class="rkbo-combo-card-art" data-combo-card-id="'+esc(p.card_id)+
+ '" data-combo-art-season="'+esc(p.season)+'">'+miniatureCard(p)+'</span>';
+}
+function refreshSeasonThumbnails(season){
+ if(!dialog||!overlay||overlay.hidden)return;
+ for(const el of dialog.querySelectorAll('.rkbo-combo-card-art[data-combo-art-season="'+season+'"]')){
+  const p=inventory.find(x=>x.card_id===el.dataset.comboCardId);
+  if(p)el.innerHTML=miniatureCard(p);
+ }
+}
+async function ensureSeasonArtwork(season){
+ season=Number(season);
+ if(!Number.isInteger(season)||season<1||season>60||artworkFailed.has(season))return [];
+ if(artworkCache.has(season))return artworkCache.get(season);
+ if(artworkLoads.has(season))return artworkLoads.get(season);
+ const promise=(async()=>{
+  let cards;
+  if(season===60)cards=(root.RKBOSeason?.builtin?.()||[]).map(p=>({...p}));
+  else{
+   const response=await fetch("./data/seasons/"+season+".json",{cache:"force-cache"});
+   if(!response.ok)throw Error("Season card file unavailable: "+season);
+   const body=await response.json();
+   cards=(Array.isArray(body)?body:body.players||[]).map(p=>({...p}));
+  }
+  if(!cards.length)throw Error("No catalog cards: "+season);
+  await root.RKBONameMap?.apply?.(cards,null);
+  root.RKBOTeamBrand?.decorate?.(cards);
+  cards=root.RKBOCardSpecials?.addTo?.(cards,season)||cards;
+  artworkCache.set(season,cards);
+  refreshSeasonThumbnails(season);
+  return cards;
+ })().catch(error=>{
+  artworkFailed.add(season);
+  console.warn("[RKBO combo] Season thumbnails unavailable",season,error);
+  refreshSeasonThumbnails(season);
+  return [];
+ }).finally(()=>artworkLoads.delete(season));
+ artworkLoads.set(season,promise);
+ return promise;
+}
+function observeThumbnails(){
+ if(artworkObserver){artworkObserver.disconnect();artworkObserver=null}
+ if(!dialog||!overlay||overlay.hidden)return;
+ const pending=[...dialog.querySelectorAll(".rkbo-combo-card-art")].filter(el=>{
+  const n=Number(el.dataset.comboArtSeason);
+  return !artworkCache.has(n)&&!artworkFailed.has(n);
+ });
+ if(!pending.length)return;
+ const list=dialog.querySelector(".rkbo-combo-candidates");
+ if(!root.IntersectionObserver){
+  for(const n of new Set(pending.map(el=>Number(el.dataset.comboArtSeason))))void ensureSeasonArtwork(n);
+  return;
+ }
+ const watcher=new root.IntersectionObserver(entries=>{
+  for(const entry of entries){
+   if(!entry.isIntersecting)continue;
+   watcher.unobserve(entry.target);
+   void ensureSeasonArtwork(Number(entry.target.dataset.comboArtSeason));
+  }
+ },{root:list,rootMargin:"160px 0px"});
+ artworkObserver=watcher;
+ for(const el of pending){
+  if(el.closest(".rkbo-combo-candidates"))watcher.observe(el);
+  else void ensureSeasonArtwork(Number(el.dataset.comboArtSeason));
+ }
+}
+
 function activeCards(){
  return inventory.filter(p=>(filterSeason==="all"||String(p.season)===filterSeason)
   &&(filterGrade==="all"||p.grade===filterGrade)
   &&(!search||String(p.name+" "+p.card_id).toLowerCase().includes(search.toLowerCase())));
 }
 function wrapCard(p){
- const used=count(p.card_id),full=busy||selected.length>=5||used>=p.available;
- return '<button type="button" class="rkbo-combo-candidate rarity-'+esc(p.grade)+'" data-combo-add="'+esc(p.card_id)+'"'+(full?' disabled':'')+'>'+
- '<span class="rkbo-combo-grade">'+esc(p.grade)+' · '+esc(p.season)+'차</span>'+
- '<strong>'+esc(p.name)+'</strong><span>OVR '+esc(p.ovr)+' · 보너스 중복 '+esc(p.available)+'장</span>'+
- '<small>'+(used?'투입 '+used+' / '+p.available:'클릭하여 재료로 추가')+'</small></button>';
+ const used=count(p.card_id),remaining=Math.max(0,Number(p.available||0)-used);
+ const full=busy||selected.length>=5||remaining===0;
+ return '<button type="button" class="rkbo-combo-candidate rarity-'+esc(p.grade)+
+ (used?' is-used':'')+'" data-combo-add="'+esc(p.card_id)+'"'+
+ ' aria-label="'+esc(p.season)+'차 '+esc(p.name)+', 조합 가능 '+remaining+'장. 클릭하여 추가"'+
+ (full?' disabled':'')+'>'+previewMarkup(p)+
+ '<span class="rkbo-combo-count'+(remaining===0?' is-empty':'')+'">×'+remaining+'</span></button>';
 }
+
 function options(){
  const unique=[...new Set(inventory.map(v=>Number(v.season)))].sort((a,b)=>b-a);
  return '<option value="all">전체 시즌</option>'+unique.map(n=>
@@ -178,26 +269,13 @@ async function rouletteCinematic(winner){
  cinema.classList.add("is-landed");
  await cinematicPause(850);
 }
-async function standardCinematic(winner){
- const tier=winner.grade==="골드"?"gold":"ordinary";
- cinematicScreen("조합 결과 공개",'<div class="rkbo-combo-flip-scene tier-'+tier+'">'+
-  '<div class="rkbo-combo-flip-card"><span>RKBO</span><strong>✦</strong>'+
-  '<small>'+esc(winner.grade)+'</small></div></div>',
-  esc(winner.season)+"차 "+esc(winner.grade)+" 카드 등장!");
- if(!cinemaSkip&&!reducedMotion()){
-  root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
-   if(cinema?.querySelector(".rkbo-combo-flip-scene"))cinema.classList.add("is-revealing");
-  }));
- }
- await cinematicPause(1050);
-}
 
 function resultMarkup(){
  if(!result)return "";
  const p=result.result||{};
  return '<section class="rkbo-combo-success tier-'+(p.grade==="코랄"?"coral":p.grade==="다이아몬드"?"diamond":premiumGrades.has(p.grade)?"special":"regular")+'">'+
  '<div class="rkbo-combo-award"><small>⚾ COMBINATION RESULT</small><h3>🎉 '+esc(p.grade)+' 획득!</h3>'+
- '<strong>'+esc(p.season)+'차 '+esc(resultDisplayName||p.name)+'</strong><p>OVR '+esc(p.ovr)+' · 조합 점수 '+esc(result.points)+'</p>'+
+ '<strong>'+esc(p.season)+'차 '+esc(resultDisplayName||p.name)+'</strong><p>OVR '+esc(p.ovr)+'</p>'+
  '<div class="rkbo-combo-winning-art">'+(resultArtwork||'<span>선수 카드 이미지 불러오는 중…</span>')+'</div>'+
  '<div class="rkbo-combo-actions"><button type="button" data-combo-detail="'+esc(p.cardId)+'">선수 카드 상세 보기</button>'+
  '<button type="button" data-combo-again>다시 조합하기</button></div></div></section>';
@@ -205,7 +283,7 @@ function resultMarkup(){
 function historyMarkup(){
  return '<section class="rkbo-combo-history"><h3>📜 최근 카드 조합 기록</h3>'+
  (history.length?history.map(x=>'<div><span>'+
- new Date(x.created_at).toLocaleString("ko-KR")+' · '+esc(x.points)+'점</span>'+
+ new Date(x.created_at).toLocaleString("ko-KR")+'</span>'+
  '<strong>'+esc(x.result_season)+'차 · '+esc(x.result_grade)+'</strong>'+
  '<button type="button" data-combo-history-detail="'+esc(x.result_card_id)+'">카드 보기</button></div>').join(""):
  '<p>아직 조합 기록이 없어.</p>')+'</section>';
@@ -221,7 +299,7 @@ function render(){
  '<b>동일 차수는 그 차수 확정</b> · 혼합하면 등록된 시즌 랜덤 · 재료 점수가 높을수록 상위 등급 기대 상승.'+
  '<br>마지막 1장·MY TEAM 편성 카드·금테/프리즘·특수 등급 카드는 재료에서 제외해.</div>'+
  resultMarkup()+
- '<div class="rkbo-combo-layout"><section class="rkbo-combo-list"><h3>내 중복 선수 카드 <small>'+inventory.length+'종</small></h3>'+
+ '<div class="rkbo-combo-layout"><section class="rkbo-combo-list"><h3>보유 카드 <small>'+inventory.length+'종</small></h3>'+
  '<div class="rkbo-combo-filters"><select data-combo-filter-season>'+options()+'</select>'+
  '<select data-combo-filter-grade>'+gradeOptions()+'</select></div>'+
  '<input type="search" id="rkbo-combo-search" placeholder="선수 이름 검색" value="'+esc(search)+'" autocomplete="off">'+
@@ -230,19 +308,25 @@ function render(){
  '<section class="rkbo-combo-config"><h3>조합할 카드 <small>'+selected.length+' / 5</small></h3>'+
  '<div class="rkbo-combo-slots">'+Array.from({length:5},(_,i)=>{
  const id=selected[i],p=id?selectionCard(id):null;
- return '<button type="button" data-combo-remove="'+i+'" class="'+(p?'filled':'empty')+'"'+(!p||busy?' disabled':'')+'>'+
- (p?'<small>'+esc(p.grade)+' · '+esc(p.season)+'차</small><strong>'+esc(p.name)+'</strong><span>× 제거</span>':
- '<span class="rkbo-combo-plus">+</span><small>재료 '+(i+1)+'</small>')+'</button>';
+ return '<button type="button" data-combo-remove="'+i+'" class="'+(p?'filled':'empty')+'"'+
+ (p?' aria-label="'+esc(p.name)+' 재료 제거"':' aria-label="빈 재료 슬롯 '+(i+1)+'"')+
+ (!p||busy?' disabled':'')+'>'+
+ (p?previewMarkup(p)+'<span class="rkbo-combo-remove-mark" aria-hidden="true">×</span>':
+ '<span class="rkbo-combo-plus">+</span>')+'</button>';
  }).join("")+'</div>'+
- '<div class="rkbo-combo-points"><span>조합 점수</span><strong>'+esc(quote?.points??scorePreview())+'</strong></div>'+
+ '<button type="button" class="rkbo-combo-submit" data-combo-submit'+
+ (busy||quoteLoading||!quote||selected.length<3||selected.length>5?' disabled':'')+'>'+
+ (busy?'서버에서 조합 중…':'⚾ 카드 '+selected.length+'장 조합하기')+'</button>'+
+ '<p class="rkbo-combo-status" id="rkbo-combo-status" role="status">'+esc(notice)+'</p>'+
  '<h3>🎲 결과 등급 확률 <small>공개</small></h3>'+percentMarkup()+
  '<button type="button" class="rkbo-combo-submit" data-combo-submit'+(busy||quoteLoading||!quote||selected.length<3||selected.length>5?' disabled':'')+'>'+
  (busy?'서버에서 조합 중…':'⚾ 카드 '+selected.length+'장 조합하기')+'</button>'+
- '<p class="rkbo-combo-note">확인 후 카드가 즉시 차감되고 결과 카드 1장이 지급돼. 이 작업은 되돌릴 수 없어.</p>'+
- '<p class="rkbo-combo-status" id="rkbo-combo-status" role="status">'+esc(notice)+'</p></section></div>'+
+ '<p class="rkbo-combo-note">조합 시 재료 카드가 차감되고 결과 카드 1장을 획득해. 되돌릴 수 없어.</p>'+
+ '</section></div>'+
  historyMarkup()+'</div>';
  dialog.scrollTop=prevScroll;
  const list=dialog.querySelector(".rkbo-combo-candidates");if(list)list.scrollTop=listScroll;
+ observeThumbnails();
 }
 async function loadData(){
  loading=true;msg("내 중복 카드와 조합 기록을 읽는 중…");
@@ -300,7 +384,7 @@ async function combine(){
  if(busy||selected.length<3||selected.length>5||!quote||quoteLoading)return;
  const ingredients=selected.slice(),materials=ingredients.map(selectionCard),rated=quote;
  const seasonMsg=rated.mode==="same"?rated.season+"차 고정":"혼합 시즌 랜덤";
- if(!root.confirm("카드 "+ingredients.length+"장("+rated.points+"점)을 소모하고 새로운 카드 1장을 얻을까요?\n"+
+ if(!root.confirm("카드 "+ingredients.length+"장을 소모하고 새로운 카드 1장을 얻을까요?\n"+
  seasonMsg+" · 결과가 낮은 등급일 수도 있으며 조합 후 되돌릴 수 없습니다."))return;
  busy=true;quoteIndex++;render();
  const requestId=pendingRequest||root.crypto?.randomUUID?.();
@@ -324,7 +408,7 @@ async function combine(){
   await loadWinningArt(data.result.cardId);
   try{
    if(usesRoulette(data.result.grade))await rouletteCinematic(data.result);
-   else await standardCinematic(data.result);
+   // Standard grades reveal the awarded card immediately.
   }catch(animationError){
    console.warn("[RKBO combination] Cosmetic effect failed",animationError);
   }
@@ -348,32 +432,17 @@ async function combine(){
  }
 }
 async function loadWinningArt(cardId){
- try{
-  const season=Number(String(cardId||"").split("-")[0]);
-  if(!Number.isInteger(season)||season<1||season>60)return;
-  let cards=artworkCache.get(season);
-  if(!cards){
-   if(season===60)cards=(root.RKBOSeason?.builtin?.()||[]).map(p=>({...p}));
-   else{
-    const response=await fetch("./data/seasons/"+season+".json",{cache:"force-cache"});
-    if(!response.ok)throw Error("경기 시즌 카드 데이터를 불러올 수 없습니다");
-    const data=await response.json();
-    cards=(Array.isArray(data)?data:data.players||[]).map(p=>({...p}));
-   }
-   await root.RKBONameMap?.apply?.(cards,null);
-   root.RKBOTeamBrand?.decorate?.(cards);
-   cards=root.RKBOCardSpecials?.addTo?.(cards,season)||cards;
-   artworkCache.set(season,cards);
-  }
-  const player=cards.find(p=>p.id===cardId);
-  if(!player){resultArtwork="<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>";return}
+ const season=Number(String(cardId||"").split("-")[0]);
+ if(!Number.isInteger(season)||season<1||season>60)return;
+ const cards=await ensureSeasonArtwork(season);
+ const player=cards.find(p=>p.id===cardId);
+ if(!player){resultArtwork='<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>'}
+ else{
   resultDisplayName=player.name||"";
-  resultArtwork=root.RKBOCardView?.render?.(player,true)||"";
-  if(result?.result?.cardId===cardId)render();
- }catch(e){console.warn("[RKBO combo] Award card art",e);
-  resultArtwork='<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>';
-  if(result?.result?.cardId===cardId)render();
+  try{resultArtwork=root.RKBOCardView?.render?.(player,true)||""}
+  catch(error){console.warn("[RKBO combo] Award preview",error);resultArtwork=""}
  }
+ if(result?.result?.cardId===cardId)render();
 }
 async function detail(cardId){
  const n=Number(String(cardId||"").split("-")[0]);
