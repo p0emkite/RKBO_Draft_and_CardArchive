@@ -2,7 +2,7 @@
 (function(root){"use strict";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const when=v=>{try{return new Date(v).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}catch{return ""}};
-let overlay=null,panel=null,tab="members",userId="",isPublic=false;
+let overlay=null,panel=null,tab="members",userId="",isPublic=true;
 let members=[],names=new Map(),memberQuery="",selected=null,cardQuery="",cards=[],offset=0,hasMore=false,mine=[],wanted="";
 let trades=[],cardTitles=new Map(),messages=[],notice="",working=false,channel=null,channelClient=null,poll=null;
 const artCache=new Map(),artBusy=new Map();
@@ -29,7 +29,7 @@ async function loadMine(){
  const c=await account();
  const own=await c.from("rkbo_community_visibility").select("is_public").eq("user_id",userId).maybeSingle();
  if(own.error)throw Error(own.error.message);
- isPublic=!!own.data?.is_public;mine=[];
+ isPublic=own.data?.is_public!==false;mine=[];
  for(let off=0;off<1400;off+=100){
   const portion=await call("rkbo_community_collection",{p_user:userId,p_limit:100,p_offset:off});
   mine.push(...portion);if(portion.length<100)break;
@@ -104,7 +104,7 @@ function collectionView(){
 }
 function membersView(){
  return '<section class="rkbo-cm-visibility"><label><input type="checkbox" data-cm-public '+(isPublic?'checked':'')+'> 내 도감 공개</label>'+
- '<small>처음에는 비공개야. 도감을 공개한 회원끼리 중복 카드 교환 가능.</small></section>'+
+ '<small>도감은 기본 공개야. 체크를 해제하면 비공개가 되고 다른 회원이 보거나 교환할 수 없어.</small></section>'+
  '<form class="rkbo-cm-search" data-cm-member-search><input name="nickname" placeholder="회원 닉네임 검색" maxlength="50" value="'+esc(memberQuery)+'"><button>검색</button></form>'+
  '<div class="rkbo-cm-members">'+members.map(m=>'<button data-cm-member="'+esc(m.user_id)+'" class="rkbo-cm-member">'+
  '<strong>'+esc(m.nickname)+'</strong><small>'+((m.is_public||m.user_id===userId)?'📚 공개':'🔒 비공개')+(m.user_id===userId?' · 나':'')+'</small></button>').join("")+'</div>'+
