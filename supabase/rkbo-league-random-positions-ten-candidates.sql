@@ -1,0 +1,253 @@
+-- Each 8-team round draws a different randomly shuffled position;
+-- 18 unique positions, one per round. Max 10 true player-card choices.
+ALTER TABLE public.rkbo_league_rooms
+ ADD COLUMN IF NOT EXISTS draft_order text[] NOT NULL DEFAULT ARRAY[]::text[];
+
+-- In-progress rooms keep past picks and current on-screen slot unchanged.
+-- Remaining positions are randomized for all subsequent rounds.
+UPDATE public.rkbo_league_rooms r
+SET draft_order=(
+ SELECT array_agg(x.slot ORDER BY CASE WHEN x.ord<=r.draft_round THEN 0 ELSE 1 END,
+ CASE WHEN x.ord<=r.draft_round THEN x.ord::numeric ELSE random()*100 END)
+ FROM unnest(ARRAY['C','1B','2B','3B','SS','LF','CF','RF','DH',
+  'SP1','SP2','SP3','SP4','SP5','RP1','RP2','RP3','CP']::text[])
+ WITH ORDINALITY AS x(slot,ord)
+)
+WHERE r.phase='draft' AND cardinality(r.draft_order)=0;
+
+CREATE OR REPLACE FUNCTION public.rkbo_league_slot(p_room uuid,p_round integer)
+RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+ SELECT coalesce(
+  (SELECT r.draft_order[p_round] FROM public.rkbo_league_rooms r WHERE r.id=p_room),
+  public.rkbo_league_slot(p_round));
+$$;
+REVOKE ALL ON FUNCTION public.rkbo_league_slot(uuid,integer) FROM PUBLIC,anon,authenticated;
+
+-- Reduce already open 15-card candidate pools without changing draft state.
+UPDATE public.rkbo_league_rooms r SET draft_candidates=(
+ SELECT coalesce(jsonb_agg(x.value ORDER BY x.ord),'[]'::jsonb)
+ FROM jsonb_array_elements(r.draft_candidates) WITH ORDINALITY AS x(value,ord)
+ WHERE x.ord<=10)
+WHERE r.phase='draft' AND jsonb_array_length(r.draft_candidates)>10;
+
+CREATE OR REPLACE FUNCTION public.rkbo_league_state(p_room uuid)
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+DECLARE v_user uuid:=auth.uid();v_room public.rkbo_league_rooms%rowtype;v_club text;
+BEGIN
+ IF v_user IS NULL OR coalesce(auth.jwt()->>'role','')<>'authenticated'
+   OR coalesce((auth.jwt()->>'is_anonymous')::boolean,false) THEN
+  RAISE EXCEPTION 'Google 로그인이 필요해' USING ERRCODE='28000';
+ END IF;
+ IF NOT public.rkbo_league_can_view(p_room) THEN
+  RAISE EXCEPTION '접근할 수 없는 리그 방이야' USING ERRCODE='42501';
+ END IF;
+ SELECT * INTO v_room FROM public.rkbo_league_rooms WHERE id=p_room;
+ IF NOT FOUND THEN RAISE EXCEPTION '리그 방을 찾지 못했어'; END IF;
+ SELECT club INTO v_club FROM public.rkbo_league_members
+  WHERE room_id=p_room AND user_id=v_user;
+ RETURN jsonb_build_object(
+  'room',to_jsonb(v_room),
+  'myClub',v_club,
+  'myTurn',v_room.phase='draft' AND v_club IS NOT NULL
+    AND v_room.current_club=v_club,
+  'members',(SELECT coalesce(jsonb_agg(to_jsonb(m) ORDER BY m.club),'[]'::jsonb)
+    FROM (SELECT club,user_id,is_ai,roster FROM public.rkbo_league_members WHERE room_id=p_room) m),
+  'picks',(SELECT coalesce(jsonb_agg(to_jsonb(pk) ORDER BY pk.round,pk.pick),'[]'::jsonb)
+    FROM (SELECT round,pick,club,slot,card_id,auto_selected FROM public.rkbo_league_picks
+     WHERE room_id=p_room) pk),
+  'rights',(SELECT coalesce(jsonb_agg(to_jsonb(ri)),'[]'::jsonb)
+    FROM (SELECT round,pick,owner_club,original_club FROM public.rkbo_league_rights
+     WHERE room_id=p_room) ri),
+  'trades',(SELECT coalesce(jsonb_agg(to_jsonb(tr) ORDER BY tr.created_at DESC),'[]'::jsonb)
+    FROM (SELECT * FROM public.rkbo_league_trades WHERE room_id=p_room
+     ORDER BY created_at DESC LIMIT 60) tr),
+  'stats',(SELECT coalesce(jsonb_agg(to_jsonb(s)),'[]'::jsonb)
+    FROM (SELECT * FROM public.rkbo_league_stats WHERE room_id=p_room) s),
+  'games',(SELECT coalesce(jsonb_agg(to_jsonb(g) ORDER BY g.game_no DESC),'[]'::jsonb)
+    FROM (SELECT game_no,week,home_club,away_club,home_runs,away_runs
+     FROM public.rkbo_league_games WHERE room_id=p_room ORDER BY game_no DESC LIMIT 60) g));
+END;$$;
+REVOKE ALL ON FUNCTION public.rkbo_league_state(uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.rkbo_league_state(uuid) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.rkbo_league_candidates(p_room uuid, p_slot text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE v_season int;v_position text; v_json jsonb;
+BEGIN
+ SELECT season INTO v_season FROM public.rkbo_league_rooms WHERE id=p_room;
+ IF v_season IS NULL THEN RAISE EXCEPTION '방을 찾을 수 없어';END IF;
+ v_position:=CASE WHEN p_slot LIKE 'SP%' THEN 'SP' WHEN p_slot LIKE 'RP%' THEN 'RP' ELSE p_slot END;
+ SELECT coalesce(jsonb_agg(to_jsonb(c)), '[]'::jsonb) INTO v_json
+ FROM (
+  SELECT p.card_id AS "cardId",p.season,p.name,p.grade,p.ovr,p.team,p.position
+  FROM public.rkbo_pack_cards p
+  WHERE (p.position=v_position OR (p_slot='DH' AND p.card_type='타자'))
+   AND NOT EXISTS(SELECT 1 FROM public.rkbo_league_picks pick
+     WHERE pick.room_id=p_room AND pick.card_id=p.card_id)
+  ORDER BY CASE WHEN p.season=v_season THEN 0 ELSE 1 END,
+           CASE WHEN p.season=v_season THEN random() ELSE random()+0.4 END
+  LIMIT 10
+ ) c;
+ RETURN v_json;
+END;$function$;
+CREATE OR REPLACE FUNCTION public.rkbo_league_process(p_room uuid, p_force_timeout boolean DEFAULT false)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE v_room public.rkbo_league_rooms%rowtype;v_club text;v_ai boolean;v_slot text;
+ v_candidates jsonb;v_card jsonb;v_right text;v_r int;v_t int;loops int:=0;
+BEGIN
+ LOOP
+  loops:=loops+1;
+  IF loops>200 THEN RAISE EXCEPTION '드래프트 자동 지명 횟수 초과';END IF;
+  SELECT * INTO v_room FROM public.rkbo_league_rooms WHERE id=p_room FOR UPDATE;
+  IF v_room.phase<>'draft' THEN RETURN;END IF;
+  IF v_room.draft_round>18 THEN
+   UPDATE public.rkbo_league_rooms
+    SET phase='season',draft_candidates='[]',current_slot=NULL,current_club=NULL,expires_at=NULL,week=0,updated_at=now()
+    WHERE id=p_room;
+   RETURN;
+  END IF;
+  v_r:=v_room.draft_round;v_t:=v_room.draft_turn;
+  SELECT owner_club INTO v_club FROM public.rkbo_league_rights WHERE room_id=p_room AND round=v_r AND pick=v_t;
+  SELECT is_ai INTO v_ai FROM public.rkbo_league_members WHERE room_id=p_room AND club=v_club;
+  v_slot:=public.rkbo_league_slot(p_room,v_r);
+  IF v_club IS NULL THEN RAISE EXCEPTION '지명권 소유자를 찾을 수 없어';END IF;
+  IF v_room.current_club=v_club AND v_room.current_slot=v_slot AND jsonb_array_length(v_room.draft_candidates)>0 THEN
+   v_candidates:=v_room.draft_candidates;
+   IF NOT v_ai AND (v_room.expires_at IS NULL OR v_room.expires_at>clock_timestamp()) THEN RETURN;END IF;
+  ELSE
+   v_candidates:=public.rkbo_league_candidates(p_room,v_slot);
+  END IF;
+  IF jsonb_array_length(v_candidates)=0 THEN
+   -- Every candidate must be real; never synthesize players or repeat already drafted cards.
+   RAISE EXCEPTION '해당 포지션 선수 풀이 부족해 드래프트를 계속할 수 없어: %',v_slot;
+  END IF;
+  IF NOT v_ai AND (v_room.current_club IS DISTINCT FROM v_club OR v_room.current_slot IS DISTINCT FROM v_slot) THEN
+   UPDATE public.rkbo_league_rooms SET current_club=v_club,current_slot=v_slot,
+     draft_candidates=v_candidates,expires_at=clock_timestamp()+interval '40 seconds',updated_at=now()
+    WHERE id=p_room;
+   RETURN;
+  END IF;
+  -- Auto choices favor good cards, with variance; expired humans auto-pick the top candidate.
+  IF v_ai THEN
+   SELECT e INTO v_card FROM jsonb_array_elements(v_candidates) e
+     ORDER BY (e->>'ovr')::int+random()*12 DESC LIMIT 1;
+  ELSE
+   SELECT e INTO v_card FROM jsonb_array_elements(v_candidates) e
+     ORDER BY (e->>'ovr')::int DESC LIMIT 1;
+  END IF;
+  INSERT INTO public.rkbo_league_picks(room_id,round,pick,club,slot,card_id,auto_selected)
+   VALUES(p_room,v_r,v_t,v_club,v_slot,v_card->>'cardId',true);
+  UPDATE public.rkbo_league_members
+   SET roster=jsonb_set(roster,ARRAY[v_slot],v_card,true)
+   WHERE room_id=p_room AND club=v_club;
+  UPDATE public.rkbo_league_rooms SET draft_round=CASE WHEN v_t=8 THEN v_r+1 ELSE v_r END,
+   draft_turn=CASE WHEN v_t=8 THEN 1 ELSE v_t+1 END,
+   current_club=NULL,current_slot=NULL,draft_candidates='[]',expires_at=NULL,updated_at=now()
+   WHERE id=p_room;
+ END LOOP;
+END;$function$;
+CREATE OR REPLACE FUNCTION public.rkbo_league_action(p_action text, p_room uuid DEFAULT NULL::uuid, p_name text DEFAULT NULL::text, p_club text DEFAULT NULL::text, p_visibility text DEFAULT 'public'::text, p_mode text DEFAULT 'multi'::text, p_season integer DEFAULT 60, p_code text DEFAULT NULL::text, p_card text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE u uuid:=auth.uid();r public.rkbo_league_rooms%rowtype;v_code text;
+ v_order text[]:=ARRAY['KIA','HAN','SAM','LOT','LG','DOO','SSG','NC'];
+ v_club text;v_slot text;v_round int;v_turn int;v_right text;v_card jsonb;v_counter int;v_owner uuid;
+BEGIN
+ IF u IS NULL OR coalesce(auth.jwt()->>'role','')<>'authenticated'
+   OR coalesce((auth.jwt()->>'is_anonymous')::boolean,false) THEN
+  RAISE EXCEPTION 'Google 로그인 후 이용해 줘' USING ERRCODE='28000';
+ END IF;
+ IF p_action='create' THEN
+  IF p_club IS NULL OR p_club<>ALL(v_order) OR p_visibility NOT IN('public','code')
+   OR p_mode NOT IN('solo','multi') OR length(btrim(coalesce(p_name,''))) NOT BETWEEN 2 AND 48
+   OR NOT EXISTS(SELECT 1 FROM public.rkbo_pack_cards WHERE season=p_season) THEN
+   RAISE EXCEPTION '방 이름·구단·모드·시즌을 확인해 줘' USING ERRCODE='22023';
+  END IF;
+  INSERT INTO public.rkbo_league_rooms(host_id,name,visibility,mode,season)
+  VALUES(u,btrim(p_name),p_visibility,p_mode,p_season) RETURNING * INTO r;
+  INSERT INTO public.rkbo_league_members(room_id,club,user_id,is_ai)
+  VALUES(r.id,p_club,u,false);
+  v_code:=upper(substr(replace(gen_random_uuid()::text,'-',''),1,12));
+  INSERT INTO public.rkbo_league_invites(room_id,code_hash) VALUES(r.id,md5(v_code));
+  RETURN jsonb_build_object('roomId',r.id,'inviteCode',v_code,'visibility',r.visibility);
+ END IF;
+ IF p_action='join_code' THEN
+  SELECT room_id INTO p_room FROM public.rkbo_league_invites WHERE code_hash=md5(upper(trim(coalesce(p_code,''))));
+  IF p_room IS NULL THEN RAISE EXCEPTION '유효하지 않은 초대 코드야' USING ERRCODE='22023';END IF;
+ END IF;
+ IF p_room IS NULL THEN RAISE EXCEPTION '방을 선택해 줘' USING ERRCODE='22023';END IF;
+ SELECT * INTO r FROM public.rkbo_league_rooms WHERE id=p_room FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION '방이 없어';END IF;
+ IF p_action IN('join','join_code') THEN
+  IF r.phase<>'lobby' THEN RAISE EXCEPTION '이미 시작한 방이야';END IF;
+  IF p_action='join' AND r.visibility='code' AND NOT EXISTS(SELECT 1 FROM public.rkbo_league_members WHERE room_id=p_room AND user_id=u) THEN
+   RAISE EXCEPTION '초대 코드로 참가해야 해';END IF;
+  IF p_club IS NULL OR p_club<>ALL(v_order) THEN RAISE EXCEPTION 'RKBO 8개 구단 중 선택해 줘';END IF;
+  IF EXISTS(SELECT 1 FROM public.rkbo_league_members WHERE room_id=p_room AND user_id=u) THEN
+   RETURN jsonb_build_object('roomId',p_room,'joined',true,'alreadyJoined',true);
+  END IF;
+  INSERT INTO public.rkbo_league_members(room_id,club,user_id,is_ai)
+   VALUES(p_room,p_club,u,false);
+  RETURN jsonb_build_object('roomId',p_room,'joined',true);
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.rkbo_league_members WHERE room_id=p_room AND user_id=u)
+   AND r.host_id<>u THEN RAISE EXCEPTION '이 방의 참가자가 아니야' USING ERRCODE='42501';END IF;
+ IF p_action='start' THEN
+  IF r.host_id<>u OR r.phase<>'lobby' THEN RAISE EXCEPTION '방장만 대기실에서 시작할 수 있어';END IF;
+  IF r.mode='solo' AND (SELECT count(*) FROM public.rkbo_league_members WHERE room_id=p_room AND NOT is_ai)<>1 THEN
+   RAISE EXCEPTION '혼자 플레이하는 모드야';END IF;
+  FOREACH v_club IN ARRAY v_order LOOP
+   INSERT INTO public.rkbo_league_members(room_id,club,user_id,is_ai)
+    VALUES(p_room,v_club,NULL,true) ON CONFLICT DO NOTHING;
+  END LOOP;
+  FOR v_round IN 1..18 LOOP
+   FOR v_turn IN 1..8 LOOP
+    v_club:=v_order[CASE WHEN v_round%2=1 THEN v_turn ELSE 9-v_turn END];
+    INSERT INTO public.rkbo_league_rights(room_id,round,pick,original_club,owner_club)
+     VALUES(p_room,v_round,v_turn,v_club,v_club);
+   END LOOP;
+  END LOOP;
+  UPDATE public.rkbo_league_rooms SET phase='draft',draft_round=1,draft_turn=1,
+    draft_order=(SELECT array_agg(position ORDER BY random()) FROM unnest(ARRAY['C','1B','2B','3B','SS','LF','CF','RF','DH','SP1','SP2','SP3','SP4','SP5','RP1','RP2','RP3','CP']::text[]) position),
+    updated_at=now() WHERE id=p_room;
+  PERFORM public.rkbo_league_process(p_room,false);
+  RETURN jsonb_build_object('roomId',p_room,'started',true);
+ END IF;
+ IF p_action='tick' THEN
+  IF r.phase='draft' THEN PERFORM public.rkbo_league_process(p_room,false);END IF;
+  RETURN jsonb_build_object('roomId',p_room,'phase',(SELECT phase FROM public.rkbo_league_rooms WHERE id=p_room));
+ END IF;
+ IF p_action='pick' THEN
+  IF r.phase<>'draft' THEN RAISE EXCEPTION '현재 드래프트 중이 아니야';END IF;
+  SELECT owner_club INTO v_club FROM public.rkbo_league_rights
+   WHERE room_id=p_room AND round=r.draft_round AND pick=r.draft_turn;
+  IF NOT EXISTS(SELECT 1 FROM public.rkbo_league_members WHERE room_id=p_room AND club=v_club AND user_id=u) THEN
+   RAISE EXCEPTION '지금은 네 지명 차례가 아니야' USING ERRCODE='42501';END IF;
+  SELECT x INTO v_card FROM jsonb_array_elements(r.draft_candidates) x WHERE x->>'cardId'=p_card;
+  IF v_card IS NULL THEN RAISE EXCEPTION '현재 후보 10명 중 선택해 줘';END IF;
+  v_slot:=public.rkbo_league_slot(p_room,r.draft_round);
+  INSERT INTO public.rkbo_league_picks(room_id,round,pick,club,slot,card_id)
+   VALUES(p_room,r.draft_round,r.draft_turn,v_club,v_slot,p_card);
+  UPDATE public.rkbo_league_members SET roster=jsonb_set(roster,ARRAY[v_slot],v_card,true)
+   WHERE room_id=p_room AND club=v_club;
+  UPDATE public.rkbo_league_rooms SET
+   draft_round=CASE WHEN draft_turn=8 THEN draft_round+1 ELSE draft_round END,
+   draft_turn=CASE WHEN draft_turn=8 THEN 1 ELSE draft_turn+1 END,
+   current_club=NULL,current_slot=NULL,draft_candidates='[]'::jsonb,expires_at=NULL,updated_at=now()
+   WHERE id=p_room;
+  PERFORM public.rkbo_league_process(p_room,false);
+  RETURN jsonb_build_object('cardId',p_card,'club',v_club,'slot',v_slot);
+ END IF;
+ RAISE EXCEPTION '지원하지 않는 동작: %',p_action;
+END;$function$;
