@@ -1548,7 +1548,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette{width:100%;padding:0;overflow:hidden;--combo-wheel-card-width:clamp(188px,20vw,268px)}
 .rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-window{position:relative;min-height:0;padding:17px 0;border-block:1px solid #7094ad;background:linear-gradient(90deg,#06121f,#193048,#06121f);box-shadow:inset 0 0 48px #020b17}
 .rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{display:flex;align-items:center;gap:14px;width:max-content;position:relative;will-change:transform}
-.rkbo-combo-roulette-card{position:relative;display:block;flex:none;width:var(--combo-wheel-card-width);height:calc(var(--combo-wheel-card-width)*1.56);pointer-events:none}
+.rkbo-combo-roulette-card{position:relative;display:block;flex:none;width:var(--combo-wheel-card-width);height:auto;aspect-ratio:0.64;pointer-events:none}
 .rkbo-combo-roulette-card>.player-card{width:100%;height:100%;min-height:0;aspect-ratio:auto;margin:0;transform:none!important;pointer-events:none;border-radius:12px;box-shadow:0 10px 30px #000b}
 .rkbo-combo-roulette-card>.player-card:hover{transform:none!important;box-shadow:0 10px 30px #000b}
 .rkbo-combo-roulette-card .card-inner{height:100%;min-height:0;overflow:hidden}
