@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  // Do not interrupt an already logged-in visitor or another game dialog.
  const promptGuest=()=>{
   if(!overlay?.hidden)return;
-  if(document.querySelector('#rkbo-draft-overlay:not([hidden]),#rkbo-pack-overlay:not([hidden]),#rkbo-club-overlay:not([hidden]),#rkbo-my-overlay:not([hidden])'))return;
+  if(document.querySelector('#rkbo-draft-overlay:not([hidden]),#rkbo-pack-overlay:not([hidden]),#rkbo-combo-overlay:not([hidden]),#rkbo-club-overlay:not([hidden]),#rkbo-my-overlay:not([hidden])'))return;
   open("account");
  };
  getClient().then(c=>c.auth.getUser())
@@ -330,3 +330,4 @@ document.addEventListener("DOMContentLoaded",()=>{
   .catch(err=>{console.warn("[RKBO ONLINE] Initial auth status unavailable",err);promptGuest()});
 });
 })(window);
+

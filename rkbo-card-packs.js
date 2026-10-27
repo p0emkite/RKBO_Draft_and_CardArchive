@@ -89,7 +89,7 @@ function loginView(error){
 }
 function frame(){
  dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎫 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
- '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="combine">🧬 카드 조합</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
+ '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
 }
@@ -385,7 +385,6 @@ async function saveAdmin(remove=false){
 }
 
 async function showTab(next){
- if(next==="combine"){close();root.RKBOCombination?.open?.();return}
  if(!["pack","collection","history","admin"].includes(next))return;
  if(next==="admin"&&!adminAuthorized)return;
  if(opening)return;
@@ -470,3 +469,4 @@ root.RKBOCardPacks={open};
 root.addEventListener("rkbo-special-updated",()=>cache.clear());
 document.addEventListener("DOMContentLoaded",init);
 })(window);
+

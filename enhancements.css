@@ -1209,7 +1209,14 @@ body.rkbo-pack-open .dialog-bg:not([hidden]){z-index:2700}
 }
 
 
-/* RKBO CARD COMBINATION 1.0 — separate secure collection workflow */
+/* RKBO CARD COMBINATION — main menu and server-returned balance summary */
+.rkbo-combo-nav{padding:9px 13px;border:1px solid #67b9b2;border-radius:9px;
+ background:linear-gradient(120deg,#245c60,#253d59);color:#e1fff5;font-size:12px;
+ font-weight:900;cursor:pointer;white-space:nowrap}
+.rkbo-combo-outlook{padding:11px;background:#163e47;border:1px solid #4b8c8b;border-radius:9px}
+.rkbo-combo-outlook small{display:block;color:#b3d9db;font-size:11px;margin-bottom:7px}
+.rkbo-combo-outlook>div{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;font-size:12px}
+.rkbo-combo-outlook b{color:#ffe0a5;font-variant-numeric:tabular-nums}
 .rkbo-combo-overlay[hidden]{display:none!important}
 .rkbo-combo-overlay{position:fixed;inset:0;z-index:2500;background:#040b13e8;
  display:flex;align-items:center;justify-content:center;padding:20px}
@@ -1314,3 +1321,4 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-winning-art .player-card{width:100%;max-width:300px;margin:0;cursor:default}
 .rkbo-combo-winning-art .player-card:hover{transform:none}
 .rkbo-combo-winning-art .fav{pointer-events:none}
+

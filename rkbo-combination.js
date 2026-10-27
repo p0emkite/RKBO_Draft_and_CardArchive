@@ -1,4 +1,4 @@
-/* RKBO Card Combination 1.0
+/* RKBO Card Combination 2.0 balance
  * Server is the only authority for eligibility, quote, randomness and inventory updates.
  * Client only displays server-returned rates and a player's eligible duplicate cards.
  */
@@ -53,7 +53,14 @@ function percentMarkup(){
  if(quoteError)return '<div class="rkbo-combo-error">'+esc(quoteError)+'</div>';
  if(!quote)return '<div class="rkbo-combo-hint">재료를 선택하면 확률이 표시돼.</div>';
  const odds=quote.odds||{};
- return '<div class="rkbo-combo-odds">'+grades.map(g=>{
+ const highest=Math.max(...(quote.materials||[]).map(p=>grades.indexOf(p.grade)));
+ const base=grades[highest];
+ const lower=grades.slice(0,highest).reduce((sum,g)=>sum+Number(odds[g]||0),0);
+ const upper=grades.slice(highest+1).reduce((sum,g)=>sum+Number(odds[g]||0),0);
+ return (base?'<div class="rkbo-combo-outlook" aria-label="'+esc(base)+' 기준 결과 확률">'+
+  '<small>최고 재료 등급 '+esc(base)+' 기준</small><div><span>하락 <b>'+fmt(lower)+'%</b></span>'+
+  '<span>보존 <b>'+fmt(odds[base])+'%</b></span><span>상위 <b>'+fmt(upper)+'%</b></span></div></div>':'')+
+ '<div class="rkbo-combo-odds">'+grades.map(g=>{
   const rate=Number(odds[g]||0);
   return '<div class="rkbo-combo-odd"><div><span>'+esc(g)+'</span><strong>'+fmt(rate)+'%</strong></div>'+
    '<div class="rkbo-combo-meter"><i style="width:'+Math.max(0,Math.min(100,rate))+'%;background:'+hue[g]+'"></i></div></div>';
@@ -61,7 +68,8 @@ function percentMarkup(){
  '<p class="rkbo-combo-note">'+(quote.mode==="same"
  ?'🎯 '+esc(quote.season)+'차 시즌 카드만 나와.'
  :'🎲 서버에 등록된 '+(quote.eligibleSeasons||[]).map(n=>esc(n)+'차').join(" · ")+' 중 시즌이 균등 무작위로 결정돼.')+
- ' 확률은 실제 추첨 분포야. 투입 카드보다 낮은 등급도 나올 수 있어.</p>';
+ ' 등록되지 않은 등급의 확률은 가까운 하위 등급에 합산돼(하위가 없으면 최저 등록 등급). 특수카드가 없는 시즌은 다이아몬드에 합산돼.'+
+ ' 보존은 같은 등급의 새 카드 1장 획득을 뜻해. 혼합 등급은 합산 점수로 계산하므로 최고 등급 보존율이 낮아질 수 있어.</p>';
 }
 function resultMarkup(){
  if(!result)return "";
@@ -89,7 +97,7 @@ function render(){
  '<h2>🧬 카드 조합</h2><p>중복 카드 3~5장 → 새로운 선수 카드 1장</p></div>'+
  '<button type="button" data-combo-close aria-label="닫기">×</button></header>'+
  '<div class="rkbo-combo-content"><div class="rkbo-combo-rules">'+
- '<b>동일 차수는 그 차수 확정</b> · 혼합하면 등록된 시즌 랜덤 · 등급이 내려갈 수도 있어.'+
+ '<b>동일 차수는 그 차수 확정</b> · 혼합하면 등록된 시즌 랜덤 · 재료 점수가 높을수록 상위 등급 기대 상승.'+
  '<br>마지막 1장·MY TEAM 편성 카드·금테/프리즘·특수 등급 카드는 재료에서 제외해.</div>'+
  resultMarkup()+
  '<div class="rkbo-combo-layout"><section class="rkbo-combo-list"><h3>내 중복 선수 카드 <small>'+inventory.length+'종</small></h3>'+
@@ -242,6 +250,11 @@ function open(){
 }
 function init(){
  if(overlay)return;
+ const nav=document.querySelector(".nav-right")||document.querySelector(".nav");
+ const button=document.createElement("button");button.id="rkbo-combo-open";button.type="button";
+ button.className="rkbo-combo-nav";button.textContent="🧬 카드 조합";button.addEventListener("click",open);
+ const packButton=document.getElementById("rkbo-pack-open");
+ if(packButton)packButton.after(button);else nav?.prepend(button);
  overlay=document.createElement("div");overlay.id="rkbo-combo-overlay";overlay.className="rkbo-combo-overlay";overlay.hidden=true;
  overlay.innerHTML='<div class="rkbo-combo-dialog" role="dialog" aria-modal="true" aria-label="RKBO 카드 조합"></div>';
  document.body.appendChild(overlay);dialog=overlay.querySelector(".rkbo-combo-dialog");
@@ -271,3 +284,4 @@ function init(){
 root.RKBOCombination={open,close};
 root.document.addEventListener("DOMContentLoaded",init);
 })(window);
+
