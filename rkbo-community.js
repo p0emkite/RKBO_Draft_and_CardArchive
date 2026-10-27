@@ -199,13 +199,13 @@ async function act(button){
   if(!request)throw Error("보안 연결에서 요청 ID를 만들 수 없어.");
   await call("rkbo_community_trade",{p_action:"create",p_target:selected,p_offered:offered,
    p_requested:wanted,p_request:request});
-  await chooseTab("trades");inform("교환 요청을 보냈어. 상대가 수락하면 카드가 교환돼.");return;
+  await chooseTab("trades");root.dispatchEvent(new Event("rkbo-trade-updated"));inform("교환 요청을 보냈어. 상대가 수락하면 카드가 교환돼.");return;
  }
  if(d.cmTrade){
   if(d.cmTrade==="accept"&&!root.confirm("양쪽 중복 카드가 하나씩 교환돼. 수락할까?"))return;
   await call("rkbo_community_trade",{p_action:d.cmTrade,p_trade:d.id});
   if(d.cmTrade==="accept"){await loadMine();root.dispatchEvent(new Event("rkbo-collection-updated"))}
-  await loadTrades();inform(d.cmTrade==="accept"?"✅ 교환이 완료됐어!":"교환 상태가 변경됐어.");return;
+  await loadTrades();root.dispatchEvent(new Event("rkbo-trade-updated"));inform(d.cmTrade==="accept"?"✅ 교환이 완료됐어!":"교환 상태가 변경됐어.");return;
  }
  if(d.cmRefresh!==undefined){await loadTrades();return}
  if(d.cmSend!==undefined){
@@ -223,12 +223,14 @@ async function act(button){
   await call("rkbo_community_chat_report",{p_id:Number(d.cmReport)});inform("신고가 접수됐어.");return;
  }
 }
-async function open(){
+async function open(destination){
  if(!overlay)init();
  overlay.hidden=false;document.body.classList.add("rkbo-cm-open");
- tab="members";selected=null;cards=[];notice="";render();
- try{await account();await Promise.all([loadMine(),loadMembers()]);render()}
- catch(e){inform(e.message)}
+ tab=destination==="trades"?"trades":"members";selected=null;cards=[];notice="";render();
+ try{
+  await account();await Promise.all([loadMine(),loadMembers()]);
+  if(tab==="trades")await loadTrades();else render();
+ }catch(e){inform(e.message)}
 }
 function close(){if(!overlay)return;overlay.hidden=true;document.body.classList.remove("rkbo-cm-open");void stopChat()}
 function init(){
