@@ -1,8 +1,8 @@
 /* RKBO LEAGUE v1 — server-authoritative 10-team snake draft & 144 game season. */
 (function(root){"use strict";
-const CLUBS=["KIA","HAN","SAM","LOT","LG","DOO","SSG","NC","KT","KIW"];
+const CLUBS=["KIA","HAN","SAM","LOT","LG","DOO","SSG","NC"];
 const LABELS={KIA:"KIA 타이거즈",HAN:"한화 이글스",SAM:"삼성 라이온즈",LOT:"롯데 자이언츠",
- LG:"LG 트윈스",DOO:"두산 베어스",SSG:"SSG 랜더스",NC:"NC 다이노스",KT:"KT 위즈",KIW:"키움 히어로즈"};
+ LG:"LG 트윈스",DOO:"두산 베어스",SSG:"SSG 랜더스",NC:"NC 다이노스"};
 const POS=["C","1B","2B","3B","SS","LF","CF","RF","DH","SP1","SP2","SP3","SP4","SP5","RP1","RP2","RP3","CP"];
 const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const logo=c=>c==="NC"?"./assets/teams/NC.png":"./assets/teams/"+c+".svg";
@@ -108,11 +108,11 @@ function rosterName(club,slot){const c=rosterFor(club)[slot];return c?c.name+" (
 function renderList(){
  return '<section class="rkbo-league-lobby"><div class="rkbo-league-two-col">'+
  '<div class="rkbo-league-box"><h3>🏟️ 새 리그 만들기</h3>'+
- '<form data-league-create><label>방 이름<input name="title" maxlength="48" required value="RKBO 10구단 리그"></label>'+
+ '<form data-league-create><label>방 이름<input name="title" maxlength="48" required value="RKBO 8구단 리그"></label>'+
  '<label>방 공개 설정<select name="visibility"><option value="public" selected>🌐 공개방 (기본)</option>'+
  '<option value="code">🔑 초대 코드 전용</option></select></label>'+
  '<label>참가 방식<select name="mode"><option value="multi">실시간 멀티 (빈 팀은 AI)</option>'+
- '<option value="solo">혼자 + AI 9구단</option></select></label>'+
+ '<option value="solo">혼자 + AI 7구단</option></select></label>'+
  '<label>카드 시즌<select name="season">'+
  Array.from({length:60},(_,i)=>60-i).map(n=>'<option value="'+n+'"'+(n===60?' selected':'')+'>'+n+'차</option>').join("")+
  '</select></label><strong>내 구단 선택</strong>'+clubsMarkup("KIA","createClub")+
@@ -192,7 +192,7 @@ function renderDraft(){
  const recent=picks.slice(-12).reverse();
  return '<section class="rkbo-league-box"><div class="rkbo-league-draft-head">'+
  '<div><small>ROUND '+String(r).padStart(2,"0")+' · PICK '+String(t).padStart(2,"0")+
- ' / 10 · 전체 '+(picks.length)+'/180 지명</small><h3>'+
+ ' / 8 · 전체 '+(picks.length)+'/144 지명</small><h3>'+
  (club?esc(ko(club))+" 지명 차례":"드래프트 진행 중")+'</h3>'+
  '<p>현재 포지션: <strong>'+esc(slot||"–")+'</strong>'+
  ' · '+(club?"선택 구단: "+esc(nickname(club)):"다음 지명 준비")+'</p></div>'+
@@ -269,7 +269,7 @@ function renderSeason(){
  return '<section class="rkbo-league-box"><div class="rkbo-league-season-head"><div>'+
  '<small>RKBO LEAGUE · '+esc(room.name)+'</small><h3>'+
  (finished?'🏆 리그 종료':atMid?'🔄 시즌 중반 트레이드 기간':'⚾ 정규리그 진행 중')+
- '</h3><p>'+room.week+'주차 / 36주차 · 각 팀 '+(room.week*4)+'/144경기 · 총 '+(room.week*20)+'/720경기</p></div>'+
+ '</h3><p>'+room.week+'주차 / 36주차 · 각 팀 '+(room.week*4)+'/144경기 · 총 '+(room.week*16)+'/576경기</p></div>'+
  '<div class="rkbo-league-progress"><div style="width:'+Math.round(room.week/36*100)+'%"></div></div></div>'+
  (!finished&&host?'<div class="rkbo-league-actions">'+
  (atMid?'<button type="button" data-league-resume>트레이드 마감하고 후반기 진행 ▶</button>':
@@ -297,7 +297,7 @@ function render(){
  if(!panel)return;
  const status=room?room.phase:"none";
  panel.innerHTML='<header class="rkbo-league-header"><div><small>RKBO ONLINE · LEAGUE DRAFT</small>'+
- '<h2>🏟️ RKBO 10구단 리그</h2><p>공개방 · 포지션 드래프트 · 144경기 시뮬레이션</p></div>'+
+ '<h2>🏟️ RKBO 8구단 리그</h2><p>공개방 · 포지션 드래프트 · 144경기 시뮬레이션</p></div>'+
  '<button type="button" data-league-close aria-label="닫기">×</button></header>'+
  '<p class="rkbo-league-message" data-league-message>'+esc(message)+'</p>'+
  '<main class="rkbo-league-content">'+(!room?renderList():
@@ -400,7 +400,7 @@ function init(){
  const btn=document.createElement("button");btn.type="button";btn.className="rkbo-league-nav";
  btn.textContent="🏟️ LEAGUE";btn.addEventListener("click",open);nav?.prepend(btn);
  overlay=document.createElement("div");overlay.hidden=true;overlay.className="rkbo-league-overlay";
- overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="RKBO 10구단 리그" class="rkbo-league-panel"></section>';
+ overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="RKBO 8구단 리그" class="rkbo-league-panel"></section>';
  document.body.append(overlay);panel=overlay.firstElementChild;
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  panel.addEventListener("click",async event=>{
