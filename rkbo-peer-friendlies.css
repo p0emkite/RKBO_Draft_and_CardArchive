@@ -56,3 +56,17 @@
 .rkbo-pvp-header{padding:11px}.rkbo-pvp-header h2{font-size:18px}
 .rkbo-pvp-body{padding:11px}
 .rkbo-pvp-nav{font-size:11px;padding:7px}}
+
+
+/* Shared top navigation: prevent social features from clipping on smaller viewports. */
+.nav{height:auto;min-height:84px;gap:12px;padding-top:12px;padding-bottom:12px}
+.nav-right{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;column-gap:9px;row-gap:7px}
+@media(max-width:850px){
+ .nav{flex-wrap:wrap;align-items:center;gap:8px}
+ .nav-right{width:100%;justify-content:flex-start;column-gap:7px;row-gap:6px}
+ .rkbo-pvp-nav{font-size:11px}
+}
+@media(max-width:520px){
+ .nav-right{column-gap:5px}
+ .nav-right button{max-width:100%}
+}
