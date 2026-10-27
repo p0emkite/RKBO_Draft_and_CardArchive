@@ -12,7 +12,7 @@ let overlay=null,panel=null,room=null,roomId=null,client=null,user=null;
 let people=[],members=[],picks=[],rights=[],trades=[],standings=[],stats=[],games=[],publicRooms=[],message="",code="";
 let channel=null,subscribedId=null,refreshing=false,processing=false,autoRun=false,timer=null;
 let rosterArt=new Map(),rosterLoading=new Map(),memberNames=new Map(),lastState="",view="list";
-let serverClub=null,serverTurn=false;
+let serverClub=null,serverTurn=false,positionWheelKey="",positionWheelActive=false,positionWheelTimer=null;
 const $=s=>panel?.querySelector(s);
 function flash(s){message=s;const el=$("[data-league-message]");if(el)el.textContent=s}
 async function login(){
@@ -62,6 +62,7 @@ async function acquireRoom(){
  }
  render();
  if(room.phase==="draft"){
+  startPositionWheel();
   for(const season of new Set((room.draft_candidates||[]).map(c=>Number(c.season)))){
    if(rosterArt.has(season))hydrateCards(season);
   }
@@ -232,6 +233,34 @@ function hydrateCards(season){
   }).catch(err=>console.warn("[RKBO League] card image",card.cardId,err));
  }
 }
+
+function startPositionWheel(){
+ if(!panel||room?.phase!=="draft"||!room.current_slot)return;
+ const key=roomId+":"+room.draft_round;
+ if(positionWheelKey===key)return;
+ positionWheelKey=key;positionWheelActive=true;
+ if(positionWheelTimer)root.clearInterval(positionWheelTimer);
+ const selected=new Set((picks||[]).map(p=>p.slot));
+ const positions=POS.filter(p=>!selected.has(p));
+ if(!positions.includes(room.current_slot))positions.push(room.current_slot);
+ let steps=0;
+ const cycle=()=>{
+  const el=$("[data-league-position-wheel]");
+  if(el){
+   el.classList.add("is-spinning");
+   el.classList.remove("is-picked");
+   el.textContent=positions[Math.floor(Math.random()*positions.length)]||room.current_slot;
+  }
+  if(++steps>=22){
+   root.clearInterval(positionWheelTimer);positionWheelTimer=null;
+   positionWheelActive=false;
+   const wheel=$("[data-league-position-wheel]");
+   if(wheel){wheel.textContent=room.current_slot;wheel.classList.remove("is-spinning");wheel.classList.add("is-picked")}
+  }
+ };
+ cycle();positionWheelTimer=root.setInterval(cycle,65);
+}
+
 function renderDraft(){
  const mine=myClub(),r=room.draft_round,t=room.draft_turn;
  const club=room.current_club,slot=room.current_slot;
@@ -247,6 +276,7 @@ function renderDraft(){
  '<div class="rkbo-league-timer"><strong data-league-countdown>'+timerVal+'</strong><small>초 남음</small></div></div>'+
  '<div class="rkbo-league-ten mini">'+CLUBS.map(c=>'<div class="rkbo-league-team'+(club===c?' active':'')+'">'+img(c)+
  '<strong>'+esc(c)+'</strong><small>'+esc(nickname(c))+'</small></div>').join("")+'</div>'+
+ '<h3 class="rkbo-league-position-title">🎲 포지션 추첨 <span class="rkbo-league-position-wheel" data-league-position-wheel>'+esc(positionWheelActive?"추첨 중…":slot||"–")+'</span></h3>'+
  '<h3>🎴 '+esc(slot||"")+' 포지션 무작위 후보 '+(room.draft_candidates||[]).length+'명</h3>'+
  '<p class="rkbo-league-hint">같은 포지션의 실제 선수 카드 중 최대 15명을 무작위로 제시해. 이전에 지명된 카드는 다시 나오지 않아.</p>'+
  '<div class="rkbo-league-candidates">'+(room.draft_candidates||[]).map(c=>
@@ -352,7 +382,7 @@ function render(){
  status==="lobby"?renderLobby():status==="draft"?renderDraft():renderSeason())+'</main>';
 }
 async function loadRoom(id){
- roomId=id;code="";room=null;message="";serverClub=null;serverTurn=false;await acquireRoom();await subscribe();
+ roomId=id;code="";room=null;message="";serverClub=null;serverTurn=false;positionWheelKey="";await acquireRoom();await subscribe();
 }
 async function doSim(){
  if(autoRun||!roomId)return;
@@ -375,7 +405,7 @@ async function click(button){
  const d=button.dataset;
  if(d.leagueClose!==undefined){close();return}
  if(d.leagueReload!==undefined){await getPublic();return}
- if(d.leagueBack!==undefined){roomId=null;room=null;view="list";code="";serverClub=null;serverTurn=false;await getPublic();return}
+ if(d.leagueBack!==undefined){roomId=null;room=null;view="list";code="";serverClub=null;serverTurn=false;positionWheelKey="";await getPublic();return}
  if(d.leagueSelect){await loadRoom(d.leagueSelect);return}
  if(d.leagueStart!==undefined){
   if(!root.confirm("빈 구단은 AI로 채우고 드래프트를 시작할까?"))return;
