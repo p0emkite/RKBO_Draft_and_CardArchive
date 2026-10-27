@@ -118,6 +118,54 @@ function renderPack(){
  if(draws.length)showCurrentReveal();
  else updateCooldownUi();
 }
+
+async function savePackSharePNG(btn){
+ const old=btn.textContent;btn.disabled=true;btn.textContent="PNG 제작 중…";
+ try{
+  if(!packResult?.draws||packResult.draws.length!==5)throw Error("먼저 5장을 모두 공개해 주세요.");
+  if(!root.RKBOCardExport?.make)throw Error("카드 이미지 생성기를 찾을 수 없어요.");
+  if(document.fonts?.ready)await document.fonts.ready;
+  const roster=await playersFor(packResult.season||season);
+  const out=document.createElement("canvas");out.width=1600;out.height=1540;
+  const x=out.getContext("2d");if(!x)throw Error("이미지 캔버스를 사용할 수 없어요.");
+  const bg=x.createLinearGradient(0,0,1600,1540);
+  bg.addColorStop(0,"#203c60");bg.addColorStop(.6,"#101d32");bg.addColorStop(1,"#15152d");
+  x.fillStyle=bg;x.fillRect(0,0,1600,1540);
+  x.strokeStyle="#a7b4ce80";x.lineWidth=3;x.strokeRect(24,24,1552,1492);
+  x.textAlign="center";x.fillStyle="#f4d391";x.font="900 26px system-ui,sans-serif";
+  x.fillText("RKBO ONLINE · CARD PACK RESULT",800,76);
+  x.fillStyle="#fff5e2";x.font="900 60px system-ui,sans-serif";
+  x.fillText("카드팩 개봉 결과",800,152);
+  x.fillStyle="#adbed5";x.font="700 27px system-ui,sans-serif";
+  x.fillText((packResult.season||season)+"차 · "+packResult.packNumber+"번째 팩 · 5장",800,198);
+  const w=377,h=528,gap=37,coords=[
+   [(1600-3*w-2*gap)/2,232],[(1600-3*w-2*gap)/2+w+gap,232],[(1600-3*w-2*gap)/2+2*(w+gap),232],
+   [(1600-2*w-gap)/2,795],[(1600-2*w-gap)/2+w+gap,795]
+  ];
+  for(let i=0;i<5;i++){
+   const v=packResult.draws[i],player=roster.get(v.cardId);
+   if(!player)throw Error("선수 카드 정보를 찾지 못했어요: "+v.cardId);
+   const card=await root.RKBOCardExport.make(player),[left,top]=coords[i];
+   x.save();x.shadowColor="#000b";x.shadowBlur=22;x.shadowOffsetY=10;
+   x.drawImage(card,left,top,w,h);x.restore();
+   if(v.isNew){
+    x.fillStyle="#ffdb8c";x.fillRect(left+w-91,top+9,81,30);
+    x.fillStyle="#102035";x.font="900 18px system-ui,sans-serif";x.fillText("NEW!",left+w-50,top+30);
+   }
+  }
+  x.fillStyle="#9db4ce";x.font="800 26px system-ui,sans-serif";
+  x.fillText("RKBO ONLINE · MY CARD PACK",800,1460);
+  const png=await new Promise(done=>out.toBlob(done,"image/png"));
+  if(!png)throw Error("PNG를 만들지 못했어요.");
+  const url=URL.createObjectURL(png),a=document.createElement("a");
+  a.href=url;a.download="RKBO_"+(packResult.season||season)+"차_"+packResult.packNumber+"팩.png";
+  document.body.append(a);a.click();a.remove();
+  root.setTimeout(()=>URL.revokeObjectURL(url),12000);
+  message("📸 결과 이미지 저장 완료!");
+ }catch(e){message("이미지 저장 실패: "+e.message);console.warn("[RKBO share]",e)}
+ finally{btn.disabled=false;btn.textContent=old}
+}
+
 function renderResult(){
  const body=$("#rkbo-pack-body");if(!body||!packResult)return;
  const vals=packResult.draws||[];
@@ -126,7 +174,7 @@ function renderResult(){
  '<div class="rkbo-pack-result-grid">'+vals.map((v,i)=>'<button type="button" class="rkbo-pack-result-tile rarity-'+esc(v.grade)+'" data-pack-detail="'+esc(v.cardId)+'" title="선수 상세정보 보기"><span>'+esc(displayGrade(v.grade))+'</span>'+
  '<strong>'+esc(cache.get(Number(v.cardId.split("-")[0]))?.get(v.cardId)?.name||v.name)+'</strong>'+
  '<small>OVR '+v.ovr+' · '+(v.isNew?"NEW!":"중복 ×"+v.quantity)+'</small><em class="rkbo-pack-detail-hint">선수 카드 자세히 보기</em></button>').join("")+'</div>'+
- '<div class="rkbo-pack-result-buttons"><button type="button" data-pack="reset">🎁 다음 카드팩</button><button type="button" data-pack="collection">📚 내 도감 보기</button></div></div>';
+ '<div class="rkbo-pack-result-buttons"><button type="button" data-pack="share">📸 5장 결과 PNG 저장</button><button type="button" data-pack="reset">🎁 다음 카드팩</button><button type="button" data-pack="collection">📚 내 도감 보기</button></div></div>';
 }
 function showCurrentReveal(){
  const target=$("#rkbo-pack-reveal");if(!target)return;
@@ -418,6 +466,7 @@ function init(){
   if(action==="login"){close();root.RKBOOnline?.open?.("account");return}
   if(action==="open"){await openPack();return}
   if(action==="next"){await showNext();return}
+  if(action==="share"){await savePackSharePNG(target);return}
   if(action==="reset"){draws=[];cursor=0;packResult=null;await showTab("pack");return}
   if(action==="collection"){await showTab("collection");return}
   if(action==="more"){collectionLimit+=36;renderCollection()}
