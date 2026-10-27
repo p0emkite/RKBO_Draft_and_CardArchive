@@ -61,6 +61,11 @@ async function acquireRoom(){
   for(const c of room.draft_candidates||[])void ensureArt(c.season);
  }
  render();
+ if(room.phase==="draft"){
+  for(const season of new Set((room.draft_candidates||[]).map(c=>Number(c.season)))){
+   if(rosterArt.has(season))hydrateCards(season);
+  }
+ }
 }
 async function refresh(){
  if(refreshing||processing)return;
@@ -141,14 +146,55 @@ function renderLobby(){
  '<p class="rkbo-league-hint">방장이 드래프트를 시작하면 자동으로 이동해.</p>')+
  '</section>';
 }
+
+const leagueCardUrls=new Map(),leagueCardPending=new Map(),leagueCardQueue=[];
+let leagueCardJobs=0;
+// Use the original 750x1050 export rather than downsizing CSS card internals.
 function miniMarkup(c){
- const season=Number(c.season),p=rosterArt.get(season)?.get(c.cardId);
- if(p&&root.RKBOCardView?.render){
-  try{return root.RKBOCardView.render(p,true).replace(/<button\b[^>]*>[\s\S]*?<\/button>/gi,"")}
-  catch(e){console.warn("[RKBO League] card art",e)}
+ const url=leagueCardUrls.get(c.cardId);
+ if(url)return '<img class="rkbo-league-original-card" src="'+esc(url)+
+  '" alt="'+esc(c.season+'차 '+c.name+' '+c.grade)+'" draggable="false">';
+ return '<div class="rkbo-league-card-fallback"><div>'+esc(c.grade)+'</div>'+
+  '<strong>'+esc(c.ovr)+'</strong><span>'+esc(c.name)+'</span>'+
+  '<small>'+esc(c.season)+'차 · '+esc(c.position)+'</small></div>';
+}
+function pumpLeagueImages(){
+ while(leagueCardJobs<2&&leagueCardQueue.length){
+  const job=leagueCardQueue.shift();
+  leagueCardJobs++;
+  (async()=>{
+   await ensureArt(job.season);
+   const player=rosterArt.get(job.season)?.get(job.cardId);
+   if(!player||!root.RKBOCardExport?.make)throw Error("공식 카드 렌더링 데이터가 없어");
+   const canvas=await root.RKBOCardExport.make(player);
+   const blob=await new Promise(done=>canvas.toBlob(done,"image/png"));
+   if(!blob)throw Error("PNG 렌더링 실패");
+   const url=URL.createObjectURL(blob);
+   leagueCardUrls.set(job.cardId,url);
+   if(leagueCardUrls.size>80){
+    const oldest=leagueCardUrls.keys().next().value;
+    if(oldest!==job.cardId){
+     URL.revokeObjectURL(leagueCardUrls.get(oldest));
+     leagueCardUrls.delete(oldest);
+    }
+   }
+   return url;
+  })().then(job.resolve,job.reject).finally(()=>{
+   leagueCardJobs--;
+   leagueCardPending.delete(job.cardId);
+   pumpLeagueImages();
+  });
  }
- return '<div class="rkbo-league-card-fallback"><div>'+esc(c.grade)+'</div><strong>'+esc(c.ovr)+'</strong>'+
- '<span>'+esc(c.name)+'</span><small>'+season+'차 · '+esc(c.position)+'</small></div>';
+}
+function exportLeagueCard(c){
+ if(leagueCardUrls.has(c.cardId))return Promise.resolve(leagueCardUrls.get(c.cardId));
+ if(leagueCardPending.has(c.cardId))return leagueCardPending.get(c.cardId);
+ const pending=new Promise((resolve,reject)=>{
+  leagueCardQueue.push({cardId:c.cardId,season:Number(c.season),resolve,reject});
+  pumpLeagueImages();
+ });
+ leagueCardPending.set(c.cardId,pending);
+ return pending;
 }
 async function ensureArt(season){
  const s=Number(season);
@@ -170,11 +216,20 @@ async function ensureArt(season){
  })().catch(e=>console.warn("[RKBO League] asset loading",e)).finally(()=>rosterLoading.delete(s));
  rosterLoading.set(s,pending);return pending;
 }
+
 function hydrateCards(season){
- if(!panel)return;
+ if(!panel||room?.phase!=="draft")return;
+ const current=new Map((room.draft_candidates||[]).map(c=>[c.cardId,c]));
  for(const el of panel.querySelectorAll('.rkbo-league-art[data-season="'+season+'"]')){
-  const c=(room?.draft_candidates||[]).find(x=>x.cardId===el.dataset.cardId);
-  if(c)el.innerHTML=miniMarkup(c);
+  const card=current.get(el.dataset.cardId);
+  if(!card)continue;
+  if(leagueCardUrls.has(card.cardId)){el.innerHTML=miniMarkup(card);continue}
+  void exportLeagueCard(card).then(()=>{
+   if(el.isConnected&&room?.phase==="draft"&&
+     (room.draft_candidates||[]).some(p=>p.cardId===card.cardId)){
+    el.innerHTML=miniMarkup(card);
+   }
+  }).catch(err=>console.warn("[RKBO League] card image",card.cardId,err));
  }
 }
 function renderDraft(){
