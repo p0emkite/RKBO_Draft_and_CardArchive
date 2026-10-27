@@ -1,0 +1,66 @@
+
+/* RKBO Community v1: responsive gallery, trades, and chat */
+.rkbo-cm-nav{padding:9px 12px;border:1px solid #689baa;border-radius:9px;background:#25435c;color:#f1faff;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+.rkbo-cm-overlay[hidden]{display:none!important}
+.rkbo-cm-overlay{position:fixed;inset:0;z-index:2800;padding:14px;background:#030914eb;display:flex;align-items:center;justify-content:center;color:#eff7ff}
+.rkbo-cm-dialog{width:min(1100px,100%);max-height:94dvh;overflow:auto;border:1px solid #4f728d;background:#101f32;border-radius:16px;box-shadow:0 27px 100px #000c}
+.rkbo-cm-head{display:flex;justify-content:space-between;align-items:start;gap:12px;padding:16px 20px;background:linear-gradient(115deg,#153b52,#343456)}
+.rkbo-cm-head h2{font-size:22px;color:#ffdf9e;margin:4px 0}
+.rkbo-cm-head p{font-size:12px;color:#adc8d8;margin:0}
+.rkbo-cm-head small{font-size:10px;color:#92bacf;letter-spacing:.12em;font-weight:900}
+.rkbo-cm-head>button{background:#1b4057;color:white;font-size:22px;border:1px solid #7194a9;border-radius:8px;width:39px;height:39px;cursor:pointer}
+.rkbo-cm-tabs{display:flex;padding:10px 15px;gap:8px;background:#0d192b}
+.rkbo-cm-tabs button{flex:1;min-width:0;background:#203b51;color:#cfe6f4;border:1px solid #446781;border-radius:9px;padding:10px;font-size:12px;font-weight:900;cursor:pointer}
+.rkbo-cm-tabs button.active{background:#2a6873;border-color:#81dbcb;color:white}
+.rkbo-cm-main{padding:17px 20px 24px}
+.rkbo-cm-notice{color:#ffe1a7;font-size:12px;min-height:18px;margin:7px 20px}
+.rkbo-cm-visibility{padding:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#17394d;border:1px solid #326879;border-radius:9px;margin-bottom:13px}
+.rkbo-cm-visibility label{font-weight:900;font-size:13px;white-space:nowrap}
+.rkbo-cm-visibility input{accent-color:#8cddca;vertical-align:middle}
+.rkbo-cm-visibility small{font-size:11px;color:#adc7d6}
+.rkbo-cm-search{display:flex;gap:7px;margin:9px 0 13px}
+.rkbo-cm-search input,.rkbo-cm-offer select,.rkbo-cm-compose textarea{flex:1;min-width:0;width:100%;padding:10px;background:#091927;color:#e6faff;border:1px solid #466a82;border-radius:8px;font-size:12px}
+.rkbo-cm-search button,.rkbo-cm-card-meta button,.rkbo-cm-offer button,.rkbo-cm-more,.rkbo-cm-trades button,.rkbo-cm-compose button{padding:9px 12px;border:1px solid #739ab0;background:#29516a;color:#eaf8ff;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer}
+.rkbo-cm-members{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rkbo-cm-member{display:flex;flex-direction:column;gap:5px;text-align:left;padding:11px;background:#19354b;color:#e9f5ff;border:1px solid #426d87;border-radius:9px;cursor:pointer;min-width:0}
+.rkbo-cm-member strong{font-size:13px;overflow-wrap:anywhere}
+.rkbo-cm-member small{font-size:11px;color:#b6cfdb}
+.rkbo-cm-muted{font-size:12px;color:#a7bfd2;line-height:1.7}
+.rkbo-cm-section{margin-top:17px;border-top:1px solid #3a5b72;padding-top:16px}
+.rkbo-cm-section h3,.rkbo-cm-trade-head h3{font-size:17px;margin:0 0 11px;color:#ffdda8}
+.rkbo-cm-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.rkbo-cm-card{display:flex;flex-direction:column;gap:4px;min-width:0;padding:5px;border:1px solid #3c5e79;background:#071929;border-radius:10px}
+.rkbo-cm-art{width:100%;min-width:0}
+.rkbo-cm-art .player-card{pointer-events:none}
+.rkbo-cm-art-pending{aspect-ratio:.735;background:#1a3851;border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#bfd4e5;font-size:26px}
+.rkbo-cm-art-pending small{font-size:10px}
+.rkbo-cm-card-meta{display:flex;flex-direction:column;gap:6px;padding:5px}
+.rkbo-cm-card-meta strong{font-size:12px;overflow-wrap:anywhere}
+.rkbo-cm-card-meta small{font-size:11px;color:#aac7d6}
+.rkbo-cm-offer{margin-top:14px;background:#193950;border:1px solid #4d8594;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:12px}
+.rkbo-cm-offer>strong{color:#ffdaa0}
+.rkbo-cm-offer label{font-size:12px}
+.rkbo-cm-offer select{display:block;margin-top:7px}
+.rkbo-cm-trade-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.rkbo-cm-trade{margin:11px 0;padding:14px;background:#193246;border:1px solid #416c87;border-radius:10px;display:flex;flex-direction:column;gap:8px}
+.rkbo-cm-trade small{font-size:11px;color:#a7c6d5}
+.rkbo-cm-trade strong{font-size:13px;overflow-wrap:anywhere}
+.rkbo-cm-trade p{font-size:12px;margin:0;color:#f7dcab}
+.rkbo-cm-trade>div{display:flex;gap:8px}
+.rkbo-cm-stream{background:#0a1928;border:1px solid #385872;border-radius:11px;padding:10px;max-height:53dvh;overflow:auto;display:flex;flex-direction:column;gap:9px}
+.rkbo-cm-message{max-width:88%;align-self:start;background:#203e55;border-radius:10px;padding:10px 13px}
+.rkbo-cm-message.mine{align-self:end;background:#25584c}
+.rkbo-cm-message>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rkbo-cm-message strong{font-size:12px}.rkbo-cm-message small{font-size:10px;color:#b3c7d7}
+.rkbo-cm-message p{font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0}
+.rkbo-cm-message button{background:transparent;border:0;color:#b5c5d3;font-size:10px;cursor:pointer;padding:0}
+.rkbo-cm-compose{display:flex;gap:8px;margin-top:11px}.rkbo-cm-compose button{min-width:73px}
+@media(max-width:760px){
+ .rkbo-cm-overlay{padding:6px;align-items:stretch}
+ .rkbo-cm-dialog{max-height:calc(100dvh - 12px);border-radius:10px}
+ .rkbo-cm-head{padding:12px}.rkbo-cm-head h2{font-size:18px}
+ .rkbo-cm-tabs{padding:7px;gap:4px}.rkbo-cm-tabs button{font-size:10px;padding:10px 4px}
+ .rkbo-cm-main{padding:11px}
+ .rkbo-cm-members,.rkbo-cm-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rkbo-cm-nav{font-size:11px;padding:8px}
+}
