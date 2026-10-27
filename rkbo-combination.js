@@ -75,6 +75,7 @@ function percentMarkup(){
 /* Purely cosmetic 2.0 animations. The server response is the ONLY winner. */
 const premiumGrades=new Set(["코랄","다이아몬드","특수","신인왕","드림","나눔","MVP","베스트릴리프"]);
 const displayGrades=["브론즈","실버","골드","코랄","다이아몬드","신인왕","드림","나눔","MVP","베스트릴리프"];
+const usesRoulette=grade=>!["브론즈","실버","골드"].includes(grade);
 let cinema=null,cinemaSkip=false,cinemaAdvance=null;
 const reducedMotion=()=>Boolean(root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
 function cinematicStop(){
@@ -322,7 +323,7 @@ async function combine(){
   // This only loads existing local card assets; it never performs another draw.
   await loadWinningArt(data.result.cardId);
   try{
-   if(premiumGrades.has(data.result.grade))await rouletteCinematic(data.result);
+   if(usesRoulette(data.result.grade))await rouletteCinematic(data.result);
    else await standardCinematic(data.result);
   }catch(animationError){
    console.warn("[RKBO combination] Cosmetic effect failed",animationError);
@@ -365,7 +366,7 @@ async function loadWinningArt(cardId){
    artworkCache.set(season,cards);
   }
   const player=cards.find(p=>p.id===cardId);
-  if(!player)return;
+  if(!player){resultArtwork="<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>";return}
   resultDisplayName=player.name||"";
   resultArtwork=root.RKBOCardView?.render?.(player,true)||"";
   if(result?.result?.cardId===cardId)render();

@@ -1414,3 +1414,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 @media(prefers-reduced-motion:reduce){
  .rkbo-combo-cinema *, .rkbo-combo-success .player-card{animation:none!important;transition:none!important}
 }
+
+/* Keep the entire convergence stage inside narrow phone viewports. */
+@media(max-width:760px){.rkbo-combo-merge-stage{width:100%;transform:scale(.64)}}
+@media(max-width:400px){.rkbo-combo-merge-stage{width:100%;transform:scale(.47)}}
