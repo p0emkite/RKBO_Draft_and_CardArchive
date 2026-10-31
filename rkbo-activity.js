@@ -43,7 +43,8 @@ function renderAlerts(){
  }
  popup.hidden=!noticesExpanded;
  popup.innerHTML='<div class="rkbo-activity-alert-head"><strong>🔔 카드 교환 알림</strong>'+
-  '<button type="button" data-activity-read-all '+(pending.length?'':'disabled')+'>모두 읽음</button></div>'+
+  '<div class="rkbo-activity-alert-actions"><button type="button" data-activity-read-all '+(pending.length?'':'disabled')+'>모두 읽음</button>'+
+  '<button type="button" class="rkbo-activity-alert-close" data-activity-close aria-label="알림창 닫기" title="알림창 닫기">×</button></div></div>'+
   '<div class="rkbo-activity-alert-list">'+(alerts.length?alerts.map(a=>
    '<button type="button" class="rkbo-activity-alert-item'+(a.read_at?'':' unread')+
    '" data-activity-alert="'+a.id+'"><small>'+esc(when(a.created_at))+'</small><span>'+
@@ -105,7 +106,6 @@ async function onAlert(evt){
  seenIds.add("a"+row.id);
  await refreshAlerts();
  toastMessage(row.body,true);
- root.RKBOChatDock?.notify?.(row.body);
 }
 async function connect(){
  if(connected&&client)return;
@@ -155,6 +155,9 @@ function init(){
   if(noticesExpanded)try{await connect();await refreshAlerts()}catch(e){console.warn("[RKBO activity] notification",e)}
  });
  popup.addEventListener("click",async event=>{
+  if(event.target.closest("[data-activity-close]")){
+   noticesExpanded=false;renderAlerts();return;
+  }
   if(event.target.closest("[data-activity-read-all]")){
    try{await markRead(null)}catch(e){console.warn("[RKBO alerts] mark all",e.message)}return;
   }

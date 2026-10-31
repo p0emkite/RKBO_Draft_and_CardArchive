@@ -11,18 +11,6 @@ const fmt=value=>{
 };
 let dock=null,expanded=false,client=null,userId=null,channel=null,connecting=null;
 
-let privateSystemNotices=[];
-function notifyPrivate(message){
- const content=String(message||"").trim();
- if(!content)return;
- privateSystemNotices.unshift(content);privateSystemNotices=privateSystemNotices.slice(0,6);
- const system=find("[data-chat-private]");
- if(system)system.innerHTML=privateSystemNotices.map(m=>
-  '<div class="rkbo-chat-private-message"><strong>🔔 개인 알림</strong><p>'+escapeHTML(m)+'</p></div>'
- ).join("");
- if(!expanded){unread++;updateUnread()}
-}
-
 let messages=[],names=new Map(),unread=0,knownLastId=0,sending=false,requestSeq=0;
 let refreshTimer=null;
 const find=selector=>dock?.querySelector(selector);
@@ -195,7 +183,6 @@ function init(){
   '<div class="rkbo-chat-stream" role="log" aria-live="polite" aria-relevant="additions" data-chat-messages>'+
    '<p class="rkbo-chat-empty">채팅창을 연결하고 있어…</p></div>'+
   '<div class="rkbo-chat-status" data-chat-status role="status"></div>'+
-  '<div class="rkbo-chat-private" data-chat-private></div>'+
   '<div class="rkbo-chat-auth" data-chat-auth hidden></div>'+
   '<form class="rkbo-chat-compose" data-chat-form hidden>'+
    '<textarea data-chat-input aria-label="채팅 메시지" maxlength="240" rows="2" placeholder="회원들과 자유롭게 대화해 주시기 바랍니다."></textarea>'+
@@ -227,7 +214,7 @@ function init(){
   if(expanded&&client)void syncMessages().catch(()=>{});
  });
 }
-root.RKBOChatDock={open:()=>expand(true),close:()=>expand(false),toggle:()=>expand(!expanded),notify:notifyPrivate};
+root.RKBOChatDock={open:()=>expand(true),close:()=>expand(false),toggle:()=>expand(!expanded)};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
 else init();
 })(window);

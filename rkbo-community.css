@@ -155,8 +155,10 @@
 .rkbo-activity-alert-head{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;
  gap:9px;background:#1d3e54}
 .rkbo-activity-alert-head strong{font-size:13px}
+.rkbo-activity-alert-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .rkbo-activity-alert-head button{background:transparent;border:1px solid #527e98;color:#d6eafb;
  padding:5px 8px;border-radius:6px;font-size:11px;cursor:pointer}
+.rkbo-activity-alert-head .rkbo-activity-alert-close{font-size:17px;line-height:1;min-width:28px;min-height:27px;display:grid;place-items:center}
 .rkbo-activity-alert-list{max-height:290px;overflow-y:auto;padding:7px}
 .rkbo-activity-alert-list p{font-size:12px;margin:12px;color:#a9bfce}
 .rkbo-activity-alert-item{display:flex;flex-direction:column;gap:5px;align-items:flex-start;
@@ -173,10 +175,6 @@
  padding:13px 16px;border-radius:10px;box-shadow:0 10px 40px #0008;
  transition:opacity .22s,transform .22s}
 .rkbo-activity-toast.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;cursor:pointer}
-.rkbo-chat-private{padding:0 11px;max-height:110px;overflow-y:auto}
-.rkbo-chat-private-message{padding:8px 10px;margin:6px 0;background:#4c3b2d;border:1px solid #aa8761;
- border-radius:8px;color:#fff0d7}
-.rkbo-chat-private-message strong{font-size:10px}.rkbo-chat-private-message p{font-size:11px;margin:5px 0;line-height:1.5}
 @media(max-width:760px){
  .rkbo-activity-bar{gap:7px;padding:7px 8px}
  .rkbo-activity-brand{font-size:11px}.rkbo-activity-live{display:none}
