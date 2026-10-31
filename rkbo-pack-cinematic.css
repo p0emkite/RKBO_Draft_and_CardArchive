@@ -267,3 +267,22 @@
 @media(prefers-reduced-motion:reduce){
  .rkbo-cine-phase-run .rkbo-cine-turf-tint{animation:none;opacity:.5}
 }
+
+/* Administrator-only presentation preview; hidden unless authorized in pack UI. */
+.rkbo-cine-test-controls{
+ display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;
+ max-width:720px;margin:12px auto;padding:12px;border:1px solid #455d79;
+ background:#13233a;border-radius:12px;
+}
+.rkbo-cine-test-controls small{
+ display:block;width:100%;color:#bcd6ef;font-size:12px;text-align:center;
+}
+.rkbo-cine-test-controls button{
+ background:#263c5b;color:#fff;border:1px solid #7f94b2;border-radius:8px;
+ font:700 12px system-ui,sans-serif;padding:9px 12px;cursor:pointer;
+}
+.rkbo-cine-test-controls button:disabled{opacity:.45;cursor:default}
+.rkbo-cine-preview-label{
+ text-align:center;color:#fce7a6;background:#142033;
+ font:700 12px system-ui,sans-serif;padding:8px;border-radius:7px;
+}
