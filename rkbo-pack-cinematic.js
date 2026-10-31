@@ -65,11 +65,11 @@
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");
    link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-photoreal-v2";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-photoreal-v3";
    link.dataset.rkboCine="1";
    document.head.appendChild(link);
   }
-  ["atlas.webp","baseball.webp"].forEach(f=>{
+  ["atlas.avif","atlas.webp","baseball.webp"].forEach(f=>{
    const image=new Image();image.decoding="async";image.src=ASSETS+f;
   });
   const crest=new Image();crest.src="./assets/rkbo-archive-logo.webp";
