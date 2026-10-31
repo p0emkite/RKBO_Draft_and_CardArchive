@@ -613,13 +613,13 @@
     },
     "60-KIA-타-007-SPECIAL-NANUM": {
       "path": "assets/cards/60-KIA-타-007-SPECIAL-NANUM.webp",
-      "x": 0.6191950464396281,
-      "y": 4.029304029304029,
-      "zoom": 0.9254430000000001,
+      "x": 3.4055727554179565,
+      "y": 14.285714285714285,
+      "zoom": 1.1392899900000002,
       "fit": "contain",
-      "rev": "mvw9vwsl",
-      "commit": "f25e65f804469a1ee14741e12a19e6073e053d7c",
-      "blobSha": "265e5b01efab61fde2b8fdcdbb48310596b444ec"
+      "rev": "mvwa2mny",
+      "commit": "f78843fb092c16c4275f12aa632b6cf0609af45a",
+      "blobSha": "1d85c829e7380d36ab4d520406b5788b2409fd1a"
     },
     "60-KIA-타-010": {
       "path": "assets/cards/60-KIA-타-010.webp",
