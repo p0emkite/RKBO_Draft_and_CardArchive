@@ -48,7 +48,7 @@ async function loadUser(){
  return authUser;
 }
 function buildHeader(){
- return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 TRT | Tsuki's RKBO Together <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
+ return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 TRT | Tsuki&#39;s RKBO Together <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
 }
 function shell(inner){if(!panel)return;panel.innerHTML=buildHeader()+'<div class="rkbo-online-inner">'+inner+'</div>'}
 function notice(text){const el=q("#rkbo-online-message");if(el)el.textContent=text}
