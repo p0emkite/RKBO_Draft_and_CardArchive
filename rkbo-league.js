@@ -17,9 +17,9 @@ const $=s=>panel?.querySelector(s);
 function flash(s){message=s;const el=$("[data-league-message]");if(el)el.textContent=s}
 async function login(){
  const c=await root.RKBOOnline?.getClient?.();
- if(!c)throw Error("RKBO ONLINE에 로그인해 줘.");
+ if(!c)throw Error("RKBO ONLINE에 로그인해 주시기 바랍니다.");
  const {data,error}=await c.auth.getUser();
- if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 리그에 참가할 수 있어.");
+ if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 리그에 참가할 수 있습니다.");
  client=c;user=data.user.id;return c;
 }
 async function act(method,params={}){
@@ -43,7 +43,7 @@ async function getPublic(){
 async function acquireRoom(){
  const c=await login();
  const result=await c.rpc("rkbo_league_state",{p_room:roomId});
- if(result.error||!result.data?.room)throw Error(result.error?.message||"리그 상태를 불러오지 못했어.");
+ if(result.error||!result.data?.room)throw Error(result.error?.message||"리그 상태를 불러오지 못했습니다.");
  const data=result.data;
  room=data.room;members=data.members||[];picks=data.picks||[];
  rights=data.rights||[];trades=data.trades||[];stats=data.stats||[];games=data.games||[];
@@ -117,13 +117,13 @@ function renderList(){
  '</select></label><strong>내 구단 선택</strong>'+clubsMarkup("KIA","createClub")+
  '<button class="rkbo-league-primary" type="submit">방 생성</button></form></div>'+
  '<div class="rkbo-league-box"><h3>🌐 공개 리그 방</h3>'+
- '<p>카페 회원이 자유롭게 참여할 수 있어. 초대 코드는 선택 사항이야.</p>'+
+ '<p>카페 회원 누구나 자유롭게 참여할 수 있습니다. 초대 코드는 선택 사항입니다.</p>'+
  '<button type="button" data-league-reload>공개방 새로고침</button>'+
  '<div class="rkbo-league-public">'+
  (publicRooms.length?publicRooms.map(r=>'<button type="button" data-league-select="'+esc(r.id)+'">'+
  '<strong>'+esc(r.name)+'</strong><span>'+esc(r.season)+'차 · '+
  (r.mode==="solo"?"혼자 + AI":"멀티")+' · '+(r.phase==="lobby"?"참가 모집 중":"진행 중")+
- '</span></button>').join(""):'<p>공개방이 없어. 첫 방을 만들어 봐!</p>')+'</div>'+
+ '</span></button>').join(""):'<p>공개방이 없습니다. 첫 번째 방을 만들어 주시기 바랍니다.</p>')+'</div>'+
  '<form data-league-code><label>🔑 초대 코드로 참가<input name="invite" required maxlength="16" placeholder="12자리 초대 코드"></label>'+
  '<strong>참가할 구단</strong>'+clubsMarkup("HAN","codeClub")+
  '<button type="submit">코드로 입장</button></form></div></div></section>';
@@ -142,7 +142,7 @@ function renderLobby(){
  }).join("")+'</div>'+
  (!mine?'<form data-league-join><h3>내 구단 선택</h3>'+clubsMarkup("","joinClub")+
  '<button type="submit" class="rkbo-league-primary">이 구단으로 참가</button></form>':
- '<p class="rkbo-league-hint">✅ '+esc(ko(mine))+' 구단으로 참가했어.</p>')+
+ '<p class="rkbo-league-hint">✅ '+esc(ko(mine))+' 구단으로 참가했습니다.</p>')+
  (isHost?'<button class="rkbo-league-primary" data-league-start>🏁 드래프트 시작 · 빈 구단 AI 충원</button>':
  '<p class="rkbo-league-hint">방장이 드래프트를 시작하면 자동으로 이동해.</p>')+
  '</section>';
@@ -303,7 +303,7 @@ function renderTradePanel(kind){
  esc(ko(c))+' ('+esc(nickname(c))+')</option>').join("")+'</select></label>'+
  (kind==="player"?'<label>교환할 포지션<select name="slot">'+POS.map(s=>
  '<option value="'+s+'">'+s+' · '+esc(rosterName(mine,s))+'</option>').join("")+'</select></label>':
- '<p>다음 라운드의 서로 다른 지명 순서를 맞바꿔. 상대가 수락하면 바로 적용돼.</p>')+
+ '<p>다음 라운드의 서로 다른 지명 순서를 교환합니다. 상대방이 수락하면 즉시 적용됩니다.</p>')+
  '<button type="submit">교환 제안</button></form>'+
  '<div class="rkbo-league-trade-records">'+(pending.length?pending.map(t=>{
  const receivable=t.recipient===mine,other=receivable?t.proposer:t.recipient;
@@ -313,7 +313,7 @@ function renderTradePanel(kind){
  '<button data-league-trade-resolve="decline" data-trade-id="'+esc(t.id)+'">거절</button>':
  '<button data-league-trade-resolve="cancel" data-trade-id="'+esc(t.id)+'">취소</button>')+
  '</div>';
- }).join(""):'현재 대기 중인 교환 제안이 없어.')+'</div></details>';
+ }).join(""):'현재 대기 중인 교환 제안이 없습니다.')+'</div></details>';
 }
 function renderStandings(){
  return '<table class="rkbo-league-table"><thead><tr><th>순위</th><th>구단</th>'+
@@ -408,18 +408,18 @@ async function click(button){
  if(d.leagueBack!==undefined){roomId=null;room=null;view="list";code="";serverClub=null;serverTurn=false;positionWheelKey="";await getPublic();return}
  if(d.leagueSelect){await loadRoom(d.leagueSelect);return}
  if(d.leagueStart!==undefined){
-  if(!root.confirm("빈 구단은 AI로 채우고 드래프트를 시작할까?"))return;
+  if(!root.confirm("빈 구단을 AI로 채우고 드래프트를 시작하시겠습니까?"))return;
   await act("start");await acquireRoom();return;
  }
  if(d.leaguePick){
   const card=(room.draft_candidates||[]).find(c=>c.cardId===d.leaguePick);
   if(!card)return;
-  if(!root.confirm(card.name+" 선수를 "+room.current_slot+"에 지명할까?"))return;
+  if(!root.confirm(card.name+" 선수를 "+room.current_slot+"에 지명하시겠습니까?"))return;
   await act("pick",{p_card:d.leaguePick});await acquireRoom();return;
  }
  if(d.leagueSimulate!==undefined){await doSim();return}
  if(d.leagueResume!==undefined){
-  if(!root.confirm("시즌 중반 트레이드를 마감하고 후반기로 진행할까?"))return;
+  if(!root.confirm("시즌 중반 트레이드를 마감하고 후반기로 진행하시겠습니까?"))return;
   const c=await login(),result=await c.rpc("rkbo_league_week",{p_room:roomId,p_action:"resume"});
   if(result.error)throw Error(result.error.message);
   await acquireRoom();await doSim();return;
@@ -435,19 +435,19 @@ async function click(button){
 async function submit(form){
  const values=new FormData(form);
  if(form.matches("[data-league-create]")){
-  const club=values.get("createClub");if(!club)throw Error("KBO 구단을 선택해 줘.");
+  const club=values.get("createClub");if(!club)throw Error("KBO 구단을 선택해 주시기 바랍니다.");
   const result=await act("create",{p_name:String(values.get("title")||"").trim(),
    p_club:club,p_visibility:values.get("visibility"),p_mode:values.get("mode"),
    p_season:Number(values.get("season")||60)});
   await loadRoom(result.roomId);code=result.inviteCode||"";render();return;
  }
  if(form.matches("[data-league-code]")){
-  const club=values.get("codeClub");if(!club)throw Error("참가할 구단을 골라 줘.");
+  const club=values.get("codeClub");if(!club)throw Error("참가할 구단을 선택해 주시기 바랍니다.");
   const result=await act("join_code",{p_code:String(values.get("invite")||"").trim(),p_club:club});
   await loadRoom(result.roomId);return;
  }
  if(form.matches("[data-league-join]")){
-  const club=values.get("joinClub");if(!club)throw Error("비어 있는 구단을 선택해 줘.");
+  const club=values.get("joinClub");if(!club)throw Error("비어 있는 구단을 선택해 주시기 바랍니다.");
   await act("join",{p_club:club});await acquireRoom();return;
  }
  if(form.matches("[data-league-trade-create]")){
