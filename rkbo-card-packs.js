@@ -114,7 +114,7 @@ function renderPack(){
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
  '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening||!draws.length&&remainingCooldownMs()>0?'disabled':'')+'>'+
  (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button>'+
- '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+ (CINEMATIC_TEST?'<div class="rkbo-cine-test-controls"><small>🧪 연출 테스트 · 카드 지급 없음 · 기존 확률·천장 유지</small>'+ '<button data-pack="preview" data-grade="코랄">🪸 코랄</button><button data-pack="preview" data-grade="다이아몬드">💎 다이아몬드</button>'+ '<button data-pack="preview" data-grade="특수">🏆 특수등급</button><button data-pack="preview-reset">다시 보기</button></div>':'')+
+ '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+ (CINEMATIC_TEST&&!draws.length?'<div class="rkbo-cine-test-controls"><small>🧪 연출 테스트 · 카드 지급 없음 · 기존 확률·천장 유지</small>'+ '<button data-pack="preview" data-grade="코랄">🪸 코랄</button><button data-pack="preview" data-grade="다이아몬드">💎 다이아몬드</button>'+ '<button data-pack="preview" data-grade="특수">🏆 특수등급</button><button data-pack="preview-reset">다시 보기</button></div>':'')+
  '';
  if(draws.length)showCurrentReveal();
  else updateCooldownUi();
