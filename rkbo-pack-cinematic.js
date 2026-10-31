@@ -33,9 +33,9 @@
   }
   return {kind:"none",alt:""};
  }
- function stadiumWorld(tier,phase,w,h){
+ function stadiumWorld(tier,phase,w,height){
   const board=phase>=2?'<div class="rkbo-cine-board-content"><strong>'+h(tier[0])+'</strong></div>':'';
-  return '<div class="rkbo-cine-world" style="--world-w:'+w+'px;--world-h:'+h+'px">'+
+  return '<div class="rkbo-cine-world" style="--world-w:'+w+'px;--world-h:'+height+'px">'+
     '<div class="rkbo-cine-photo" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-grass" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-grass-pulse" aria-hidden="true"></div>'+
