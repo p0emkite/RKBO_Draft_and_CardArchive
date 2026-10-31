@@ -88,7 +88,7 @@ function loginView(error){
  '<button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>TRT | Tsuki&#39;s RKBO Together</small><h2>🎫 RKBO CARD PACK</h2><p>5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RTM | RKBO THE MOMENT</small><h2>🎫 RTM CARD PACK</h2><p>5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
@@ -133,7 +133,7 @@ async function savePackSharePNG(btn){
   x.fillStyle=bg;x.fillRect(0,0,1600,1540);
   x.strokeStyle="#a7b4ce80";x.lineWidth=3;x.strokeRect(24,24,1552,1492);
   x.textAlign="center";x.fillStyle="#f4d391";x.font="900 26px system-ui,sans-serif";
-  x.fillText("RKBO ONLINE · CARD PACK RESULT",800,76);
+  x.fillText("RKBO THE MOMENT · CARD PACK RESULT",800,76);
   x.fillStyle="#fff5e2";x.font="900 60px system-ui,sans-serif";
   x.fillText("카드팩 개봉 결과",800,152);
   x.fillStyle="#adbed5";x.font="700 27px system-ui,sans-serif";
@@ -154,7 +154,7 @@ async function savePackSharePNG(btn){
    }
   }
   x.fillStyle="#9db4ce";x.font="800 26px system-ui,sans-serif";
-  x.fillText("RKBO ONLINE · MY CARD PACK",800,1460);
+  x.fillText("RKBO THE MOMENT · MY CARD PACK",800,1460);
   const png=await new Promise(done=>out.toBlob(done,"image/png"));
   if(!png)throw Error("PNG를 만들지 못했어요.");
   const url=URL.createObjectURL(png),a=document.createElement("a");
@@ -183,7 +183,7 @@ function showCurrentReveal(){
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
  const special=PRIORITIES[draw.grade]>=3;
  const card=renderPlayer(p),front=special?'<div class="rkbo-pack-flip">'+
-  '<div class="rkbo-pack-flip-inner"><div class="rkbo-pack-flip-back"><span>RKBO</span><strong>LEGENDARY CARD</strong><small>✨ CLICK TO REVEAL ✨</small></div>'+
+  '<div class="rkbo-pack-flip-inner"><div class="rkbo-pack-flip-back" aria-label="선수 카드 뒷면"><img src="./assets/card-back.webp?v=rtm-20261031" alt="" draggable="false"></div>'+
   '<div class="rkbo-pack-flip-front">'+card+'</div></div></div>':card;
  target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+

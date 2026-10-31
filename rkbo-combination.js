@@ -197,7 +197,7 @@ function cinematicScreen(title,content,subtitle){
  cinema.hidden=false;
  cinema.className="rkbo-combo-cinema";
  cinema.innerHTML='<div class="rkbo-combo-cinema-panel">'+
-  '<header><small>TRT | Tsuki&#39;s RKBO Together · CARD COMBINATION</small><h2>'+esc(title)+'</h2></header>'+
+  '<header><small>RTM | RKBO THE MOMENT · CARD COMBINATION</small><h2>'+esc(title)+'</h2></header>'+
   '<div class="rkbo-combo-cinema-scene">'+content+'</div>'+
   '<p class="rkbo-combo-cinema-caption">'+esc(subtitle||"")+'</p>'+
   '<button type="button" class="rkbo-combo-cinema-skip" data-combo-fx-skip>연출 건너뛰기</button>'+
@@ -328,7 +328,7 @@ function render(){
  const prevScroll=dialog.scrollTop;
  const listScroll=dialog.querySelector(".rkbo-combo-candidates")?.scrollTop||0;
  overlay?.classList.toggle('is-combining',busy);
-  dialog.innerHTML='<header class="rkbo-combo-header"><div><small>TRT | Tsuki&#39;s RKBO Together</small>'+
+  dialog.innerHTML='<header class="rkbo-combo-header"><div><small>RTM | RKBO THE MOMENT</small>'+
  '<h2>🧬 카드 조합</h2><p>중복 카드 3~5장 → 새로운 선수 카드 1장</p></div>'+
  '<button type="button" data-combo-close aria-label="닫기">×</button></header>'+
  '<div class="rkbo-combo-content"><div class="rkbo-combo-rules">'+
