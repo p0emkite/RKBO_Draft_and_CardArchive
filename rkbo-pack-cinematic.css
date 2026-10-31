@@ -187,3 +187,61 @@
 }
 
 @keyframes rkbo-cine-seam-fade{0%,18%{opacity:1}36%,100%{opacity:0}}
+
+/* v9 high-resolution scene. Intentionally does NOT alter approved gate/door assets. */
+.rkbo-cine-photo{
+ background-image:url("./assets/cinematic/stadium-qhd.svg")!important;
+ background-size:100% 100%;background-position:center center;
+ filter:contrast(1.025) saturate(1.07)
+}
+.rkbo-cine-grass{
+ inset:55% -3% -2%!important;opacity:0;mix-blend-mode:screen;
+ background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--cine-tone) 39%,transparent) 32%,color-mix(in srgb,var(--cine-tone) 75%,transparent) 100%),
+ radial-gradient(ellipse 88% 105% at 50% 100%,var(--cine-tone),transparent 92%);
+ -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 21%,#000 100%);
+ mask-image:linear-gradient(to bottom,transparent 0%,#000 21%,#000 100%);
+}
+.rkbo-cine-grass-pulse{
+ left:-5%;right:-5%;top:56%;bottom:-4%;height:auto;
+ background:radial-gradient(ellipse 105% 95% at 50% 105%,var(--cine-tone) 0%,transparent 92%);
+ mix-blend-mode:screen;filter:blur(7px);
+ -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 33%,#000 100%);
+ mask-image:linear-gradient(to bottom,transparent 0%,#000 33%,#000 100%);
+}
+.rkbo-cine-phase-board .rkbo-cine-grass{opacity:.69;transform:translateY(0) scale(1.04)}
+.rkbo-cine-phase-board .rkbo-cine-grass-pulse{opacity:.59}
+.rkbo-cine-phase-ball .rkbo-cine-grass{opacity:.62}
+.rkbo-cine-phase-ball .rkbo-cine-grass-pulse{opacity:.46}
+.rkbo-cine-led{
+ left:50%!important;top:32.25%!important;
+ width:17.7%!important;height:16.4%!important;
+ border:0;background:#02070b0d;box-shadow:none;
+}
+.rkbo-cine-board-content{position:absolute;inset:0;display:grid;place-items:center;}
+.rkbo-cine-board-content strong{display:block;align-self:center;justify-self:center;text-align:center;margin:0;padding:0 4px;font-size:clamp(16px,2.7vw,33px);line-height:1}
+.rkbo-cine-phase-run .rkbo-cine-grass{animation:rkbo-cine-grass-arrive-v9 1.45s ease-out both}
+.rkbo-cine-phase-run .rkbo-cine-grass-pulse{animation:rkbo-cine-grass-pulse-v9 1.45s ease-out both}
+@keyframes rkbo-cine-grass-arrive-v9{
+ 0%{opacity:0;transform:translateY(42%) scale(.75)}
+ 55%{opacity:.32}
+ 100%{opacity:.69;transform:translateY(0) scale(1.04)}
+}
+@keyframes rkbo-cine-grass-pulse-v9{
+ 0%{opacity:0;transform:translateY(40%) scale(.75)}
+ 55%{opacity:.28}
+ 100%{opacity:.59;transform:translateY(0) scale(1.07)}
+}
+@keyframes rkbo-cine-camera-board{
+ 0%{transform:translate(-50%,-49%) scale(1.19)}
+ 100%{transform:translate(-50%,-46%) scale(1.60)}
+}
+@keyframes rkbo-cine-ball-sharp{
+ 0%{filter:blur(2px);opacity:.1}
+ 23%{filter:blur(.3px);opacity:1}
+ 39%,62%{filter:blur(0);opacity:1}
+ 90%{filter:blur(.7px);opacity:1}
+ 100%{filter:blur(3px);opacity:0}
+}
+.rkbo-cine-ball-photo{image-rendering:auto;filter:drop-shadow(0 12px 23px #06101abb) drop-shadow(0 0 15px var(--cine-tone))}
+.rkbo-cine-ball-mark{image-rendering:auto;backface-visibility:hidden;filter:contrast(1.16) drop-shadow(1px 2px 1px #000a)}
+@media(max-width:540px){.rkbo-cine-board-content strong{font-size:clamp(14px,3.3vw,26px)}}
