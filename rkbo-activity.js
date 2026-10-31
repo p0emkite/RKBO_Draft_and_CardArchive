@@ -95,8 +95,8 @@ async function onHighlight(evt){
  if(seenIds.has("h"+row.id))return;
  seenIds.add("h"+row.id);
  if(seenIds.size>100)seenIds.clear();
+ // Top ticker keeps updating. Do not toast unrevealed pack pulls.
  await refreshFeed();
- toastMessage(brief(row),false);
 }
 async function onAlert(evt){
  const row=evt.new||{};
