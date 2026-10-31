@@ -830,6 +830,16 @@
       "rev": "mvwc4552",
       "commit": "c31a001b354af3737f5bfda2932c4933e543b85a",
       "blobSha": "dd5fa733d7032bd15a2ef840c535c4d205aadbc6"
+    },
+    "60-DOO-타-005": {
+      "path": "assets/cards/60-DOO-타-005.webp",
+      "x": 0.9230769230769231,
+      "y": 32.48175182481752,
+      "zoom": 1.4933767731249405,
+      "fit": "contain",
+      "rev": "mvwc4fs0",
+      "commit": "53ce0c29d891b935ba1dc332d7f02f2a26c564d4",
+      "blobSha": "51f11bb1591cea55af84735d908a57121d203865"
     }
   }
 }
