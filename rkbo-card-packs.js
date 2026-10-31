@@ -241,11 +241,18 @@ async function previewCinematic(grade){
  buttons.forEach(b=>b.disabled=true);
  try{
   if(!stage||!root.RKBOPackCinematic?.play)throw Error("시네마틱 연출을 불러오지 못했습니다.");
-  const roster=await playersFor(season);
+  // Fixed 60th-season cards for visual-only administrator testing.
+  const fixedCards={
+   "코랄":{id:"60-SAM-투-004",grade:"코랄",rawName:"Fukutomi , Tsuki"},
+   "다이아몬드":{id:"60-SAM-타-011",grade:"다이아몬드",rawName:"Yu , Ash"},
+   "특수":{id:"60-SAM-투-004-SPECIAL-DREAM",grade:"드림",rawName:"Fukutomi , Tsuki",specialKind:"DREAM"}
+  };
+  const spec=fixedCards[grade],roster=await playersFor(60);
   if(token!==revealToken||!canPreviewCinematic()||overlay.hidden)return;
-  const candidates=[...roster.values()].filter(p=>grade==="특수"?SPECIAL_RARITIES.includes(p.grade):p.grade===grade);
-  if(!candidates.length)throw Error(season+"차 시즌에 "+grade+" 등급 카드가 없습니다.");
-  const player=candidates[Math.floor(Math.random()*candidates.length)];
+  const player=roster.get(spec.id);
+  if(!player||player.team!=="SAM"||player.grade!==spec.grade||
+     player.rawName!==spec.rawName||(spec.specialKind&&player.specialKind!==spec.specialKind))
+   throw Error("60차 삼성 "+grade+" 고정 테스트 카드를 찾지 못했습니다: "+spec.id);
   message("🧪 "+grade+" 연출 테스트 · 실제 카드 지급 없음");
   const finished=await root.RKBOPackCinematic.play(stage,player.grade,
    ()=>token===revealToken&&!overlay.hidden&&canPreviewCinematic(),player);
