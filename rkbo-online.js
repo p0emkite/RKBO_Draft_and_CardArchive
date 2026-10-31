@@ -48,7 +48,7 @@ async function loadUser(){
  return authUser;
 }
 function buildHeader(){
- return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 RKBO ONLINE <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
+ return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 TRT | Tsuki's RKBO Together <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
 }
 function shell(inner){if(!panel)return;panel.innerHTML=buildHeader()+'<div class="rkbo-online-inner">'+inner+'</div>'}
 function notice(text){const el=q("#rkbo-online-message");if(el)el.textContent=text}
@@ -87,8 +87,8 @@ async function loadBoard(){
   records=data||[];selected=null;
   elem.innerHTML=records.length?'<div class="rkbo-online-table-head"><span>순위</span><span>플레이어 / 시즌</span><span>TPI</span><span>평균 OVR</span></div>'+
    records.map((r,i)=>'<button class="rkbo-online-entry" type="button" data-online-detail="'+esc(r.id)+'"><span class="rkbo-online-rank">'+(i+1)+'</span><span class="rkbo-online-player"><strong>'+esc(r.rkbo_profiles?.nickname||"익명 선수")+'</strong><small>'+(r.mode==="season"?r.season+"차":"올타임")+' · '+formatDate(r.created_at)+'</small></span><b>'+r.tpi+'</b><span>'+Number(r.average_ovr).toFixed(1)+'</span></button>').join("")+
-   '<div id="rkbo-online-detail"></div>':'<p class="rkbo-online-none">아직 등록된 팀이 없어! 18인 드래프트를 완성해서 첫 번째 기록을 남겨봐.</p>';
- }catch(err){if(elem.isConnected)elem.innerHTML='<p class="rkbo-online-none">랭킹을 불러오지 못했어. '+esc(err.message)+'</p>'}
+   '<div id="rkbo-online-detail"></div>':'<p class="rkbo-online-none">아직 등록된 팀이 없습니다. 18인 드래프트를 완성하여 첫 번째 기록을 남겨 주시기 바랍니다.</p>';
+ }catch(err){if(elem.isConnected)elem.innerHTML='<p class="rkbo-online-none">랭킹을 불러오지 못했습니다. '+esc(err.message)+'</p>'}
 }
 
 function onlineSlotTitle(r,slot){
@@ -151,7 +151,7 @@ function showDetails(id){
 
 async function accountView(){
  if(!isConfigured()){disabledView();return}
- shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 계정으로 로그인하고 다른 기기에서도 기록을 확인하세요.</small></div>'+
+ shell(headerTabs()+'<div class="rkbo-online-section-head"><h3>온라인 플레이어 계정</h3><small>Google 계정으로 로그인하고 다른 기기에서도 기록을 확인하시기 바랍니다.</small></div>'+
  '<div id="rkbo-online-account"><p class="rkbo-online-wait">로그인 상태 확인 중…</p></div>'+
  '<p class="rkbo-online-message" id="rkbo-online-message" role="status"></p>');
  try{await loadUser();drawAccount()}catch(e){notice(e.message)}
@@ -162,7 +162,7 @@ function drawAccount(){
   el.innerHTML='<div class="rkbo-online-login">'+
    '<button type="button" class="rkbo-online-social rkbo-online-social-google" data-online="google-signin"><span aria-hidden="true">G</span> Google 계정으로 로그인</button>'+
    '<p>별도의 RKBO 비밀번호 없이 Google 계정으로 연결할 수 있어요.</p>'+ 
-   '<p class="rkbo-online-guest-warning"><strong>로그인하지 않고 이용하면?</strong> 드래프트는 플레이할 수 있지만 기록은 현재 브라우저에만 남아 계정·온라인 랭킹·MY RKBO에 저장되지 않아요. 카드팩은 Google 로그인 전에는 개봉하거나 수집할 수 없어요.</p></div>';
+   '<p class="rkbo-online-guest-warning"><strong>로그인하지 않고 이용하면?</strong> 드래프트는 플레이할 수 있지만 기록은 현재 브라우저에만 남아 계정·온라인 랭킹·MY RKBO에 저장되지 않아요. 카드팩은 Google 로그인 전에는 개봉하거나 수집할 수 없습니다.</p></div>';
   return;
  }
  const nickname=profile?.nickname||"",defaultNickname="RKBO_"+authUser.id.slice(0,8);
@@ -217,7 +217,7 @@ function nicknameTyping(){
    hint.classList.toggle("taken",!ok);
   }catch(err){
    if(id!==nicknameCheckId)return;
-   hint.textContent="중복 확인에 실패했어요. 저장 시 다시 확인할게요.";
+   hint.textContent="중복 확인에 실패했습니다. 저장 시 다시 확인하겠습니다.";
   }
  },400);
 }
