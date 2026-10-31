@@ -9,8 +9,8 @@
  transform:translate(-50%,-50%) scale(1);transform-origin:50% 60%;will-change:transform
 }
 .rkbo-cine-photo{
- position:absolute;inset:0;background-image:url("./assets/cinematic/stadium.webp");
- background-position:center;background-size:100% 100%;filter:contrast(1.08) saturate(1.04)
+ position:absolute;inset:0;background-image:url("./assets/cinematic/atlas.webp");
+ background-position:center top;background-size:100% 200%;filter:contrast(1.08) saturate(1.04)
 }
 .rkbo-cine-grass{
  position:absolute;inset:53% -3% -6%;opacity:0;mix-blend-mode:screen;
@@ -45,14 +45,14 @@
 }
 .rkbo-cine-photo-door{
  position:absolute;top:-1%;height:102%;width:50.3%;z-index:10;opacity:1!important;
- background-image:url("./assets/cinematic/doors.webp");
- background-repeat:no-repeat;background-size:235% 100%;
+ background-image:url("./assets/cinematic/atlas.webp");
+ background-repeat:no-repeat;background-size:235% 200%;
  border:0;box-shadow:0 0 23px #020408b0;
  will-change:transform;
  animation:rkbo-cine-door-part 1.18s cubic-bezier(.3,.08,.2,1) forwards;
 }
-.rkbo-cine-photo-door.left{left:0;background-position:left center;--door-destination:-111%;--door-middle:-73%}
-.rkbo-cine-photo-door.right{right:0;background-position:right center;--door-destination:111%;--door-middle:73%}
+.rkbo-cine-photo-door.left{left:0;background-position:left bottom;--door-destination:-111%;--door-middle:-73%}
+.rkbo-cine-photo-door.right{right:0;background-position:right bottom;--door-destination:111%;--door-middle:73%}
 .rkbo-cine-door-seam{position:absolute;z-index:12;left:calc(50% - 1px);width:2px;top:0;bottom:0;background:#05060b}
 .rkbo-cine-phase-gate .rkbo-cine-world{transform:translate(-50%,-50%) scale(1)}
 .rkbo-cine-phase-run .rkbo-cine-world{animation:rkbo-cine-camera-run 1.45s cubic-bezier(.38,0,.29,1) both}
