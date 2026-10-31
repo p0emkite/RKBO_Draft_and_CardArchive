@@ -11,8 +11,8 @@
 .rkbo-cine-caption{position:absolute;z-index:20;bottom:17px;left:0;right:0;text-align:center;font-size:11px;font-weight:950;letter-spacing:.28em;color:#f7f7ff;text-shadow:0 2px 9px #000,0 0 15px var(--cine-tone)}
 .rkbo-cine-1 .rkbo-cine-stadium{filter:brightness(1.9) blur(4px);transform:scale(1.1)}
 .rkbo-cine-door{position:absolute;z-index:6;top:-1%;height:104%;width:50.2%;background:linear-gradient(110deg,#06070b,#232933 26%,#14191e 64%,#06080d);border:3px solid #10151d;box-shadow:inset 0 0 75px #000a,0 2px 65px #000;animation:rkbo-cine-door .96s cubic-bezier(.2,.65,.32,1) forwards}
-.rkbo-cine-left{left:0;transform-origin:left center;--door-to:-94%}
-.rkbo-cine-right{right:0;transform-origin:right center;--door-to:94%}
+.rkbo-cine-left{left:0;transform-origin:left center;--door-to:-94%;--door-mid:-78%}
+.rkbo-cine-right{right:0;transform-origin:right center;--door-to:94%;--door-mid:78%}
 .rkbo-cine-door i{position:absolute;top:48%;height:31%;width:9px;background:linear-gradient(90deg,#020406,#79858a,#0d1116);border-radius:10px;box-shadow:0 0 13px #0009}
 .rkbo-cine-left i{right:14%}.rkbo-cine-right i{left:14%}
 .rkbo-cine-door-glow{position:absolute;z-index:5;inset:-15% 25%;background:#fff;box-shadow:0 0 90px 75px #fff9,0 0 110px 100px var(--cine-tone);opacity:.85;animation:rkbo-cine-glow 1.2s ease-out both}
@@ -39,7 +39,7 @@
 .rkbo-cine-test-controls button{padding:9px 13px;color:#fff;border:1px solid #9ca5d0;border-radius:8px;background:#25314e;font-weight:800;font-size:12px}
 .rkbo-cine-test-controls small{width:100%;color:#bdd2e5;font-size:11px;text-align:center}
 .rkbo-cine-preview-label{position:relative;z-index:5;color:#ffe8aa;border-radius:8px;background:#141729;padding:8px;text-align:center;font-size:12px;font-weight:800}
-@keyframes rkbo-cine-door{0%{transform:translateX(0)}65%{transform:translateX(calc(var(--door-to) * .9))}100%{transform:translateX(var(--door-to))}}
+@keyframes rkbo-cine-door{0%{transform:translateX(0)}65%{transform:translateX(var(--door-mid))}100%{transform:translateX(var(--door-to))}}
 @keyframes rkbo-cine-glow{0%{opacity:.06}40%{opacity:.98}100%{opacity:.2}}
 @keyframes rkbo-cine-hands{0%,30%{transform:translateY(10%) scale(1.03)}65%{transform:translateY(0) scale(1)}100%{transform:translateY(9%) scale(.97);opacity:.15}}
 @keyframes rkbo-cine-run{0%{transform:scale(1.02)}100%{transform:scale(1.7) translateY(8%)}}
