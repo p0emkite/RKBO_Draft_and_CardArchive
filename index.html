@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark" />
-<title>RKBO 60차 시즌 | 선수 카드 도감</title>
+<title>TRT | Tsuki's RKBO Together</title>
 <style>
 :root{--bg:#080e1a;--panel:#111c2b;--panel2:#142237;--border:#26384b;--text:#eef3fa;--muted:#8ea2ba;--gold:#f7cd72;--blue:#80bff3}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 85% 25% at 50% 0%,#18314a 0%,transparent 85%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Pretendard","Malgun Gothic",sans-serif;letter-spacing:-.02em;line-height:1.55}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #91d2ff;outline-offset:2px}.site{max-width:1480px;margin:auto;padding:0 32px}.nav{display:flex;justify-content:space-between;align-items:center;height:84px;border-bottom:1px solid #ffffff16}.brand{display:flex;align-items:center;gap:13px;font-weight:900;font-size:25px;letter-spacing:.01em}.logo{background:linear-gradient(140deg,#e6c271,#b88e42);color:#081522;padding:4px 10px;transform:skew(-9deg);border-radius:4px;box-shadow:0 2px 15px #a77c342f}.brand-sub{font-size:11px;color:#95a6b9;font-weight:800;letter-spacing:.23em}.nav-right{display:flex;align-items:center;gap:16px;color:#9bb0c6;font-size:12px;font-weight:700}.vtag{border:1px solid #49617b;border-radius:22px;padding:6px 12px;color:#e0ebf4}
@@ -46,14 +46,14 @@
 .season-loading{font-size:11px;color:#b3d6de;min-height:1em}
 @media(max-width:680px){.archive-brand-logo{width:53px;height:53px}.hero{padding:24px 0 32px;min-height:auto}.season-select{width:165px}.hero-right{opacity:.2}}
 </style>
-<link rel="stylesheet" href="./enhancements.css?v=combo-roulette22-20261027b" />
+<link rel="stylesheet" href="./enhancements.css?v=trt-20261031" />
 <link rel="stylesheet" href="./rkbo-community.css?v=community-activity-20261027" />
 <link rel="stylesheet" href="./rkbo-peer-friendlies.css?v=peer-v1-20261027b" />
 <link rel="stylesheet" href="./rkbo-league.css?v=league-roulettefix-20261027" />
 </head>
 <body>
 <div class="site">
-<header class="nav"><a href="#" class="brand" aria-label="RKBO 카드 도감 첫 화면"><img class="archive-brand-logo" src="./assets/rkbo-archive-logo.webp" alt="RKBO 리그 로고"><span class="brand-sub">CARD ARCHIVE</span></a><div class="nav-right"></div></header>
+<header class="nav"><a href="#" class="brand" aria-label="TRT | Tsuki&#39;s RKBO Together 첫 화면"><img class="archive-brand-logo" src="./assets/rkbo-archive-logo.webp" alt="RKBO 리그 로고"><span class="brand-sub">TRT | Tsuki&#39;s RKBO Together</span></a><div class="nav-right"></div></header>
 <section class="hero"><div><div class="season-picker-row"><label for="season-select" class="season-select-label">시즌 선택</label><select id="season-select" class="season-select" aria-label="시즌 선택"><option value="60">60차 시즌</option></select><span id="season-loading" class="season-loading" aria-live="polite"></span></div><h1><span id="hero-season-number">60</span>차 시즌,<br><em>기록이 카드가 되다.</em></h1></div><div class="hero-right"><div class="giant60" id="hero-background-season">60</div><div class="hero-emblem" data-season="60"></div></div></section>
 <section class="stats-head" aria-label="시즌 개요"><div class="kpi"><div class="number" id="all-count">211</div><div class="label">시즌 선수 카드</div></div><div class="kpi"><div class="number" id="bat-count">105</div><div class="label">타자 카드</div></div><div class="kpi"><div class="number" id="pit-count">106</div><div class="label">투수 카드</div></div><div class="kpi"><div class="number" id="fav-count">0</div><div class="label">내 관심 카드 ★</div></div></section>
 <hr class="divider">
@@ -69,7 +69,7 @@
 <script src="./rkbo-season-engine.js"></script>
 <script src="./rkbo-role-rules.js?v=cp-20261025"></script>
 <script src="./team-branding.js?v=season43"></script>
-<script src="./enhancements.js?v=award-specific-photos-20261026-2"></script>
+<script src="./enhancements.js?v=trt-20261031"></script>
 <script src="./team-backgrounds.js?v=card-unify-20261024"></script>
 <script src="./rkbo-season-identity.js"></script>
 <script src="./rkbo-defense-scoring.js?v=season-upload-20261025"></script>
@@ -270,18 +270,19 @@ paintActiveSeason();loadSeasonManifest().catch(error=>{q('season-loading').textC
 </script>
 <script src="./rkbo-player-edit.js?v=special-variants-20261026"></script>
 <script src="./rkbo-online-config.js?v=online-google-nickname-20261026"></script>
-<script src="./rkbo-online.js?v=combo-v2-20261027"></script>
-<script src="./rkbo-my-teams.js?v=my-rkbo-20261026"></script>
-<script src="./rkbo-card-packs.js?v=community-share-20261027"></script>
-<script src="./rkbo-combination.js?v=combo-roulette22-20261027"></script>
-<script src="./rkbo-club.js?v=match21-pitching-mvp-20261026-2"></script>
-<script src="./rkbo-archive-collection.js?v=special-safe-collection-20261026"></script>
+<script src="./rkbo-online.js?v=trt-20261031"></script>
+<script src="./rkbo-admin-vault.js?v=trt-20261031"></script>
+<script src="./rkbo-my-teams.js?v=trt-20261031"></script>
+<script src="./rkbo-card-packs.js?v=trt-20261031"></script>
+<script src="./rkbo-combination.js?v=trt-20261031"></script>
+<script src="./rkbo-club.js?v=trt-20261031"></script>
+<script src="./rkbo-archive-collection.js?v=trt-20261031"></script>
 <script src="./rkbo-draft.js?v=season-select-20261027b"></script>
-<script src="./rkbo-community.js?v=community-activity-20261027"></script>
-<script src="./rkbo-chat-dock.js?v=community-activity-20261027"></script>
-<script src="./rkbo-activity.js?v=community-activity-20261027"></script>
-<script src="./rkbo-peer-friendlies.js?v=peer-v1-20261027"></script>
-<script src="./rkbo-league.js?v=league-roulettefix-20261027"></script>
+<script src="./rkbo-community.js?v=trt-20261031"></script>
+<script src="./rkbo-chat-dock.js?v=trt-20261031"></script>
+<script src="./rkbo-activity.js?v=trt-20261031"></script>
+<script src="./rkbo-peer-friendlies.js?v=trt-20261031"></script>
+<script src="./rkbo-league.js?v=trt-20261031"></script>
 </body>
 </html>
 

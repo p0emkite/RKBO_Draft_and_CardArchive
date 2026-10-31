@@ -70,7 +70,7 @@ function stats(p){
 }
 function renderHeader(){
  panel.innerHTML='<div class="rkbo-club-head"><div><small>RKBO · COLLECTED CARD CLUBHOUSE</small><h2>⚾ MY TEAM & MATCH</h2>'+
- '<p>보유 카드 선수단으로 CPU 친선 경기와 시즌별 구단 도장깨기에 도전해 봐!</p></div>'+
+ '<p>보유 카드 선수단으로 CPU 친선 경기와 시즌별 구단 도장깨기에 도전할 수 있습니다.</p></div>'+
  '<button type="button" data-club="close" aria-label="닫기">×</button></div>'+
  '<nav class="rkbo-club-tabs"><button data-club="screen-editor" class="'+(screen==="editor"?"active":"")+'">👕 선수단 편성</button>'+
  '<button data-club="screen-teams" class="'+(screen==="teams"?"active":"")+'">💾 저장한 팀</button>'+
@@ -107,10 +107,10 @@ function editor(){
  '<div class="rkbo-club-tools"><label>팀 이름 <input id="rkbo-club-name" maxlength="40" value="'+E(teamName)+'"></label>'+
  '<button data-club="auto">✨ 보유 카드 자동 편성</button><button data-club="reset">초기화</button>'+
  '<button data-club="save" class="primary" '+(remain?'disabled':'')+'>💾 '+(teamId?'팀 수정 저장':'새 팀 저장')+'</button></div>'+
- '<p class="rkbo-club-instructions">선수는 실제 획득한 카드만 선택할 수 있어. 각 포지션은 본래 수비 위치를 적용하고 DH에는 아무 타자나 배치할 수 있어. 카드 한 장은 한 자리에만 배치 가능!</p>'+
+ '<p class="rkbo-club-instructions">실제 획득한 카드만 선택할 수 있습니다. 각 포지션은 본래 수비 위치를 적용하며 DH에는 타자를 자유롭게 배치할 수 있습니다. 카드 한 장은 한 자리에만 배치할 수 있습니다.</p>'+
  '<h3>타자 9명</h3><div class="rkbo-club-slot-grid">'+SLOTS.slice(0,9).map(([id,label,role])=>rowHtml(id,label,role)).join("")+'</div>'+
  '<h3>선발 5명 · 중계 3명 · 마무리 1명</h3><div class="rkbo-club-slot-grid">'+SLOTS.slice(9).map(([id,label,role])=>rowHtml(id,label,role)).join("")+'</div>'+
- '<h3>✎ 라인업 세부 편집</h3><p class="rkbo-club-instructions">선수 이름 아래 주요 스탯 5개를 확인할 수 있어. PC에서는 드래그, 모바일에서는 두 선수를 차례로 눌러 교체해. 수비 포지션은 본래 카드 위치와 DH만 허용해.</p>'+
+ '<h3>✎ 라인업 세부 편집</h3><p class="rkbo-club-instructions">선수 이름 아래 주요 스탯 5개를 확인할 수 있습니다. PC에서는 드래그하고 모바일에서는 두 선수를 차례로 눌러 교체합니다. 수비 포지션은 본래 카드 위치와 DH만 허용됩니다.</p>'+
  '<div class="rkbo-club-order-grid">'+
  orderSection("타순 · 1~9번","batting",lineup.battingOrder,(s,i)=>(i+1)+"번")+
  orderSection("수비 포지션 · DH","defense",HITS.map(pos=>lineup.defense[pos]),(s,i)=>HITS[i])+
@@ -130,7 +130,7 @@ function swap(group,from,to){
   const a=HITS.find(p=>lineup.defense[p]===from),b=HITS.find(p=>lineup.defense[p]===to);
   if(!a||!b)return;
   const allowed=(slot,pos)=>pos==="DH"||owned.get(picks[slot])?.position===pos;
-  if(!allowed(from,b)||!allowed(to,a)){message("수비 위치는 본래 포지션과 DH 사이에서만 변경할 수 있어.");focusedSwap=null;editor();return}
+  if(!allowed(from,b)||!allowed(to,a)){message("수비 위치는 본래 포지션과 DH 사이에서만 변경할 수 있습니다.");focusedSwap=null;editor();return}
   [lineup.defense[a],lineup.defense[b]]=[lineup.defense[b],lineup.defense[a]];
  }else{
   const list=group==="batting"?lineup.battingOrder:group==="rotation"?lineup.rotation:group==="bullpen"?lineup.bullpen:null;
@@ -144,13 +144,13 @@ function saveTeam(){
  return context().then(async({c})=>{
   const name=String($("#rkbo-club-name")?.value||teamName).trim();
   if(name.length<2||name.length>40)throw Error("팀 이름은 2~40자로 입력해야 해.");
-  if(missingCount())throw Error("18개 포지션에 선수를 모두 배치해 줘.");
+  if(missingCount())throw Error("18개 포지션에 선수를 모두 배치해 주시기 바랍니다.");
   const slots=SLOTS.map(([slot])=>({slot,cardId:picks[slot]}));
   const {data,error}=await c.rpc("rkbo_save_owned_team",{p_name:name,p_slots:slots,p_lineup:lineup,p_id:teamId});
   if(error)throw Error("팀 저장 실패: "+error.message);
   teamId=data.id;teamName=name;
   await loadTeams();
-  editor();message("✓ MY TEAM 저장 완료! 경기 버튼을 누르면 9이닝 시뮬레이션이 시작돼.");
+  editor();message("✓ MY TEAM 저장이 완료되었습니다. 경기 버튼을 누르면 9이닝 시뮬레이션이 시작됩니다.");
   return data;
  });
 }
@@ -164,7 +164,7 @@ async function loadTeams(){
 function useTeam(t){picks=Object.fromEntries((t.slots||[]).map(p=>[p.slot,p.cardId]));lineup=JSON.parse(JSON.stringify(t.lineup||initialLineup()));teamId=t.id;teamName=t.name;screen="editor";show()}
 function listTeams(){
  const el=$("#rkbo-club-content");if(!el)return;
- el.innerHTML='<h3>💾 내 보유 카드 팀</h3><p class="rkbo-club-instructions">내 카드로 만든 로스터만 저장돼. 기존 랜덤 DRAFT 결과·랭킹과는 별개야.</p>'+
+ el.innerHTML='<h3>💾 내 보유 카드 팀</h3><p class="rkbo-club-instructions">보유 카드로 편성한 로스터만 저장됩니다. 기존 랜덤 DRAFT 결과·랭킹과는 별개입니다.</p>'+
  (teams.length?'<div class="rkbo-club-team-list">'+teams.map(t=>
  '<article class="rkbo-club-team"><div><h4>'+E(t.name)+'</h4><small>18명 · 평균 OVR '+Number(t.average_ovr).toFixed(1)+'</small></div>'+
  '<strong>TPI '+t.tpi+'</strong><div class="rkbo-club-team-actions">'+
@@ -172,13 +172,13 @@ function listTeams(){
  '<button data-club-team="play" data-id="'+E(t.id)+'">⚾ 친선</button>'+
  '<button data-club-team="ladder" data-id="'+E(t.id)+'">🏆 도장깨기</button>'+
  '<button data-club-team="delete" data-id="'+E(t.id)+'">삭제</button></div></article>').join("")+'</div>':
- '<p class="rkbo-club-instructions">저장된 팀이 아직 없어. 먼저 보유 카드로 18명을 편성해 줘!</p>')+
+ '<p class="rkbo-club-instructions">저장된 팀이 아직 없습니다. 먼저 보유 카드로 18명을 편성해 주시기 바랍니다.</p>')+
  '<button data-club="screen-editor">← 팀 편성으로 돌아가기</button>';
 }
 async function play(id){
  if(busy)return;
  busy=true;matchTeamId=id;screen="match";show();
- const el=$("#rkbo-club-content");el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 9이닝 경기 중…</h3><p>선수 능력치로 타격과 투구 결과를 계산하고 있어.</p></div>';
+ const el=$("#rkbo-club-content");el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 9이닝 경기 중…</h3><p>선수 능력치로 타격과 투구 결과를 계산하고 있습니다.</p></div>';
  try{
   const {c}=await context();
   const {data,error}=await c.rpc("rkbo_play_owned_match",{p_team_id:id});
@@ -193,7 +193,7 @@ function renderMatch(){
  if(!match){
   el.innerHTML='<h3>⚾ MATCH · CPU와 9이닝 경기</h3><p class="rkbo-club-instructions">완성한 내 팀을 선택하면 서버에서 타격·투수 능력치로 9이닝 경기를 시뮬레이션해.</p>'+
   (teams.length?teams.map(t=>'<button class="rkbo-club-play-row" data-club-team="play" data-id="'+E(t.id)+'">⚾ '+E(t.name)+' · TPI '+t.tpi+' → CPU 도전</button>').join(""):
-  '<p class="rkbo-club-instructions">먼저 18인 MY TEAM을 저장해 줘.</p>');
+  '<p class="rkbo-club-instructions">먼저 18인 MY TEAM을 저장해 주시기 바랍니다.</p>');
  }else{
   el.innerHTML='<section class="rkbo-club-match-score"><small>CPU EXHIBITION · 9 INNINGS</small><h3>'+resultBadge(match.result)+'</h3>'+
    '<div><strong>CPU '+match.cpuRuns+'</strong><span>:</span><strong>'+match.ourRuns+' '+E(match.teamName)+'</strong></div></section>'+
@@ -206,7 +206,7 @@ function renderMatch(){
  }
  el.innerHTML+='<h3>최근 경기</h3><div class="rkbo-club-match-history">'+matches.slice(0,8).map(m=>
  '<div><strong>'+E(m.team_name)+'</strong><span>CPU '+m.cpu_runs+' : '+m.our_runs+' MY TEAM</span><small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small></div>').join("")+'</div>'+
- '<p class="rkbo-club-instructions">현재 MATCH는 AI 대전이 아닌 CPU 확률 기반 전시 경기야. OVR과 능력치는 반영하지만 정교한 야구 엔진이나 보상 시스템은 아직 없어.</p>';
+ '<p class="rkbo-club-instructions">현재 MATCH는 AI 대전이 아닌 CPU 확률 기반 전시 경기입니다. OVR과 능력치는 반영하지만 정교한 야구 엔진이나 보상 시스템은 아직 없습니다.</p>';
 }
 
 function ladderSeasonOptions(){
@@ -236,7 +236,7 @@ function ladderStatsMarkup(obj){
    ['name','IP','pitches','H','BB','K','ER','rem']);
  };
  return '<div class="rkbo-ladder-both-stats">'+box("MY TEAM",our)+
-  (cpu?box("상대팀",cpu):'<p class="rkbo-club-instructions">예전 경기 기록에는 상대팀 선수별 기록이 없어.</p>')+'</div>';
+  (cpu?box("상대팀",cpu):'<p class="rkbo-club-instructions">이전 경기 기록에는 상대팀 선수별 기록이 없습니다.</p>')+'</div>';
 }
 function ladderMvpMarkup(g){
  const m=g.playerStats?.mvp;if(g.result!=="WIN"||!m?.cardId)return "";
@@ -271,7 +271,7 @@ function renderLadder(){
   '<img class="rkbo-ladder-teamlogo" src="'+E(ladderTeamLogo(t.code))+'" alt="'+E(ladderTeamName(t.code))+' 로고" loading="lazy">'+
   '<span>'+(won?'✓ 클리어':active?'⚔️ 도전 가능':'🔒 잠김')+'</span></article>';
  }).join("")+'</div>'+
- (complete?'<p class="rkbo-ladder-finish">🎉 이 시즌의 모든 구단을 제패했어! 다른 시즌도 도전해 봐.</p>':
+ (complete?'<p class="rkbo-ladder-finish">🎉 이 시즌의 모든 구단을 제패했습니다! 다른 시즌에도 도전해 주시기 바랍니다.</p>':
   '<div class="rkbo-ladder-challenge"><label>출전할 MY TEAM<select data-club-ladder-team>'+
   (teams.length?teams.map(t=>'<option value="'+E(t.id)+'"'+(t.id===ladderTeamId?' selected':'')+'>'+
    E(t.name)+' · TPI '+t.tpi+'</option>').join(""):'<option value="">저장한 팀이 없습니다</option>')+
@@ -284,7 +284,7 @@ function renderLadder(){
    '<h3>'+resultBadge(g.result)+'</h3>'+
    '<div><strong>'+E(g.opponentCode?ladderTeamName(g.opponentCode):g.opponentName)+' '+g.cpuRuns+'</strong><span>:</span>'+
    '<strong>'+g.ourRuns+' '+E(g.teamName)+'</strong></div>'+
-   '<p>'+ (g.result==="WIN"?'승리! 다음 구단이 해금됐어.':'다음 순위에 가려면 승리해야 해.')+'</p></section>'+
+   '<p>'+ (g.result==="WIN"?'승리했습니다! 다음 구단이 해금되었습니다.':'다음 순위에 진출하려면 승리해야 합니다.')+'</p></section>'+
    '<div class="rkbo-club-inning-scroll"><table class="rkbo-club-innings"><thead><tr><th>팀</th>'+
    g.innings.map(x=>'<th>'+x.inning+'</th>').join("")+'<th>R</th></tr></thead><tbody>'+
    '<tr><th>'+E(g.opponentCode?ladderTeamName(g.opponentCode):g.opponentName)+'</th>'+g.innings.map(x=>'<td>'+x.cpu+'</td>').join("")+'<td>'+g.cpuRuns+'</td></tr>'+
@@ -302,7 +302,7 @@ function renderLadder(){
     '<div><strong>'+E(m.opponent_rank)+'위 '+E(ladderTeamName(m.opponent_code))+'</strong>'+
     '<span>'+resultBadge(m.result)+' · '+m.our_runs+' : '+m.cpu_runs+'</span>'+
     '<small>'+new Date(m.created_at).toLocaleString("ko-KR")+'</small>'+    '<button type="button" class="rkbo-ladder-history-view" data-club-ladder-history="'+E(m.id)+'">경기 기록 보기</button></div>').join(""):
-    '<p class="rkbo-club-instructions">아직 이 시즌의 도전 기록이 없어.</p>')+'</div>';
+    '<p class="rkbo-club-instructions">아직 이 시즌의 도전 기록이 없습니다.</p>')+'</div>';
  }
 }
 async function loadLadder(){
@@ -328,7 +328,7 @@ async function playLadder(){
  if(busy||!ladderTeamId||!ladderData)return;
  busy=true;const id=ladderTeamId,s=ladderSeason;
  const el=$("#rkbo-club-content");if(!el)return;
- el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 시즌 도장깨기 경기 진행 중…</h3><p>서버에서 공식 카드 능력치로 9이닝을 계산하고 있어.</p></div>';
+ el.innerHTML='<div class="rkbo-club-loading"><h3>⚾ 시즌 도장깨기 경기 진행 중…</h3><p>서버에서 공식 카드 능력치로 9이닝을 계산하고 있습니다.</p></div>';
  try{
   const {c}=await context(),{data,error}=await c.functions.invoke("season-ladder",{body:{action:"play",season:s,teamId:id}});
   if(error)throw Error("경기 진행 실패: "+error.message);
@@ -400,7 +400,7 @@ function init(){
   if(ladderTeamSelect){ladderTeamId=ladderTeamSelect.value;renderLadder();return}
   const select=e.target.closest("[data-club-slot]");if(!select)return;
   const slot=select.dataset.clubSlot,val=select.value;
-  if(val&&Object.values(picks).some((id)=>id===val&&picks[slot]!==id)){message("한 카드로 두 포지션을 동시에 채울 수 없어.");editor();return}
+  if(val&&Object.values(picks).some((id)=>id===val&&picks[slot]!==id)){message("한 카드로 두 포지션을 동시에 채울 수 없습니다.");editor();return}
   if(val)picks[slot]=val;else delete picks[slot];
   editor();
  });
@@ -421,7 +421,7 @@ function init(){
    if(t.dataset.clubTeam==="play")await play(item.id);
    if(t.dataset.clubTeam==="ladder"){ladderTeamId=item.id;await openLadder()}
    if(t.dataset.clubTeam==="delete"){
-    if(!confirm('"'+item.name+'" MY TEAM을 삭제할까? 경기 기록은 같이 삭제돼.'))return;
+    if(!confirm('"'+item.name+'" MY TEAM을 삭제하시겠습니까? 경기 기록도 함께 삭제됩니다.'))return;
     const {c}=await context(),{data,error}=await c.rpc("rkbo_delete_owned_team",{p_id:item.id});
     if(error||!data){message("삭제 실패: "+(error?.message||"본인 팀만 삭제 가능"));return}
     if(teamId===item.id)reset();await loadTeams();listTeams();
@@ -438,10 +438,10 @@ function init(){
   if(action==="screen-ladder"){await loadTeams();await openLadder();return}
   if(action==="ladder-play"){await playLadder();return}
   if(action==="reset"){reset();editor();return}
-  if(action==="auto"){auto();editor();message(missingCount()?"보유 카드만으로 완성되지 않은 포지션이 있어. 카드팩에서 선수를 더 모아줘.":"가장 OVR이 높은 보유 카드를 자동 배치했어.");return}
+  if(action==="auto"){auto();editor();message(missingCount()?"보유 카드만으로 완성되지 않은 포지션이 있습니다. 카드팩에서 선수를 더 획득해 주시기 바랍니다.":"OVR이 가장 높은 보유 카드를 자동 배치했습니다.");return}
   if(action==="save"){if(busy)return;busy=true;try{await saveTeam()}catch(e){message(e.message)}finally{busy=false}return}
-  if(action==="play"){if(!teamId){message("먼저 팀을 저장해야 경기를 시작할 수 있어.");return}await play(teamId);return}
-  if(action==="rematch"){if(matchTeamId)await play(matchTeamId);else message("저장한 팀을 다시 선택해 줘.");return}
+  if(action==="play"){if(!teamId){message("경기를 시작하려면 먼저 팀을 저장해야 합니다.");return}await play(teamId);return}
+  if(action==="rematch"){if(matchTeamId)await play(matchTeamId);else message("저장한 팀을 다시 선택해 주시기 바랍니다.");return}
  });
  panel.addEventListener("dragstart",e=>{
   const item=e.target.closest("[data-club-group]");if(!item)return;

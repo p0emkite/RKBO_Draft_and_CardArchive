@@ -49,13 +49,13 @@ function inventoryMarkup(id,modal=false){
  const inv=inventory.get(id),collected=owned.has(id),count=Math.max(0,Number(inv?.quantity)||0);
  if(!collected){
   return '<div class="rkbo-archive-owned-line is-missing">🔒 미수집 카드</div>'+
-   (modal?'<p class="rkbo-archive-owned-description">카드팩에서 획득하면 여기에 보유 수량과 강화 기능이 표시돼.</p>':'');
+   (modal?'<p class="rkbo-archive-owned-description">카드팩에서 획득하면 여기에 보유 수량과 강화 기능이 표시됩니다.</p>':'');
  }
  return '<div class="rkbo-archive-owned-line"><strong>보유 ×'+count+'</strong>'+
    (inv?.gold_border?'<span class="rkbo-archive-earned is-gold">✨ 금테</span>':'')+
    (inv?.prism?'<span class="rkbo-archive-earned is-prism">🌈 프리즘</span>':'')+
    '</div><div class="rkbo-archive-upgrade-actions">'+upgradeButtons(id,inv)+'</div>'+
-   (modal?'<p class="rkbo-archive-owned-description">금테는 동일 카드 5장, 프리즘은 10장을 소모하며 한 번 적용하면 영구 유지돼.</p>':'');
+   (modal?'<p class="rkbo-archive-owned-description">금테는 동일 카드 5장, 프리즘은 10장을 소모하며 한 번 적용하면 영구 유지됩니다.</p>':'');
 }
 function galleryState(card){
  const id=card.dataset.id;
@@ -138,7 +138,7 @@ async function applyUpgrade(id,kind){
  if(already)throw Error("이미 적용된 강화야.");
  if(count<cost)throw Error("강화에 필요한 카드가 부족해.");
  const label=kind==="gold"?"금색 추가 테두리":"프리즘 표면 효과";
- if(!confirm("동일 카드 "+cost+"장을 소모해 "+label+"를 영구 적용할까? 사용한 카드는 복구할 수 없어."))return;
+ if(!confirm("동일 카드 "+cost+"장을 소모해 "+label+"를 영구 적용하시겠습니까? 사용한 카드는 복구할 수 없습니다."))return;
  upgrading.add(id);paintCardStates();
  try{
   const c=client||(client=await root.RKBOOnline.getClient());
@@ -159,10 +159,10 @@ function markup(){
   container.innerHTML='<p class="rkbo-archive-collection-hint">개인 수집 현황 확인 중…</p>';return;
  }
  if(status==="error"){
-  container.innerHTML='<p class="rkbo-archive-collection-hint">개인 수집 현황을 불러오지 못했어. <button type="button" data-collection-refresh>다시 시도</button></p>';return;
+  container.innerHTML='<p class="rkbo-archive-collection-hint">개인 수집 현황을 불러오지 못했습니다. <button type="button" data-collection-refresh>다시 시도</button></p>';return;
  }
  if(!userId){
-  container.innerHTML='<p class="rkbo-archive-collection-hint">🌐 전체 선수 도감은 누구나 볼 수 있어. 로그인하면 내 카드 수집률과 미수집 표시가 나타나!</p>';return;
+  container.innerHTML='<p class="rkbo-archive-collection-hint">🌐 전체 선수 도감은 누구나 볼 수 있습니다. 로그인하면 카드 수집률과 미수집 표시가 나타납니다.</p>';return;
  }
  const {collected,total,groups}=getProgress();
  const bars=groups.map(t=>{
@@ -173,7 +173,7 @@ function markup(){
  }).join("");
  container.innerHTML='<div class="rkbo-archive-summary-head"><div><small>MY CARD COLLECTION · '+selected+'차 시즌</small>'+
   '<h3>📚 '+selected+'차 전체 수집률 <strong>'+percent(collected,total)+'%</strong></h3>'+
-  '<p>'+collected+' / '+total+'종 보유 · 아직 획득하지 않은 카드에는 검은색 50% 오버레이가 표시돼.</p></div>'+
+  '<p>'+collected+' / '+total+'종 보유 · 아직 획득하지 않은 카드에는 검은색 50% 오버레이가 표시됩니다.</p></div>'+
   '<button type="button" data-collection-refresh>↻ 동기화</button></div>'+
   '<div class="rkbo-archive-progress-track rkbo-archive-total-track"><div style="width:'+percent(collected,total)+'%"></div></div>'+
   '<div class="rkbo-archive-progress-label">구단별 수집률 · '+selected+'차</div>'+

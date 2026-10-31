@@ -7,9 +7,9 @@ const find=s=>panel?.querySelector(s);
 const date=v=>{try{return new Date(v).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}catch{return ""}};
 async function context(){
  const c=await root.RKBOOnline?.getClient?.();
- if(!c)throw Error("로그인 후 이용해 줘.");
+ if(!c)throw Error("로그인 후 이용해 주시기 바랍니다.");
  const {data,error}=await c.auth.getUser();
- if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 친선경기를 이용할 수 있어.");
+ if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 친선경기를 이용할 수 있습니다.");
  client=c;user=data.user.id;return c;
 }
 async function rpc(action,extra){
@@ -49,7 +49,7 @@ function entry(m){
  '<div class="rkbo-pvp-actions"><button data-pvp-action="accept" data-id="'+esc(m.id)+'"'+
  (teams.length?'':' disabled')+'>⚾ 수락하고 경기 시작</button>'+
  '<button data-pvp-action="decline" data-id="'+esc(m.id)+'">거절</button></div>':
- '<div class="rkbo-pvp-actions"><p>상대가 수락하면 9이닝 경기가 진행돼.</p>'+
+ '<div class="rkbo-pvp-actions"><p>상대방이 수락하면 9이닝 경기가 진행됩니다.</p>'+
  '<button data-pvp-action="cancel" data-id="'+esc(m.id)+'">도전 취소</button></div>')+
  '</article>';
 }
@@ -57,7 +57,7 @@ function render(){
  if(!panel)return;
  const others=members.filter(p=>p.user_id!==user);
  panel.innerHTML='<header class="rkbo-pvp-header"><div><small>RKBO ONLINE · COMMUNITY MATCH</small>'+
- '<h2>⚾ 회원 간 친선경기</h2><p>카페 회원의 MY TEAM에 도전해 봐!</p></div>'+
+ '<h2>⚾ 회원 간 친선경기</h2><p>카페 회원의 MY TEAM에 도전할 수 있습니다.</p></div>'+
  '<button type="button" data-pvp-close aria-label="닫기">×</button></header>'+
  '<p class="rkbo-pvp-notice" data-pvp-notice>'+esc(notice)+'</p>'+
  '<div class="rkbo-pvp-body"><section class="rkbo-pvp-start"><h3>도전장 보내기</h3>'+
@@ -68,9 +68,9 @@ function render(){
  '<div class="rkbo-pvp-actions"><button data-pvp-create'+(!others.length||!teams.length?' disabled':'')+'>⚾ 친선경기 신청</button>'+
  '<button data-pvp-myteam>MY TEAM 편성</button>'+
  '<button data-pvp-refresh>새로고침</button></div>'+
- (!teams.length?'<p>먼저 MY TEAM에서 선수 18명으로 팀을 저장해 줘.</p>':'')+
+ (!teams.length?'<p>먼저 MY TEAM에서 선수 18명으로 팀을 저장해 주시기 바랍니다.</p>':'')+
  '</section><section class="rkbo-pvp-list"><h3>도전장 · 경기 기록</h3>'+
- (matches.length?matches.map(entry).join(""):'<p class="rkbo-pvp-muted">아직 친선경기 기록이 없어.</p>')+
+ (matches.length?matches.map(entry).join(""):'<p class="rkbo-pvp-muted">아직 친선경기 기록이 없습니다.</p>')+
  '</section></div>';
 }
 function badge(){
@@ -119,21 +119,21 @@ async function click(buttonEl){
  if(d.pvpRefresh!==undefined){await refresh();return}
  if(d.pvpCreate!==undefined){
   const target=find("#rkbo-pvp-opponent")?.value,team=find("#rkbo-pvp-team")?.value;
-  if(!target||!team)throw Error("도전 상대와 내 MY TEAM을 선택해 줘.");
+  if(!target||!team)throw Error("도전 상대와 MY TEAM을 선택해 주시기 바랍니다.");
   if(!root.confirm("이 회원에게 친선경기 도전장을 보낼까?"))return;
-  const request=root.crypto?.randomUUID?.();if(!request)throw Error("요청 ID 생성에 실패했어.");
+  const request=root.crypto?.randomUUID?.();if(!request)throw Error("요청 ID 생성에 실패했습니다.");
   await rpc("create",{p_target:target,p_team:team,p_request:request});
-  await refresh();say("⚾ 도전장을 보냈어! 상대가 수락하면 경기 결과를 확인할 수 있어.");return;
+  await refresh();say("⚾ 도전장을 보냈습니다! 상대방이 수락하면 경기 결과를 확인할 수 있습니다.");return;
  }
  if(d.pvpAction){
   let team=null;
   if(d.pvpAction==="accept"){
    team=find('select[data-pvp-accept-team="'+d.id+'"]')?.value;
-   if(!team)throw Error("수락할 내 MY TEAM을 선택해 줘.");
-   if(!root.confirm("도전을 수락하고 9이닝 경기를 진행할까?"))return;
+   if(!team)throw Error("도전을 수락할 MY TEAM을 선택해 주시기 바랍니다.");
+   if(!root.confirm("도전을 수락하고 9이닝 경기를 진행하시겠습니까?"))return;
   }
   await rpc(d.pvpAction,{p_team:team,p_match:d.id});
-  await refresh();say(d.pvpAction==="accept"?"⚾ 친선경기 결과가 나왔어!":"도전장 상태가 변경됐어.");return;
+  await refresh();say(d.pvpAction==="accept"?"⚾ 친선경기 결과가 나왔습니다!":"도전장 상태가 변경되었습니다.");return;
  }
 }
 function init(){

@@ -1,3 +1,5 @@
+-- HISTORICAL ONLY (2026-10-27). DO NOT REAPPLY to production.
+-- Current server implementation: supabase/pack-odds-20261031-trt-premium-pity.sql
 -- RKBO regular pack drop probabilities (applies to every active season):
 -- Bronze 46.5%, Silver 31.5%, Gold 15%, Coral 5%, Diamond 1%, Specials 1%.
 -- Existing 50-pack diamond guarantee, 5-card independent draws and special uniform pool remain.

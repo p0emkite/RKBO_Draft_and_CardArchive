@@ -50,9 +50,9 @@ const packArt=()=>packFor(season)?.image_url||defaultPackArt;
 const $=selector=>dialog?.querySelector(selector);
 const client=()=>root.RKBOOnline?.getClient?.();
 async function context(){
- if(!root.RKBOOnline?.getClient)throw Error("RKBO ONLINE 연결이 필요해요.");
+ if(!root.RKBOOnline?.getClient)throw Error("RKBO ONLINE 연결이 필요합니다.");
  const c=await client(),{data,error}=await c.auth.getUser();
- if(error||!data?.user)throw Error("Google 계정으로 로그인하면 카드팩과 내 수집 도감을 이용할 수 있어요.");
+ if(error||!data?.user)throw Error("Google 계정으로 로그인하면 카드팩과 수집 도감을 이용할 수 있습니다.");
  return {c,user:data.user};
 }
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -83,12 +83,12 @@ function renderPlayer(p){
  catch(e){console.warn("[RKBO packs] render",e);return '<div class="rkbo-pack-card-missing">'+esc(p.name)+'</div>'}
 }
 function loginView(error){
- return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요해요</h3><p>'+esc(error||"Google 로그인 후 카드팩을 이용할 수 있어요.")+'</p>'+ 
- '<p class="rkbo-pack-guest-warning">로그인하지 않으면 카드팩을 개봉할 수 없으며, 카드 획득·수집 기록도 저장되지 않아요.</p>'+ 
+ return '<div class="rkbo-pack-login"><div class="rkbo-pack-lock-icon">🔐</div><h3>이 브라우저에서 Google 로그인이 필요합니다</h3><p>'+esc(error||"Google 로그인 후 카드팩을 이용할 수 있습니다.")+'</p>'+ 
+ '<p class="rkbo-pack-guest-warning">로그인하지 않으면 카드팩을 개봉할 수 없으며, 카드 획득·수집 기록도 저장되지 않습니다.</p>'+ 
  '<button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>RKBO · CARD COLLECTION</small><h2>🎫 RKBO CARD PACK</h2><p>제작자가 공개한 시즌 카드팩 · 5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>TRT | Tsuki&#39;s RKBO Together</small><h2>🎫 RKBO CARD PACK</h2><p>5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
@@ -101,10 +101,10 @@ function renderPack(){
   return;
  }
  body.innerHTML='<section class="rkbo-pack-summary" id="rkbo-pack-summary"><div><small>총 개봉 팩</small><strong>'+(packsState?.total_packs||0)+'</strong></div>'+
- '<div><small>연속 다이아 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
+ '<div><small>연속 다이아·특수 미획득</small><strong>'+(packsState?.no_diamond_streak||0)+'/49</strong></div>'+
  '<div><small>보유 종류</small><strong>'+owned.size+'종</strong></div></section>'+
- '<div class="rkbo-pack-odds"><b>'+esc(packFor(season)?.label||season+'차 카드팩')+'</b><span>브론즈 46.5% · 실버 31.5% · 골드 15% · 코랄 5% · 다이아몬드 1% · 특수등급 1%</span>'+
- '<small>정규 시즌팩 기본 비율 · 5장 독립 추첨 · 특수등급 내 등록 카드 균등 무작위 · 50팩 다이아 천장 유지. 특수카드가 없는 시즌은 해당 1%를 일반 등급에 비례 재분배.</small></div>'+
+ '<div class="rkbo-pack-odds"><b>'+esc(packFor(season)?.label||season+'차 카드팩')+'</b><span>브론즈 50% · 실버 32% · 골드 16% · 코랄 1% · 다이아몬드 0.5% · 특수등급 0.5%</span>'+
+ '</div>'+
  '<div class="rkbo-pack-season-toggle"><label for="rkbo-pack-season">카드팩 선택</label><select id="rkbo-pack-season" data-pack-season>'+
  packChoices.filter(p=>p.active).map(p=>'<option value="'+p.season+'"'+(p.season===season?' selected':'')+'>'+esc(p.label)+'</option>').join("")+'</select></div>'+ 
  '<div class="rkbo-pack-stage" id="rkbo-pack-stage" '+(draws.length?'data-pack="next" title="터치해서 다음 카드 공개"':'')+'><div class="rkbo-pack-aura"></div>'+
@@ -114,7 +114,7 @@ function renderPack(){
  '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening||!draws.length&&remainingCooldownMs()>0?'disabled':'')+'>'+
  (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button>'+
  '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+
- '<div class="rkbo-pack-footnote">🔐 Google 로그인 필요 · 개봉 카드와 기록은 로그인한 계정에 저장 · 서버 추첨 · 5초 개봉 간격 · 유료 구매 없음</div>';
+ '';
  if(draws.length)showCurrentReveal();
  else updateCooldownUi();
 }
@@ -161,7 +161,7 @@ async function savePackSharePNG(btn){
   a.href=url;a.download="RKBO_"+(packResult.season||season)+"차_"+packResult.packNumber+"팩.png";
   document.body.append(a);a.click();a.remove();
   root.setTimeout(()=>URL.revokeObjectURL(url),12000);
-  message("📸 결과 이미지 저장 완료!");
+  message("📸 결과 이미지 저장이 완료되었습니다!");
  }catch(e){message("이미지 저장 실패: "+e.message);console.warn("[RKBO share]",e)}
  finally{btn.disabled=false;btn.textContent=old}
 }
@@ -170,7 +170,7 @@ function renderResult(){
  const body=$("#rkbo-pack-body");if(!body||!packResult)return;
  const vals=packResult.draws||[];
  body.innerHTML='<div class="rkbo-pack-results"><h3>🎉 '+packResult.packNumber+'번째 카드팩 개봉 완료!</h3>'+
- '<p>'+(packResult.hitDiamond?'💎 다이아몬드 획득!':vals.some(v=>SPECIAL_RARITIES.includes(v.grade))?'🏆 특수카드 획득!':'다음 팩에는 더 좋은 카드가 나올지도!')+'</p>'+
+ '<p>'+(packResult.hitDiamond?'💎 다이아몬드 카드를 획득했습니다!':vals.some(v=>SPECIAL_RARITIES.includes(v.grade))?'🏆 특수등급 카드를 획득했습니다!':'다음 팩에는 더 좋은 카드가 나올 수 있습니다.')+'</p>'+
  '<div class="rkbo-pack-result-grid">'+vals.map((v,i)=>'<button type="button" class="rkbo-pack-result-tile rarity-'+esc(v.grade)+'" data-pack-detail="'+esc(v.cardId)+'" title="선수 상세정보 보기"><span>'+esc(displayGrade(v.grade))+'</span>'+
  '<strong>'+esc(cache.get(Number(v.cardId.split("-")[0]))?.get(v.cardId)?.name||v.name)+'</strong>'+
  '<small>OVR '+v.ovr+' · '+(v.isNew?"NEW!":"중복 ×"+v.quantity)+'</small><em class="rkbo-pack-detail-hint">선수 카드 자세히 보기</em></button>').join("")+'</div>'+
@@ -179,7 +179,7 @@ function renderResult(){
 function showCurrentReveal(){
  const target=$("#rkbo-pack-reveal");if(!target)return;
  const draw=draws[cursor-1];
- if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉 완료! 결과를 확인해줘.</div>';return}
+ if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉이 완료되었습니다. 결과를 확인해 주시기 바랍니다.</div>';return}
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
  const special=PRIORITIES[draw.grade]>=3;
  const card=renderPlayer(p),front=special?'<div class="rkbo-pack-flip">'+
@@ -240,7 +240,7 @@ async function openPack(){
   beginCooldown();
   // Treat the committed draw as successful even if rendering or inventory refresh fails.
   packResult=data;draws=data.draws;cursor=0;
-  message("카드팩 개봉 성공! 카드를 차례로 공개합니다.");
+  message("카드팩 개봉에 성공했습니다. 카드를 차례로 공개합니다.");
   try{await Promise.all([playersFor(requestedSeason),refreshStats()])}
   catch(e){console.warn("[RKBO packs] post-open display refresh",e)}
   try{root.dispatchEvent(new CustomEvent("rkbo-pack-opened",{detail:{season:data.season,draws:data.draws}}))}
@@ -249,12 +249,12 @@ async function openPack(){
   await showNext();
  }catch(e){
   opening=false;
-  if(draws.length){message("✅ 카드 5장 개봉이 완료됐어요. 결과를 확인해 주세요.");renderPack();return}
+  if(draws.length){message("✅ 카드 5장 개봉이 완료되었습니다. 결과를 확인해 주세요.");renderPack();return}
   if(/5초 간격|다음 카드팩은 잠시 후/.test(String(e.message))){
    try{await refreshStats()}catch(refreshError){console.warn("[RKBO packs] cooldown refresh",refreshError)}
    if(remainingCooldownMs()<=0)beginCooldown(PACK_COOLDOWN_MS);
    renderPack();
-   message("⏳ 아직 개봉 간격이 남아 있어요. 카운트다운이 끝나면 다시 개봉할 수 있어요.");
+   message("⏳ 아직 개봉 간격이 남아 있습니다. 카운트다운이 끝나면 다시 개봉할 수 있습니다.");
    return;
   }
   // A timed-out response can still represent a committed draw. Recover the
@@ -273,14 +273,14 @@ async function openPack(){
      draws=record.draws;cursor=0;beginCooldown();
      try{await Promise.all([playersFor(record.season),refreshStats()])}
      catch(refreshError){console.warn("[RKBO packs] recovery refresh",refreshError)}
-     message("✅ 서버에서 이미 개봉된 카드 5장을 복구했어요. 추가 개봉은 하지 않았습니다.");
+     message("✅ 서버에서 이미 개봉된 카드 5장을 복구했습니다. 추가 개봉은 하지 않았습니다.");
      renderPack();await showNext();return;
     }
    }
   }catch(recoveryError){console.warn("[RKBO packs] ambiguous RPC recovery",recoveryError)}
-  message("카드팩 개봉을 확인하지 못했어요: "+e.message+" · 개봉 기록도 함께 확인해 주세요.");
+  message("카드팩 개봉을 확인하지 못했습니다: "+e.message+" · 개봉 기록도 함께 확인해 주세요.");
   if(!draws.length){
-   if(/로그인|JWT|Auth session missing|session.*missing/i.test(e.message))$("#rkbo-pack-body").innerHTML=loginView("휴대폰과 PC는 Google 로그인을 각각 해야 해요. 계정은 동일하게 연결됩니다.");
+   if(/로그인|JWT|Auth session missing|session.*missing/i.test(e.message))$("#rkbo-pack-body").innerHTML=loginView("휴대폰과 PC는 Google 로그인을 각각 진행해야 합니다. 계정은 동일하게 연결됩니다.");
    else renderPack();
   }
  }
@@ -343,7 +343,7 @@ function renderCollection(){
  const ownedTotal=catalog.filter(c=>owned.has(c.card_id)).length,all=catalog.length;
  body.innerHTML='<section class="rkbo-pack-collect-head"><h3>📚 '+season+'차 나의 카드 수집 도감</h3>'+
  '<strong>'+ownedTotal+' / '+all+'종 · '+(all?Math.round(ownedTotal/all*100):0)+'%</strong>'+
- '<p>미보유 카드는 잠금 표시돼요. 기존 전체 선수 도감은 누구나 볼 수 있어요.</p></section>'+
+ '<p>미보유 카드는 잠금 표시됩니다. 기존 전체 선수 도감은 누구나 볼 수 있습니다.</p></section>'+
  '<div class="rkbo-pack-collect-controls">'+
  '<select data-pack-season aria-label="카드팩 시즌">'+packChoices.filter(p=>p.active).map(p=>'<option value="'+p.season+'"'+(p.season===season?' selected':'')+'>'+esc(p.label)+'</option>').join("")+'</select>'+
  '<select data-pack-filter aria-label="보유 여부"><option value="all" '+(collectionFilter==="all"?"selected":"")+'>전체 카드</option>'+
@@ -362,7 +362,7 @@ function renderCollection(){
  '</div>';
  }).join("")+'</div>'+
  (filtered.length>collectionLimit?'<button type="button" data-pack="more" class="rkbo-pack-more">더 보기 ('+collectionLimit+' / '+filtered.length+')</button>':'')+
- (!filtered.length?'<p class="rkbo-pack-loading">조건에 해당하는 카드가 없어요.</p>':'');
+ (!filtered.length?'<p class="rkbo-pack-loading">조건에 해당하는 카드가 없습니다.</p>':'');
 }
 async function loadHistory(){
  const body=$("#rkbo-pack-body");if(!body)return;
@@ -375,7 +375,7 @@ async function loadHistory(){
   body.innerHTML=history.length?'<div class="rkbo-pack-history">'+history.map(h=>
    '<section class="rkbo-pack-history-entry"><h3>📦 '+h.pack_number+'번째 개봉 · '+h.season+'차 <small>'+new Date(h.opened_at).toLocaleString("ko-KR")+'</small></h3>'+
     '<div>'+h.draws.map(v=>'<span class="rarity-'+esc(v.grade)+'">'+esc(cache.get(h.season)?.get(v.cardId)?.name||v.name||v.cardId)+' · '+esc(displayGrade(v.grade))+'</span>').join("")+'</div></section>'
-  ).join("")+'</div>':'<p class="rkbo-pack-loading">아직 개봉한 카드팩이 없어!</p>';
+  ).join("")+'</div>':'<p class="rkbo-pack-loading">아직 개봉한 카드팩이 없습니다.</p>';
  }catch(e){body.innerHTML=loginView(e.message)}
 }
 function renderAdmin(){
@@ -428,7 +428,7 @@ async function saveAdmin(remove=false){
   if(error)throw Error("팩 등록 실패: "+error.message);
   await loadPackChoices();
   if(tab==="admin")renderAdmin();
-  message(remove?"팩이 비활성화됐어. 기존 개봉 기록과 수집 카드는 유지돼.":"✓ "+seasonNo+"차 카드팩 설정이 저장됐어!");
+  message(remove?"카드팩이 비활성화되었습니다. 기존 개봉 기록과 수집 카드는 유지됩니다.":"✓ "+seasonNo+"차 카드팩 설정이 저장되었습니다!");
  }finally{adminBusy=false;controls.forEach(b=>b.disabled=false)}
 }
 
