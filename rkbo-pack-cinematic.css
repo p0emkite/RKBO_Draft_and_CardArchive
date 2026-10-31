@@ -1,54 +1,147 @@
-/* RKBO Cinematic / CSS-animation prototype.
- * Stadium photography: PxHere CC0 public domain, image 163438.
- * Recreated vector crest is an animation placeholder, not the uploaded master artwork.
+/* RKBO CINEMATIC v2 — photographic fictional stadium, no stock MLB parks.
+ * The real scoreboard is part of the same scene in cuts 1-4.
+ * User-supplied RKBO mark appears on the moving baseball.
  */
-.rkbo-pack-stage:has(.rkbo-cine-scene){background:#040810}
-.rkbo-cine-scene{position:absolute;inset:0;overflow:hidden;isolation:isolate;color:#fff;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
-.rkbo-cine-scene:before{content:"";position:absolute;z-index:2;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 22%,#050610a0 97%);pointer-events:none}
-.rkbo-cine-stadium{position:absolute;inset:-6%;background-image:linear-gradient(180deg,#0a102652 0%,#00000010 30%,#09082080 100%),url("https://c.pxhere.com/photos/b6/63/baseball_field_stadium_home_plate_sport-163438.jpg!d"),radial-gradient(ellipse at 50% 65%,#3e714a,#0c2038 67%,#080c16);background-size:cover;background-position:center 53%;filter:saturate(1.1) contrast(1.12);transform:scale(1.02)}
-.rkbo-cine-color-track{position:absolute;z-index:1;inset:36% -15% -28%;background:linear-gradient(0deg,var(--cine-tone),transparent 92%);mix-blend-mode:screen;opacity:.58;transform:perspective(270px) rotateX(46deg);filter:blur(6px)}
-.rkbo-cine-sparks{position:absolute;z-index:3;inset:0;background-image:radial-gradient(circle,#fff9 1px,transparent 2px),radial-gradient(circle,var(--cine-tone) 2px,transparent 4px);background-size:37px 53px,103px 79px;background-position:15px 25px,60px 35px;opacity:.32;animation:rkbo-cine-dust 2s linear infinite;pointer-events:none}
-.rkbo-cine-caption{position:absolute;z-index:20;bottom:17px;left:0;right:0;text-align:center;font-size:11px;font-weight:950;letter-spacing:.28em;color:#f7f7ff;text-shadow:0 2px 9px #000,0 0 15px var(--cine-tone)}
-.rkbo-cine-1 .rkbo-cine-stadium{filter:brightness(1.9) blur(4px);transform:scale(1.1)}
-.rkbo-cine-door{position:absolute;z-index:6;top:-1%;height:104%;width:50.2%;background:linear-gradient(110deg,#06070b,#232933 26%,#14191e 64%,#06080d);border:3px solid #10151d;box-shadow:inset 0 0 75px #000a,0 2px 65px #000;animation:rkbo-cine-door .96s cubic-bezier(.2,.65,.32,1) forwards}
-.rkbo-cine-left{left:0;transform-origin:left center;--door-to:-94%;--door-mid:-78%}
-.rkbo-cine-right{right:0;transform-origin:right center;--door-to:94%;--door-mid:78%}
-.rkbo-cine-door i{position:absolute;top:48%;height:31%;width:9px;background:linear-gradient(90deg,#020406,#79858a,#0d1116);border-radius:10px;box-shadow:0 0 13px #0009}
-.rkbo-cine-left i{right:14%}.rkbo-cine-right i{left:14%}
-.rkbo-cine-door-glow{position:absolute;z-index:5;inset:-15% 25%;background:#fff;box-shadow:0 0 90px 75px #fff9,0 0 110px 100px var(--cine-tone);opacity:.85;animation:rkbo-cine-glow 1.2s ease-out both}
-.rkbo-cine-hands{position:absolute;z-index:8;inset:0;width:100%;height:100%;filter:drop-shadow(0 10px 16px #0008);animation:rkbo-cine-hands 1.2s ease-out both}
-.rkbo-cine-2 .rkbo-cine-stadium{animation:rkbo-cine-run 1.45s cubic-bezier(.38,.02,.5,1) both}
-.rkbo-cine-2 .rkbo-cine-color-track{animation:rkbo-cine-runway 1.45s ease-in-out both}
-.rkbo-cine-track-light{position:absolute;z-index:4;inset:35% 12% -20%;background:linear-gradient(0deg,var(--cine-tone),transparent 75%);mix-blend-mode:screen;opacity:.45;filter:blur(16px);animation:rkbo-cine-track 1.45s ease-out both}
-.rkbo-cine-3 .rkbo-cine-stadium{filter:brightness(.4) blur(3px) saturate(.8);transform:scale(1.25)}
-.rkbo-cine-3 .rkbo-cine-sparks{opacity:.66}
-.rkbo-cine-scoreboard{position:absolute;z-index:5;left:12%;right:12%;top:19%;height:53%;border:9px solid #171e30;border-radius:7px;background:radial-gradient(ellipse at 50% 65%,#202044,#070914 75%);box-shadow:0 12px 55px #000d,0 0 45px var(--cine-tone);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;text-align:center;animation:rkbo-cine-score .85s cubic-bezier(.16,1,.28,1) both}
-.rkbo-cine-scoreboard:before{content:"";position:absolute;inset:6px;background:repeating-linear-gradient(0deg,transparent 0 3px,#ffffff09 4px 5px);pointer-events:none}
-.rkbo-cine-scoreboard small{font-size:clamp(9px,1.7vw,13px);font-weight:800;letter-spacing:.13em;color:#d6e3ed}
-.rkbo-cine-scoreboard strong{font-weight:1000;line-height:1.14;font-size:clamp(26px,5.5vw,44px);color:#fff;text-shadow:0 0 12px var(--cine-tone),0 0 26px var(--cine-tone);max-width:95%;overflow-wrap:anywhere}
-.rkbo-cine-scoreboard span{font-size:clamp(18px,4vw,36px);color:var(--cine-tone);text-shadow:0 0 20px var(--cine-tone)}
-.rkbo-cine-4 .rkbo-cine-stadium{filter:blur(6px) brightness(.66);transform:scale(1.23)}
-.rkbo-cine-rays{position:absolute;z-index:3;inset:-30%;background:conic-gradient(from 10deg at 50% 50%,transparent 0deg,var(--cine-tone) 12deg,transparent 30deg,#ffffffaa 53deg,transparent 72deg,var(--cine-tone) 113deg,transparent 140deg,#ffffff99 163deg,transparent 190deg,var(--cine-tone) 232deg,transparent 275deg,#ffffff80 310deg,transparent 350deg);opacity:.6;filter:blur(16px);animation:rkbo-cine-rays 1.9s linear both}
-.rkbo-cine-ball-travel{position:absolute;z-index:8;top:10%;left:50%;width:min(270px,55vw);aspect-ratio:1;transform:translate(-50%,0);animation:rkbo-cine-ballpass 1.9s cubic-bezier(.15,.5,.35,1) both;filter:drop-shadow(0 0 36px var(--cine-tone)) drop-shadow(0 20px 22px #0009)}
-.rkbo-cine-baseball{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 33% 24%,#fff 0%,#f4f0e7 32%,#bdbdb8 72%,#676967 100%);box-shadow:inset -19px -19px 33px #4d50564f,inset 10px 10px 17px #fff9,0 0 12px #fff4;border:2px solid #d9d7cf;animation:rkbo-cine-ballspin 1.9s ease-in-out both}
-.rkbo-cine-baseball:before{content:"";position:absolute;inset:0;opacity:.55;background:repeating-radial-gradient(circle at 32% 32%,#9f9d9940 0 1px,transparent 1px 5px)}
-.rkbo-cine-ball-stitch{position:absolute;z-index:1;top:7%;height:86%;width:30%;border:5px dashed #ae2437;border-radius:50%;transform:rotate(11deg);filter:drop-shadow(1px 1px 1px #3c1721)}
-.rkbo-cine-ball-stitch.a{left:-10%}.rkbo-cine-ball-stitch.b{right:-10%;transform:rotate(-11deg)}
-.rkbo-cine-crest{position:absolute;z-index:3;width:52%;aspect-ratio:1;top:24%;left:24%;filter:drop-shadow(2px 2px 3px #0005)}.rkbo-cine-crest svg{display:block;width:100%;height:100%;transform:rotate(-5deg)}
+.rkbo-pack-stage:has(.rkbo-cine-scene){background:#06080e}
+.rkbo-cine-scene{position:absolute;inset:0;isolation:isolate;overflow:hidden;pointer-events:none;color:white}
+.rkbo-cine-world{
+ position:absolute;left:50%;top:50%;width:var(--world-w);height:var(--world-h);
+ transform:translate(-50%,-50%) scale(1);transform-origin:50% 60%;will-change:transform
+}
+.rkbo-cine-photo{
+ position:absolute;inset:0;background-image:url("./assets/cinematic/stadium.webp");
+ background-position:center;background-size:100% 100%;filter:contrast(1.08) saturate(1.04)
+}
+.rkbo-cine-grass{
+ position:absolute;inset:53% -3% -6%;opacity:0;mix-blend-mode:screen;
+ background:
+  radial-gradient(ellipse 80% 85% at 50% 105%,var(--cine-tone) 0%,transparent 82%),
+  repeating-linear-gradient(105deg,transparent 0 22px,var(--cine-tone) 30px,transparent 42px);
+ -webkit-mask-image:linear-gradient(to top,#000 0%,#000 52%,transparent 100%);
+ mask-image:linear-gradient(to top,#000 0%,#000 52%,transparent 100%);
+ filter:blur(9px);will-change:opacity,transform;
+}
+.rkbo-cine-led{
+ position:absolute;z-index:2;left:46.5%;top:31.2%;width:12.3%;height:15.8%;
+ transform:translateX(-50%);display:flex;align-items:center;justify-content:center;
+ background:#05091211;overflow:hidden;
+}
+.rkbo-cine-board-content{
+ width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:2px;text-align:center;opacity:0;
+ animation:rkbo-cine-led-on .72s .38s ease-out both;
+}
+.rkbo-cine-board-content strong{
+ max-width:100%;font-size:clamp(12px,1.9vw,24px);line-height:1;font-weight:1000;
+ letter-spacing:.035em;color:white;
+ text-shadow:0 0 5px var(--cine-tone),0 0 13px var(--cine-tone);
+}
+.rkbo-cine-board-content span{font-size:clamp(10px,1.5vw,19px);color:var(--cine-tone);text-shadow:0 0 8px var(--cine-tone)}
+.rkbo-cine-vignette{position:absolute;inset:0;z-index:3;background:radial-gradient(ellipse 90% 92% at 50% 50%,transparent 44%,#02071080 100%)}
+.rkbo-cine-atmosphere{
+ position:absolute;z-index:4;inset:0;opacity:.3;
+ background:radial-gradient(circle,#ffffff9f 0 1px,transparent 2px),radial-gradient(circle,var(--cine-tone) 0 1px,transparent 3px);
+ background-size:109px 101px,71px 81px;animation:rkbo-cine-drift 5s linear infinite;
+}
+.rkbo-cine-photo-door{
+ position:absolute;top:-1%;height:102%;width:50.3%;z-index:10;opacity:1!important;
+ background-image:url("./assets/cinematic/doors.webp");
+ background-repeat:no-repeat;background-size:235% 100%;
+ border:0;box-shadow:0 0 23px #020408b0;
+ will-change:transform;
+ animation:rkbo-cine-door-part 1.18s cubic-bezier(.3,.08,.2,1) forwards;
+}
+.rkbo-cine-photo-door.left{left:0;background-position:left center;--door-destination:-111%;--door-middle:-73%}
+.rkbo-cine-photo-door.right{right:0;background-position:right center;--door-destination:111%;--door-middle:73%}
+.rkbo-cine-door-seam{position:absolute;z-index:12;left:calc(50% - 1px);width:2px;top:0;bottom:0;background:#05060b}
+.rkbo-cine-phase-gate .rkbo-cine-world{transform:translate(-50%,-50%) scale(1)}
+.rkbo-cine-phase-run .rkbo-cine-world{animation:rkbo-cine-camera-run 1.45s cubic-bezier(.38,0,.29,1) both}
+.rkbo-cine-phase-run .rkbo-cine-grass{animation:rkbo-cine-grass-arrive 1.45s ease-out both}
+.rkbo-cine-phase-board .rkbo-cine-world{animation:rkbo-cine-camera-board 1.35s cubic-bezier(.25,.2,.22,1) both}
+.rkbo-cine-phase-board .rkbo-cine-grass{opacity:.88;transform:scale(1.13)}
+.rkbo-cine-phase-board .rkbo-cine-atmosphere{opacity:.53}
+.rkbo-cine-phase-ball .rkbo-cine-world{transform:translate(-50%,-50%) scale(1.29);filter:blur(3px) brightness(.75)}
+.rkbo-cine-phase-ball .rkbo-cine-grass{opacity:.82}
+.rkbo-cine-phase-ball .rkbo-cine-board-content{opacity:1;animation:none}
+.rkbo-cine-energy{
+ position:absolute;inset:-30%;z-index:5;opacity:.4;
+ background:conic-gradient(from 15deg,transparent 0deg,var(--cine-tone) 13deg,transparent 27deg,
+ #ffffff77 65deg,transparent 88deg,var(--cine-tone) 117deg,transparent 153deg,
+ #ffffff66 202deg,transparent 234deg,var(--cine-tone) 299deg,transparent 319deg);
+ filter:blur(24px);animation:rkbo-cine-energy-spin 1.9s linear both;
+}
+.rkbo-cine-ball-flight{
+ position:absolute;left:50%;top:50%;z-index:8;
+ width:min(285px,58%);aspect-ratio:1;will-change:transform,filter;
+ animation:rkbo-cine-ball-pass 1.9s linear both,rkbo-cine-ball-sharp 1.9s linear both;
+}
+.rkbo-cine-ball-photo{
+ position:absolute;inset:0;display:block;width:100%;height:100%;
+ object-fit:contain;filter:drop-shadow(0 8px 28px #030512a0) drop-shadow(0 0 17px var(--cine-tone))
+}
+.rkbo-cine-ball-logo{
+ position:absolute;left:25%;top:24%;width:51%;height:51%;object-fit:contain;
+ border-radius:50%;transform:rotate(-9deg) perspective(240px) rotateY(-7deg);
+ filter:drop-shadow(1px 2px 2px #0006);
+}
 .rkbo-cine-test-controls{display:flex;gap:7px;align-items:center;justify-content:center;flex-wrap:wrap;margin:11px auto;max-width:640px}
-.rkbo-cine-test-controls button{padding:9px 13px;color:#fff;border:1px solid #9ca5d0;border-radius:8px;background:#25314e;font-weight:800;font-size:12px}
+.rkbo-cine-test-controls button{padding:9px 13px;color:#fff;border:1px solid #9ca5d0;border-radius:8px;background:#25314e;font-weight:800;font-size:12px;cursor:pointer}
 .rkbo-cine-test-controls small{width:100%;color:#bdd2e5;font-size:11px;text-align:center}
 .rkbo-cine-preview-label{position:relative;z-index:5;color:#ffe8aa;border-radius:8px;background:#141729;padding:8px;text-align:center;font-size:12px;font-weight:800}
-@keyframes rkbo-cine-door{0%{transform:translateX(0)}65%{transform:translateX(var(--door-mid))}100%{transform:translateX(var(--door-to))}}
-@keyframes rkbo-cine-glow{0%{opacity:.06}40%{opacity:.98}100%{opacity:.2}}
-@keyframes rkbo-cine-hands{0%,30%{transform:translateY(10%) scale(1.03)}65%{transform:translateY(0) scale(1)}100%{transform:translateY(9%) scale(.97);opacity:.15}}
-@keyframes rkbo-cine-run{0%{transform:scale(1.02)}100%{transform:scale(1.7) translateY(8%)}}
-@keyframes rkbo-cine-runway{0%{opacity:.08;transform:perspective(270px) rotateX(46deg) scale(.8)}100%{opacity:.84;transform:perspective(270px) rotateX(46deg) scale(1.3)}}
-@keyframes rkbo-cine-track{0%{opacity:0}100%{opacity:.75}}
-@keyframes rkbo-cine-score{0%{opacity:0;transform:scale(.72) translateY(12%)}100%{opacity:1;transform:scale(1)}}
-@keyframes rkbo-cine-rays{0%{transform:rotate(0);opacity:.2}100%{transform:rotate(80deg);opacity:.85}}
-@keyframes rkbo-cine-ballpass{0%{opacity:0;transform:translate(90%,-18%) scale(.25) rotate(-12deg)}25%{opacity:1}47%{transform:translate(-50%,3%) scale(1)}72%{transform:translate(-50%,3%) scale(1)}100%{opacity:.05;transform:translate(-220%,32%) scale(1.35) rotate(17deg)}}
-@keyframes rkbo-cine-ballspin{0%{transform:rotate(38deg)}45%,72%{transform:rotate(0deg)}100%{transform:rotate(-65deg)}}
-@keyframes rkbo-cine-dust{from{background-position:0 0,0 0}to{background-position:30px 45px,-19px 74px}}
-@media(max-width:540px){.rkbo-cine-scoreboard{left:7%;right:7%;height:44%;top:25%}.rkbo-cine-scoreboard strong{font-size:27px}.rkbo-cine-caption{bottom:14px;font-size:9px}.rkbo-cine-ball-travel{width:min(230px,61vw)}}
-@media(prefers-reduced-motion:reduce){.rkbo-cine-scene *{animation-duration:.01ms!important;animation-iteration-count:1!important}.rkbo-cine-left{transform:translateX(-94%)}.rkbo-cine-right{transform:translateX(94%)}.rkbo-cine-scoreboard{opacity:1}.rkbo-cine-ball-travel{opacity:1;transform:translate(-50%,0)}}
+@keyframes rkbo-cine-door-part{
+ 0%,12%{transform:translateX(0)}
+ 65%{transform:translateX(var(--door-middle))}
+ 100%{transform:translateX(var(--door-destination))}
+}
+@keyframes rkbo-cine-camera-run{
+ 0%{transform:translate(-50%,-50%) scale(1)}
+ 100%{transform:translate(-50%,-49%) scale(1.19)}
+}
+@keyframes rkbo-cine-camera-board{
+ 0%{transform:translate(-50%,-49%) scale(1.19)}
+ 100%{transform:translate(-50%,-48%) scale(1.29)}
+}
+@keyframes rkbo-cine-grass-arrive{
+ 0%{opacity:0;transform:translateY(27%) scale(.73)}
+ 55%{opacity:.4}
+ 100%{opacity:.88;transform:translateY(0) scale(1.13)}
+}
+@keyframes rkbo-cine-led-on{
+ 0%,30%{opacity:0;filter:brightness(.25)}
+ 72%{opacity:1;filter:brightness(2)}
+ 100%{opacity:1;filter:brightness(1)}
+}
+@keyframes rkbo-cine-drift{to{background-position:45px -62px,-20px 58px}}
+@keyframes rkbo-cine-energy-spin{
+ 0%{transform:rotate(0) scale(.9);opacity:.09}
+ 60%{opacity:.5}
+ 100%{transform:rotate(67deg) scale(1.13);opacity:.15}
+}
+/* Unlike the old version, the ball NEVER stops.
+ * Between 40-64%, it drifts slowly past the middle to show the real RKBO mark,
+ * then accelerates all the way offscreen.
+ */
+@keyframes rkbo-cine-ball-pass{
+ 0%{transform:translate(150%,-95%) scale(.46) rotate(-25deg);animation-timing-function:cubic-bezier(.05,.6,.23,1)}
+ 39%{transform:translate(-41%,-51%) scale(1.03) rotate(-3deg);animation-timing-function:linear}
+ 62%{transform:translate(-63%,-49%) scale(1.11) rotate(3deg);animation-timing-function:cubic-bezier(.7,0,1,.62)}
+ 100%{transform:translate(-310%,-23%) scale(1.35) rotate(45deg)}
+}
+@keyframes rkbo-cine-ball-sharp{
+ 0%{filter:blur(7px);opacity:.1}
+ 23%{filter:blur(2px);opacity:1}
+ 39%,62%{filter:blur(0);opacity:1}
+ 90%{filter:blur(4px);opacity:1}
+ 100%{filter:blur(12px);opacity:0}
+}
+@media(max-width:540px){
+ .rkbo-cine-ball-flight{width:min(260px,66%)}
+ .rkbo-cine-board-content strong{font-size:clamp(10px,2.7vw,17px)}
+ .rkbo-cine-board-content span{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .rkbo-cine-scene *{animation-duration:.01ms!important;animation-iteration-count:1!important}
+ .rkbo-cine-photo-door.left{transform:translateX(-111%)}
+ .rkbo-cine-photo-door.right{transform:translateX(111%)}
+ .rkbo-cine-board-content{opacity:1}
+}
