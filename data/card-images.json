@@ -590,6 +590,16 @@
       "rev": "mvw9pyce",
       "commit": "c5078bd5b178cfe5f0f29d6b8d2d275d1ae09263",
       "blobSha": "31f74345e96693ec01853c01258998ee8261c65d"
+    },
+    "60-KIA-타-003-SPECIAL-NANUM": {
+      "path": "assets/cards/60-KIA-타-003-SPECIAL-NANUM.webp",
+      "x": 4.643962848297214,
+      "y": 17.582417582417584,
+      "zoom": 1.3888403990061948,
+      "fit": "contain",
+      "rev": "mvw9qckl",
+      "commit": "dc50d077d3f7d1a7bcc9af76cf63333ea4be710c",
+      "blobSha": "23d72a5ca7bd3f26d1171623ebb89c68bd62434d"
     }
   }
 }
