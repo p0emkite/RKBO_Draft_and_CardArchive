@@ -200,7 +200,7 @@ async function showNext(){
  const stage=$("#rkbo-pack-stage"),special=PRIORITIES[value.grade]>=3;
  if(special&&stage){
   if(root.RKBOPackCinematic?.play){
-   const ok=await root.RKBOPackCinematic.play(stage,value.grade,()=>token===revealToken&&!overlay.hidden);
+   const ok=await root.RKBOPackCinematic.play(stage,value.grade,()=>token===revealToken&&!overlay.hidden,player);
    if(!ok){opening=false;return}
   }else{
    stage.innerHTML='<div class="rkbo-pack-prelude rarity-'+esc(value.grade)+'"><strong>'+esc(value.grade)+'</strong></div>';
@@ -235,7 +235,7 @@ async function previewCinematic(grade){
   if(!candidates.length)throw Error(season+"차 시즌에 "+grade+" 카드가 없어요.");
   const player=candidates[Math.floor(Math.random()*candidates.length)];
   message("🧪 "+grade+" 연출 확인 중 · 서버 추첨 없음");
-  const ok=await root.RKBOPackCinematic.play(stage,player.grade,()=>token===revealToken&&!overlay.hidden);
+  const ok=await root.RKBOPackCinematic.play(stage,player.grade,()=>token===revealToken&&!overlay.hidden,player);
   if(!ok)return;
   const tone=SPECIAL_RARITIES.includes(player.grade)?"special":player.grade==="코랄"?"coral":"diamond";
   stage.innerHTML='<div id="rkbo-pack-reveal"><div class="rkbo-pack-reveal-heading rarity-'+esc(player.grade)+'"><span>🧪 TEST</span><strong>'+esc(player.grade)+'</strong><span>미지급</span></div>'+
