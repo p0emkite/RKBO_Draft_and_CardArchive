@@ -1,4 +1,4 @@
-# RKBO Draft & Card Archive
+# TRT | Tsuki's RKBO Together
 
 **60차 시즌 카드 도감** — 8개 구단 1군 선수 중 타자 50경기 이상·투수 25경기 이상만 수록하는 시즌 카드, 능력치와 OVR을 확인할 수 있는 정적 웹앱입니다.
 
@@ -26,7 +26,7 @@
 - `imports/`: 추가 자료 보관
 
 ## 관리자 토큰
-GitHub Fine-grained PAT을 사용하며 `p0emkite` 계정의 **해당 저장소 Contents: Read and write** 권한이 필요합니다. 토큰은 현재 탭 메모리에서만 사용합니다. 일반 관람객은 변경 내용을 저장할 수 없습니다.
+GitHub Fine-grained PAT을 사용하며 `p0emkite` 계정의 **해당 저장소 Contents: Read and write** 권한이 필요합니다. Google 계정 로그인 후 최초 PAT을 입력하고 **같은 Google 계정에서 자동 연결**을 선택하면, 해당 브라우저의 암호화된 IndexedDB 저장소에 토큰이 보관됩니다. 토큰은 GitHub 공개 파일이나 localStorage에 저장되지 않습니다. 자동 연결을 선택하지 않으면 현재 페이지 메모리에서만 사용합니다. 공용 기기에서는 자동 연결을 선택하지 마세요. 연결 해제 시 보관된 인증 정보도 삭제됩니다. 일반 관람객은 변경 내용을 저장할 수 없습니다.
 
 ## 주의
 이 저장소는 **RKBO_CareerMaker와 독립적**입니다. 기존 통산 제작기의 데이터나 배포 설정을 변경하지 않습니다.
