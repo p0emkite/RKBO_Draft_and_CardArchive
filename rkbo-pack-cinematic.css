@@ -9,11 +9,11 @@
  transform:translate(-50%,-50%) scale(1);transform-origin:50% 60%;will-change:transform
 }
 .rkbo-cine-photo{
- position:absolute;inset:0;background-image:var(--rkbo-cine-stadium-image, url("./assets/cinematic/atlas.avif"));
- background-position:center center;background-size:cover;filter:contrast(1.08) saturate(1.04)
+ position:absolute;inset:0;background-image:url("./assets/cinematic/stadium-qhd.webp");
+ background-position:center center;background-size:100% 100%;filter:contrast(1.025) saturate(1.02)
 }
 .rkbo-cine-grass{
- position:absolute;z-index:1;inset:63% -7% -4%;
+ position:absolute;z-index:1;inset:51% -7% -4%;
  opacity:0;pointer-events:none;
  background:
  radial-gradient(ellipse 110% 87% at 50% 100%,var(--cine-tone) 0%,var(--cine-tone) 60%,transparent 94%),
@@ -24,7 +24,7 @@
  will-change:opacity,transform
 }
 .rkbo-cine-grass-pulse{
- position:absolute;z-index:1;left:-15%;right:-15%;bottom:-10%;height:71%;opacity:0;pointer-events:none;
+ position:absolute;z-index:1;left:-15%;right:-15%;bottom:-10%;height:62%;opacity:0;pointer-events:none;
  background:radial-gradient(ellipse 95% 100% at 50% 100%,var(--cine-tone) 0%,var(--cine-tone) 30%,#ffffff88 53%,transparent 91%);
  mix-blend-mode:screen;
  -webkit-mask-image:linear-gradient(to top,#000 0%,#000 52%,transparent 100%);
@@ -35,10 +35,10 @@
 .rkbo-cine-led{
  position:absolute;z-index:2;
  /* Real scoreboard is centered in the upper-half atlas image, not the stage. */
- left:46.4%;top:36.1%;width:19.2%;height:16.7%;
+ left:49.9%;top:25.3%;width:28%;height:18.7%;
  transform:translateX(-50%);
  display:grid;place-items:center;text-align:center;
- background:#03070d7d;border:2px solid #242b32;
+ background:#02061016;border:1px solid #242a37;
  overflow:hidden;box-shadow:inset 0 0 14px #0007
 }
 .rkbo-cine-board-content{
@@ -48,7 +48,7 @@
 }
 .rkbo-cine-board-content strong{
  display:block;width:100%;padding:0 5px;
- color:#fff;font-weight:1000;font-size:clamp(13px,2.5vw,30px);
+ color:#fff;font-weight:1000;font-size:clamp(15px,2.9vw,32px);
  line-height:1.05;letter-spacing:.02em;text-align:center;
  text-shadow:0 0 4px var(--cine-tone),0 0 11px var(--cine-tone),0 0 20px var(--cine-tone)
 }
@@ -75,11 +75,11 @@
 .rkbo-cine-phase-run .rkbo-cine-grass-pulse{animation:rkbo-cine-grass-flash 1.45s ease-out both}
 .rkbo-cine-phase-board .rkbo-cine-world{animation:rkbo-cine-camera-board 1.35s cubic-bezier(.25,.2,.22,1) both}
 .rkbo-cine-phase-board .rkbo-cine-grass{opacity:.97;transform:scale(1.13)}
-.rkbo-cine-phase-board .rkbo-cine-grass-pulse{opacity:.88}
+.rkbo-cine-phase-board .rkbo-cine-grass-pulse{opacity:.32}
 .rkbo-cine-phase-board .rkbo-cine-atmosphere{opacity:.53}
-.rkbo-cine-phase-ball .rkbo-cine-world{transform:translate(-50%,-50%) scale(1.60);filter:blur(1.5px) brightness(.8)}
+.rkbo-cine-phase-ball .rkbo-cine-world{transform:translate(-49.5%,-46%) scale(1.60);filter:blur(1.3px) brightness(.78)}
 .rkbo-cine-phase-ball .rkbo-cine-grass{opacity:.95}
-.rkbo-cine-phase-ball .rkbo-cine-grass-pulse{opacity:.66}
+.rkbo-cine-phase-ball .rkbo-cine-grass-pulse{opacity:.25}
 .rkbo-cine-phase-ball .rkbo-cine-board-content{opacity:1;animation:none}
 .rkbo-cine-energy{
  position:absolute;inset:-30%;z-index:5;opacity:.4;
@@ -117,17 +117,17 @@
 }
 @keyframes rkbo-cine-camera-board{
  0%{transform:translate(-50%,-49%) scale(1.19)}
- 100%{transform:translate(-50%,-46%) scale(1.60)}
+ 100%{transform:translate(-49.5%,-46%) scale(1.60)}
 }
 @keyframes rkbo-cine-grass-arrive{
- 0%{opacity:0;transform:translateY(27%) scale(.73)}
- 55%{opacity:.4}
+ 0%{opacity:0;transform:translateY(36%) scale(.73)}
+ 55%{opacity:.58}
  100%{opacity:.98;transform:translateY(0) scale(1.13)}
 }
 @keyframes rkbo-cine-grass-flash{
  0%{opacity:0;transform:translateY(33%) scale(.72)}
  65%{opacity:.95;transform:translateY(8%) scale(1.05)}
- 100%{opacity:.88;transform:translateY(0) scale(1.14)}
+ 100%{opacity:.32;transform:translateY(0) scale(1.14)}
 }
 @keyframes rkbo-cine-led-on{
  0%,30%{opacity:0;filter:brightness(.25)}
@@ -159,25 +159,25 @@
 }
 /* Provided ten-logo atlas: 5 columns x 2 rows. Crisp special emblems stay independent. */
 .rkbo-cine-ball-mark{
- position:absolute;z-index:3;left:26%;top:24%;width:48%;height:52%;
+ position:absolute;z-index:3;left:14%;top:13%;width:72%;height:74%;
  object-fit:contain;filter:drop-shadow(1px 2px 2px #0009);
  transform:rotate(-8deg) perspective(260px) rotateY(-5deg)
 }
 .rkbo-cine-team-mark{
- display:block;background-image:url("./assets/cinematic/club-logos.webp");
+ display:block;background-image:url("./assets/cinematic/team-logos-500.webp");
  background-size:500% 200%;background-repeat:no-repeat;
  background-position:calc(var(--team-x) * 25%) calc(var(--team-y) * 100%);
 }
 .rkbo-cine-team-fallback{width:100%;height:100%;object-fit:contain;display:block}
 /* Keep existing team logo working until optional sprite resource has loaded. */
-@supports (background-image:image-set(url("./assets/cinematic/club-logos.webp") type("image/webp"))){
- .rkbo-cine-team-mark{background-image:url("./assets/cinematic/club-logos.webp")}
+@supports (background-image:image-set(url("./assets/cinematic/team-logos-500.webp") type("image/webp"))){
+ .rkbo-cine-team-mark{background-image:url("./assets/cinematic/team-logos-500.webp")}
 }
-.rkbo-cine-special-mark{width:54%;left:23%;top:22%;height:56%;filter:drop-shadow(0 0 5px #fff8)}
+.rkbo-cine-special-mark{width:65%;left:17.5%;top:17%;height:67%;filter:drop-shadow(0 0 5px #fff8)}
 @media(max-width:540px){
  .rkbo-cine-ball-flight{width:min(260px,66%)}
  .rkbo-cine-board-content strong{font-size:clamp(12px,3vw,24px)}
- .rkbo-cine-led{left:46.4%;top:36.1%;width:19.2%;height:16.7%}
+ .rkbo-cine-led{left:49.9%;top:25.3%;width:28%;height:18.7%}
 }
 @media(prefers-reduced-motion:reduce){
  .rkbo-cine-scene *{animation-duration:.01ms!important;animation-iteration-count:1!important}

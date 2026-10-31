@@ -54,7 +54,7 @@
   }else if(emblem.kind==="team"){
    const x=emblem.index%5,y=Math.floor(emblem.index/5);
    // Uploaded team-specific artwork sprite; fallback only for browsers missing WebP.
-   const atlas=root.RKBOTeamLogoAtlas?.url;
+   const atlas=ASSETS+"team-logos-500.webp";
    logo='<span class="rkbo-cine-ball-mark rkbo-cine-team-mark'+(atlas?' rkbo-cine-sprite-loaded':'')+'" style="--team-x:'+x+';--team-y:'+y+';background-position:'+(x*25)+'% '+(y*100)+'%;'+
         (atlas?'background-image:url('+atlas+');':'')+'">'+
         (atlas?'':'<img class="rkbo-cine-team-fallback" src="'+h(emblem.url)+'" alt="" draggable="false">')+'</span>';
@@ -76,12 +76,12 @@
   if(!stage)return false;
   const tier=TYPES[grade]||TYPES["코랄"];
   const rect=stage.getBoundingClientRect(),width=Math.max(200,rect.width),height=Math.max(220,rect.height);
-  const ratio=2560/1080;
+  const ratio=2560/1440;
   const w=Math.ceil(Math.max(width,height*ratio)),sh=Math.ceil(Math.max(height,width/ratio));
   const reduced=root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   // Team artwork arrives from the uploaded separate-logo archive; never substitute
   // the existing card badge except as a decoding fallback.
-  if(root.RKBOTeamLogoAtlas?.ready)await root.RKBOTeamLogoAtlas.ready;
+  // Supplied team logos are preloaded from the repository image atlas.
   for(let phase=0;phase<4;phase++){
    if(!stage.isConnected||shouldContinue?.()===false)return false;
    stage.innerHTML=frame(phase,tier,w,sh,grade,player);
@@ -92,7 +92,7 @@
  function init(){
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-qhd-v9";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-qhd-photo-v10";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
   ["baseball-qhd.svg"].forEach(f=>{
