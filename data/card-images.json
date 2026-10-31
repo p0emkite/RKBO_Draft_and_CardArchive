@@ -1170,6 +1170,16 @@
       "rev": "mvwhxd0u",
       "commit": "2c76d910f5f2d3bf8444d1c7a2ab1f2b4fc75270",
       "blobSha": "891faaa3a6a695ef3bbda863576083525062d4da"
+    },
+    "60-HAN-타-013-SPECIAL-NANUM": {
+      "path": "assets/cards/60-HAN-타-013-SPECIAL-NANUM.webp",
+      "x": 11.145510835913312,
+      "y": 16.483516483516482,
+      "zoom": 1.1281523024506603,
+      "fit": "contain",
+      "rev": "mvwhxukr",
+      "commit": "f1c45d2dc921003e2dc75b466846308559835d27",
+      "blobSha": "9adb0299f4c5ce41765aeb232ae44ae28de5d2b6"
     }
   }
 }
