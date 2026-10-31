@@ -613,9 +613,9 @@
     },
     "60-KIA-타-007-SPECIAL-NANUM": {
       "path": "assets/cards/60-KIA-타-007-SPECIAL-NANUM.webp",
-      "x": 2.1671826625386994,
-      "y": 4.029304029304029,
-      "zoom": 0.93,
+      "x": 0.3095975232198138,
+      "y": 1.8315018315018317,
+      "zoom": 0.9951000000000001,
       "fit": "contain",
       "rev": "mvw9vwsl",
       "commit": "f25e65f804469a1ee14741e12a19e6073e053d7c",
