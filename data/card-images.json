@@ -1700,6 +1700,16 @@
       "rev": "mvwls3m1",
       "commit": "6c766cfe00a160ee9f251b36f55e515dd839e5c1",
       "blobSha": "c9295e2ab3ab07fb44e8fd66258321e27b79d0d2"
+    },
+    "60-NC-타-003": {
+      "path": "assets/cards/60-NC-타-003.webp",
+      "x": -0.3076923076923077,
+      "y": 26.642335766423358,
+      "zoom": 1.3107960100000002,
+      "fit": "contain",
+      "rev": "mvwlsetf",
+      "commit": "8d839cb0be3d0bd0e425c71106c76eb3d9a4dba1",
+      "blobSha": "2107d69fed6b5d8eb6b125703da911bbbf620dc0"
     }
   }
 }
