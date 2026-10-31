@@ -33,7 +33,7 @@
   return '<div class="rkbo-cine-energy" aria-hidden="true"></div>'+
    '<div class="rkbo-cine-ball-flight" aria-hidden="true">'+
    '<img class="rkbo-cine-ball-photo" src="'+ASSETS+'baseball.webp" alt="" draggable="false">'+
-   '<img class="rkbo-cine-ball-logo" src="'+ASSETS+'rkbo-logo.webp" alt="" draggable="false">'+
+   '<img class="rkbo-cine-ball-logo" src="./assets/rkbo-archive-logo.webp" alt="" draggable="false">'+
    '</div>';
  }
  // Always render the same scene and screen coordinates. The camera alone changes
@@ -69,9 +69,10 @@
    link.dataset.rkboCine="1";
    document.head.appendChild(link);
   }
-  ["stadium.webp","doors.webp","baseball.webp","rkbo-logo.webp"].forEach(f=>{
+  ["atlas.webp","baseball.webp"].forEach(f=>{
    const image=new Image();image.decoding="async";image.src=ASSETS+f;
   });
+  const crest=new Image();crest.src="./assets/rkbo-archive-logo.webp";
  }
  loadAssets();
  root.RKBOPackCinematic={play,supportedGrade:g=>!!TYPES[g]};
