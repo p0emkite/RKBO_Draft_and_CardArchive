@@ -1660,6 +1660,16 @@
       "rev": "mvwlqt98",
       "commit": "0aaa7d93ba4b3cb088e1bb733f1cd79492c8f6a2",
       "blobSha": "d9ffb89289ba92278bc03fa0a960f3de48b01625"
+    },
+    "60-NC-투-012": {
+      "path": "assets/cards/60-NC-투-012.webp",
+      "x": 4.3076923076923075,
+      "y": 17.88321167883212,
+      "zoom": 1.1226243561686524,
+      "fit": "contain",
+      "rev": "mvwlr29n",
+      "commit": "d49f8c8924ab9d3578d7399a1db3546eec981ad6",
+      "blobSha": "56b282c0494fad1734ffb7760ec5f2da5c1c7e75"
     }
   }
 }
