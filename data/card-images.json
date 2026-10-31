@@ -2010,6 +2010,16 @@
       "rev": "mvwocvd8",
       "commit": "995d293e002a98f886ba752304af679925613ea3",
       "blobSha": "3de0a3edaabc788fb59e127e02c0d92415a2cbe8"
+    },
+    "60-SSG-타-001": {
+      "path": "assets/cards/60-SSG-타-001.webp",
+      "x": -6.461538461538462,
+      "y": 49.27007299270073,
+      "zoom": 1.718186179831921,
+      "fit": "contain",
+      "rev": "mvwoddif",
+      "commit": "239d89edee098608e216f2193037d4487ece6699",
+      "blobSha": "583398a0a3881de8ef5070506e7d3549f7e3e158"
     }
   }
 }
