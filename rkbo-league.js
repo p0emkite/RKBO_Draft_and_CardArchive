@@ -374,7 +374,7 @@ function renderSeason(){
 function render(){
  if(!panel)return;
  const status=room?room.phase:"none";
- panel.innerHTML='<header class="rkbo-league-header"><div><small>RKBO ONLINE · LEAGUE DRAFT</small>'+
+ panel.innerHTML='<header class="rkbo-league-header"><div><small>RTM · LEAGUE DRAFT</small>'+
  '<h2>🏟️ RKBO 8구단 리그</h2><p>공개방 · 포지션 드래프트 · 144경기 시뮬레이션</p></div>'+
  '<button type="button" data-league-close aria-label="닫기">×</button></header>'+
  '<p class="rkbo-league-message" data-league-message>'+esc(message)+'</p>'+
