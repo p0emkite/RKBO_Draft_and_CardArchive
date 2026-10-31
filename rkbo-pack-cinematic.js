@@ -1,6 +1,6 @@
 /* RKBO CINEMATIC v4 — presentation only; never affects draw odds, pity or inventory. */
 (function(root){"use strict";
- const DURATIONS=[1200,1450,1450,1900];
+ const DURATIONS=[1200,1450,1900];
  const ASSETS="./assets/cinematic/";
  const TYPES={
   "코랄":["CORAL","#f6909d","coral"],
@@ -15,7 +15,7 @@
  const TEAM_CODES=["DOO","HAN","KIA","KIW","KT","LG","LOT","NC","SAM","SSG"];
  const h=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
- const sceneName=["gate","run","board","ball"];
+ const sceneName=["gate","board","ball"];
  function teamCode(p){
   let code=String(p?.displayTeamCode||p?.team||"").toUpperCase();
   if(code==="SK")code="SSG";
@@ -34,7 +34,7 @@
   return {kind:"none",alt:""};
  }
  function stadiumWorld(tier,phase,w,height){
-  const board=phase>=2?'<div class="rkbo-cine-board-content"><strong>'+h(tier[0])+'</strong></div>':'';
+  const board=phase>=1?'<div class="rkbo-cine-board-content"><strong>'+h(tier[0])+'</strong></div>':'';
   return '<div class="rkbo-cine-world" style="--world-w:'+w+'px;--world-h:'+height+'px">'+
     '<div class="rkbo-cine-photo" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-turf-tint" aria-hidden="true"></div>'+
@@ -70,7 +70,7 @@
     ' style="--cine-tone:'+tier[1]+';--backdrop-w:'+w+'px;--backdrop-h:'+height+'px">'+
     stadiumWorld(tier,phase,w,height)+
     '<div class="rkbo-cine-vignette"></div><div class="rkbo-cine-atmosphere" aria-hidden="true"></div>'+
-    (phase===0?doors():phase===3?baseball(grade,player):"")+
+    (phase===0?doors():phase===2?baseball(grade,player):"")+
     '</div>';
  }
  async function play(stage,grade,shouldContinue,player){
@@ -83,7 +83,7 @@
   // Team artwork arrives from the uploaded separate-logo archive; never substitute
   // the existing card badge except as a decoding fallback.
   // Supplied team logos are preloaded from the repository image atlas.
-  for(let phase=0;phase<4;phase++){
+  for(let phase=0;phase<3;phase++){
    if(!stage.isConnected||shouldContinue?.()===false)return false;
    stage.innerHTML=frame(phase,tier,w,sh,grade,player);
    await wait(reduced?Math.min(320,DURATIONS[phase]):DURATIONS[phase]);
@@ -93,7 +93,7 @@
  function init(){
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-fence-overlay-v12";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-direct-board-v13";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
   ["baseball-qhd.svg","stadium-selected-qhd.webp"].forEach(f=>{
