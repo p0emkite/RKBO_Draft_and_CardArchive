@@ -89,15 +89,28 @@ function collectionView(){
  if(!member)return "";
  if(!member.is_public&&selected!==userId)return '<div class="rkbo-cm-section"><h3>🔒 '+esc(member.nickname)+'님의 도감</h3>도감이 비공개 상태야.</div>';
  const available=mine.filter(p=>p.tradable);
+ // A requested card can already belong to the requester: duplicates count
+ // toward collecting ten copies for prism upgrades. Only the offering and
+ // receiving sides' tradable spare-copy rules are checked by the server.
+ const myQuantities=new Map(mine.map(p=>[p.card_id,Number(p.quantity)||0]));
  const selectedCard=cards.find(p=>p.card_id===wanted);
  return '<section class="rkbo-cm-section"><h3>📚 '+esc(member.nickname)+'님의 카드</h3>'+
  '<form data-cm-card-search class="rkbo-cm-search"><input name="card" placeholder="선수 이름 검색" maxlength="60" value="'+esc(cardQuery)+'"><button>검색</button></form>'+
- '<div class="rkbo-cm-cards">'+cards.map(p=>'<article class="rkbo-cm-card">'+
-  '<div class="rkbo-cm-art rkbo-combo-card-art" data-card-id="'+esc(p.card_id)+'" data-season="'+esc(p.season)+'">'+mini(p)+'</div>'+
-  '<div class="rkbo-cm-card-meta"><strong>'+esc(p.name)+'</strong><small>'+badge(p)+' · ×'+p.quantity+'</small>'+
-  ((selected!==userId&&isPublic&&p.tradable)?'<button data-cm-want="'+esc(p.card_id)+'">교환 제안</button>':'')+'</div></article>').join("")+'</div>'+
+ '<div class="rkbo-cm-cards">'+cards.map(p=>{
+  const myQuantity=myQuantities.get(p.card_id)||0;
+  return '<article class="rkbo-cm-card">'+
+   '<div class="rkbo-cm-art rkbo-combo-card-art" data-card-id="'+esc(p.card_id)+'" data-season="'+esc(p.season)+'">'+mini(p)+'</div>'+
+   '<div class="rkbo-cm-card-meta"><strong>'+esc(p.name)+'</strong><small>'+badge(p)+' · ×'+p.quantity+'</small>'+
+   (selected!==userId&&isPublic&&p.tradable&&myQuantity>0?
+    '<small>내 보유 ×'+myQuantity+' · 추가 수집 가능</small>':'')+
+   // Do not exclude cards the requester already owns.
+   ((selected!==userId&&isPublic&&p.tradable)?'<button data-cm-want="'+esc(p.card_id)+'">교환 제안</button>':'')+
+   '</div></article>';
+ }).join("")+'</div>'+
  (hasMore?'<button class="rkbo-cm-alt" data-cm-more>카드 더 보기</button>':'')+
- (wanted?'<div class="rkbo-cm-offer"><strong>🔁 교환 요청: '+esc(selectedCard?.name||wanted)+'</strong><label>내가 줄 중복 카드<select id="rkbo-cm-offered">'+
+ (wanted?'<div class="rkbo-cm-offer" id="rkbo-cm-offer"><strong>🔁 교환 요청: '+esc(selectedCard?.name||wanted)+'</strong>'+
+ (myQuantities.has(wanted)?'<small>내 보유 ×'+myQuantities.get(wanted)+' · 프리즘 강화를 위한 추가 수집도 가능해요.</small>':'')+
+ '<label>내가 줄 중복 카드<select id="rkbo-cm-offered">'+
  available.filter(p=>p.card_id!==wanted).map(p=>'<option value="'+esc(p.card_id)+'">'+badge(p)+' '+esc(p.name)+' (×'+p.quantity+')</option>').join("")+
  '</select></label><button data-cm-create'+(!available.filter(p=>p.card_id!==wanted).length?' disabled':'')+'>교환 요청 보내기</button></div>':'')+
  '</section>';
@@ -189,7 +202,14 @@ async function chooseTab(t){
 async function act(button){
  const d=button.dataset;
  if(d.cmMember){selected=d.cmMember;wanted="";cardQuery="";cards=[];await loadMemberCards();return}
- if(d.cmWant){wanted=d.cmWant;render();return}
+ if(d.cmWant){
+  wanted=d.cmWant;
+  render();
+  // This dialog, not the underlying page, owns the scroll container.
+  // Jump straight to the newly rendered exchange form.
+  if($("#rkbo-cm-offer"))panel.scrollTop=panel.scrollHeight;
+  return;
+ }
  if(d.cmMore!==undefined){await loadMemberCards(true);return}
  if(d.cmCreate!==undefined){
   const offered=$("#rkbo-cm-offered")?.value;
