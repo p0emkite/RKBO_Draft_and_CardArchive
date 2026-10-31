@@ -54,8 +54,10 @@
   }else if(emblem.kind==="team"){
    const x=emblem.index%5,y=Math.floor(emblem.index/5);
    // Uploaded team-specific artwork sprite; fallback only for browsers missing WebP.
-   logo='<span class="rkbo-cine-ball-mark rkbo-cine-team-mark" style="--team-x:'+x+';--team-y:'+y+'">'+
-        '<img class="rkbo-cine-team-fallback" src="'+h(emblem.url)+'" alt="" draggable="false"></span>';
+   const atlas=root.RKBOTeamLogoAtlas?.url;
+   logo='<span class="rkbo-cine-ball-mark rkbo-cine-team-mark'+(atlas?' rkbo-cine-sprite-loaded':'')+'" style="--team-x:'+x+';--team-y:'+y+';'+
+        (atlas?'background-image:url('+atlas+');':'')+'">'+
+        (atlas?'':'<img class="rkbo-cine-team-fallback" src="'+h(emblem.url)+'" alt="" draggable="false">')+'</span>';
   }
   return '<div class="rkbo-cine-energy" aria-hidden="true"></div>'+
    '<div class="rkbo-cine-ball-flight" aria-hidden="true">'+
@@ -77,6 +79,9 @@
   const ratio=830/335;
   const w=Math.ceil(Math.max(width,height*ratio)),sh=Math.ceil(Math.max(height,width/ratio));
   const reduced=root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  // Team artwork arrives from the uploaded separate-logo archive; never substitute
+  // the existing card badge except as a decoding fallback.
+  if(root.RKBOTeamLogoAtlas?.ready)await root.RKBOTeamLogoAtlas.ready;
   for(let phase=0;phase<4;phase++){
    if(!stage.isConnected||shouldContinue?.()===false)return false;
    stage.innerHTML=frame(phase,tier,w,sh,grade,player);
