@@ -61,7 +61,7 @@
 .rkbo-cine-photo-door{
  position:absolute;top:-1%;height:102%;width:50.3%;z-index:10;opacity:1!important;
  background-image:var(--rkbo-cine-door-image,url("./assets/cinematic/atlas.avif"));
- background-repeat:no-repeat;background-size:200% 100%;
+ background-repeat:no-repeat;background-size:250% 100%;
  border:0;box-shadow:0 0 23px #020408b0;
  will-change:transform;
  animation:rkbo-cine-door-part 1.18s cubic-bezier(.3,.08,.2,1) forwards;
