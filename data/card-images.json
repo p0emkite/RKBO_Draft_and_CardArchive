@@ -1970,6 +1970,16 @@
       "rev": "mvwo9bv8",
       "commit": "a4ee43acf2ad3a93794214c078eae170297c0895",
       "blobSha": "1f1c05c661e279f4157f7714132b9885349f9edc"
+    },
+    "60-SSG-투-001": {
+      "path": "assets/cards/60-SSG-투-001.webp",
+      "x": -4.923076923076923,
+      "y": 18.61313868613139,
+      "zoom": 1.1392899900000002,
+      "fit": "contain",
+      "rev": "mvwo9pjy",
+      "commit": "2998ea153716c3d5aad69e1ab35712d815613a6b",
+      "blobSha": "d9b5d0fa29d1758a20c361c57c4bf9a688c8db34"
     }
   }
 }
