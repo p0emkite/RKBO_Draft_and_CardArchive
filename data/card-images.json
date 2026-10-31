@@ -1820,6 +1820,16 @@
       "rev": "mvwlx00o",
       "commit": "47df0aeb5c035e3d22876d5db74706fbc9299ae8",
       "blobSha": "8196737ef30a0a08c2040343ab481824f1da5a2f"
+    },
+    "60-SSG-투-010": {
+      "path": "assets/cards/60-SSG-투-010.webp",
+      "x": 1.5384615384615385,
+      "y": 51.45985401459854,
+      "zoom": 1.829450762279297,
+      "fit": "contain",
+      "rev": "mvwo3b5v",
+      "commit": "b7e082c7d9605bd39f3fbddea0d4ddc367666b2a",
+      "blobSha": "52c23a7818b419860c262cf35d112b12650c9809"
     }
   }
 }
