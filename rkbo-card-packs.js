@@ -179,7 +179,7 @@ function renderResult(){
 function showCurrentReveal(){
  const target=$("#rkbo-pack-reveal");if(!target)return;
  const draw=draws[cursor-1];
- if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉 완료! 결과를 확인해줘.</div>';return}
+ if(!draw){target.innerHTML='<div class="rkbo-pack-ready">팩 개봉이 완료되었습니다. 결과를 확인해 주시기 바랍니다.</div>';return}
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
  const special=PRIORITIES[draw.grade]>=3;
  const card=renderPlayer(p),front=special?'<div class="rkbo-pack-flip">'+
