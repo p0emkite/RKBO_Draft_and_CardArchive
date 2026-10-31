@@ -54,7 +54,7 @@ async function refresh(){
    '<button type="button" data-my="rename" data-team-id="'+esc(t.id)+'">이름 변경</button>'+
    '<button type="button" data-my="delete" data-team-id="'+esc(t.id)+'">삭제</button></div>'+
    '<div id="rkbo-my-detail-'+esc(t.id)+'"></div></article>').join("")+'</div>':
-   '<div class="rkbo-my-empty">아직 저장한 팀이 없어. 드래프트를 마친 뒤 <b>💾 내 팀에 저장</b>을 눌러 봐!</div>';
+   '<div class="rkbo-my-empty">아직 저장한 팀이 없습니다. 드래프트를 마친 뒤 <b>💾 내 팀에 저장</b>을 눌러 주시기 바랍니다.</div>';
  }catch(err){
   teams=[];content.innerHTML='<div class="rkbo-my-empty">'+esc(err.message)+'<p><button type="button" data-my="login">Google 로그인</button></p></div>';
  }
@@ -104,13 +104,13 @@ async function modify(action,id){
   const name=checkName(value);
   const {data,error}=await c.from("rkbo_saved_teams").update({name,updated_at:new Date().toISOString()}).eq("id",id).eq("user_id",user.id).select("id").single();
   if(error||!data)throw Error("팀 이름 변경 실패: "+(error?.message||"변경되지 않았어요."));
-  await refresh();message("✓ 팀 이름을 변경했어.");return;
+  await refresh();message("✓ 팀 이름을 변경했습니다.");return;
  }
  if(action==="delete"){
   if(!confirm('"'+t.name+'" 팀을 삭제할까요? 복구할 수 없어요.'))return;
   const {data,error}=await c.from("rkbo_saved_teams").delete().eq("id",id).eq("user_id",user.id).select("id").single();
   if(error||!data)throw Error("팀 삭제 실패: "+(error?.message||"삭제되지 않았어요."));
-  await refresh();message("✓ 팀을 삭제했어.");
+  await refresh();message("✓ 팀을 삭제했습니다.");
  }
 }
 function close(){
