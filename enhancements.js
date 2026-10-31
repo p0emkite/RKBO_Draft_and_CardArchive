@@ -2,7 +2,7 @@
    Standalone RKBO Card Archive.
    Public viewer: anonymous read-only.
    Admin: ?admin=1 and an owner-owned GitHub fine-grained token. The token is kept
-   in JS memory only; it is NEVER written to localStorage or repository content. */
+   encrypted in IndexedDB only with user opt-in, never in localStorage or public GitHub data. */
 (function(){
 'use strict';
 const OWNER='p0emkite', REPO='RKBO_Draft_and_CardArchive', BASE='';
@@ -176,6 +176,7 @@ async function connect(){
  const raw=q('admin-token').value.trim();if(!raw){setStatus('토큰을 입력하세요.');return}
  setStatus('GitHub 계정과 저장소 쓰기 권한을 확인하고 있습니다…');
  try{
+ const googleUid=await window.RKBOAdminVault.googleUserId();
  const response=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+raw,'Accept':'application/vnd.github+json'}});
  if(!response.ok)throw Error('토큰 인증 실패 ('+response.status+')');
  const user=await response.json();if(String(user.login).toLowerCase()!==OWNER.toLowerCase())throw Error('제작자 계정('+OWNER+')만 관리자 모드를 사용할 수 있습니다.');
@@ -184,10 +185,13 @@ async function connect(){
  const repo=await check.json();if(!repo.permissions?.push)throw Error('GitHub 계정에 해당 저장소의 쓰기 권한이 없습니다.');
  setStatus('GitHub 토큰의 실제 Contents 쓰기 권한을 검사하고 있습니다…');
  await verifyTokenCanWrite(raw);
- token=raw;q('admin-token').value='';authorized=true;
+ if(googleUid!==await window.RKBOAdminVault.googleUserId())throw Error('Google 계정이 변경되었습니다. 다시 로그인해 주시기 바랍니다.');
+ token=raw;q('admin-token').value='';authorized=true;window.RKBOAdminVault.bind(googleUid);
  await syncAll(true);q('admin-controls').hidden=false;q('admin-login').hidden=true;refresh();window.dispatchEvent(new Event('rkbo-admin-connected'));
+ try{if(q('admin-remember')?.checked)await window.RKBOAdminVault.remember(raw,googleUid);
+ else await window.RKBOAdminVault.forget()}catch(e){console.warn('[TRT admin vault] Could not persist token',e)}
  setStatus(`✓ ${user.login} 연결 완료. GitHub Contents 쓰기 권한까지 확인했습니다. 카드 사진과 자료를 main에 저장할 수 있습니다.`)
- }catch(e){token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 실패: '+e.message)}
+ }catch(e){token='';authorized=false;window.RKBOAdminVault?.unbind();q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 실패: '+e.message)}
 }
 async function syncAll(show=false){
  if(!token)return;
@@ -379,7 +383,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  const b=document.createElement('button');b.id='admin-open';b.className='admin-open';b.type='button';b.textContent='⚙ 제작자 모드';document.querySelector('.nav-right')?.append(b);
  const drawer=document.createElement('aside');drawer.id='admin-drawer';drawer.className='admin-drawer';drawer.hidden=true;drawer.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><h2>⚙ RKBO 카드 도감 관리자</h2><button type="button" id="admin-close">닫기 ×</button></div>
  <p>선수 카드 이미지, 이미지 배치 설정, HHRecord·시즌 원본 파일을 GitHub에 저장합니다.</p>
- <div id="admin-login"><label for="admin-token">GitHub Fine-grained Personal Access Token</label><input id="admin-token" type="password" autocomplete="off" placeholder="github_pat_…"><div class="admin-actions"><button type="button" class="primary" id="admin-connect">GitHub 연결</button></div><div class="warning">토큰은 현재 열린 페이지의 메모리에서만 사용하며 저장하지 않습니다. ${OWNER}/${REPO} 저장소의 <b>Contents → Read and write</b> 권한이 필요합니다.<div style="margin-top:8px"><a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer">GitHub 토큰 설정 열기 ↗</a> · Repository access: <b>Only select repositories</b> → <b>RKBO_Draft_and_CardArchive</b> → Repository permissions: <b>Contents: Read and write</b></div></div></div>
+ <div id="admin-login"><label for="admin-token">GitHub Fine-grained Personal Access Token</label><input id="admin-token" type="password" autocomplete="off" placeholder="github_pat_…"><label style="display:flex;align-items:center;gap:7px;margin:10px 0"><input id="admin-remember" type="checkbox" checked> 같은 Google 계정에서 자동 연결 (이 기기에만 저장)</label><div class="admin-actions"><button type="button" class="primary" id="admin-connect">GitHub 연결</button></div><div class="warning">자동 연결을 선택하면 이 기기의 암호화된 브라우저 저장소에 토큰이 보관됩니다. 공용 기기에서는 선택하지 말고 이용 후 연결을 해제해 주시기 바랍니다. ${OWNER}/${REPO} 저장소의 <b>Contents → Read and write</b> 권한이 필요합니다.<div style="margin-top:8px"><a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer">GitHub 토큰 설정 열기 ↗</a> · Repository access: <b>Only select repositories</b> → <b>RKBO_Draft_and_CardArchive</b> → Repository permissions: <b>Contents: Read and write</b></div></div></div>
  <div id="admin-controls" hidden><div class="admin-actions"><button id="admin-sync" type="button">↻ GitHub 전체 동기화</button><button id="admin-logout" type="button">연결 해제</button></div><hr><h2>시즌 카드 등록·공개</h2><p>원본 HTML·XLS·HHRecord 보관과 달리, 이 메뉴는 <b>선수별 카드 스탯·OVR이 포함된 JSON</b>을 검증해 시즌을 실제 도감에 등록합니다. 등록된 시즌만 공개 선택 목록에 나타납니다.</p><label for="season-register-number">등록할 시즌</label><input type="number" id="season-register-number" min="1" max="999" step="1" value="59" placeholder="예: 59"><label for="season-register-file">시즌 카드 JSON 파일</label><input type="file" id="season-register-file" accept=".json,application/json"><div class="admin-actions"><button id="season-register" type="button" class="primary">새 시즌 카드 등록 · GitHub 저장</button></div><p class="warning">파일 형식: {season:59,players:[...]} 또는 카드 배열. 선수마다 시즌별 고유 ID·구단·포지션·스탯·OVR·능력치가 필요합니다. HTML/XLS/HHRecord를 업로드하는 것만으로는 카드가 자동 생성되지 않습니다.</p><div id="admin-season-list" class="admin-file-list"></div><hr><h2>선수 카드 이미지 저장소 <span id="admin-image-count">0명 등록</span></h2><p>사진은 카드의 ✎ 편집에서 업로드하고, 배치를 적용한 후 GitHub에 저장합니다. 아래 목록과 도감은 같은 이미지 데이터를 사용합니다.</p><div id="admin-image-list" class="admin-file-list"></div><div class="admin-actions"><button type="button" id="admin-image-sync">↻ 카드 이미지 동기화</button></div><hr><h2>시즌·HHRecord 자료 첨부</h2><p>확장자 .html/.htm/.xls/.xlsx/.csv/.zip/.json 등. 선택한 자료는 GitHub에 원본 보관만 되며, 선수 카드 데이터 자동 반영은 다음 단계입니다.</p><label for="import-kind">자료 종류</label><select id="import-kind"><option value="season">다른 시즌 개인 성적</option><option value="hhrecord">HHRecord</option><option value="other">기타 데이터</option></select><label for="import-files">추가 파일 선택</label><input type="file" id="import-files" multiple accept=".html,.htm,.xls,.xlsx,.csv,.zip,.json,.txt"><div class="admin-actions"><button class="primary" id="upload-import" type="button">선택 파일 GitHub 저장</button></div><div class="warning">주의: 공개 GitHub 저장소이므로 업로드한 자료도 공개될 수 있습니다. 저작권·개인정보를 확인하세요.</div><h2 style="margin-top:15px">업로드 내역</h2><div id="admin-file-list" class="admin-file-list"></div><div class="warning" style="margin-top:10px">선수 사진은 <code>assets/cards/</code>, 이미지 배치 정보는 <code>data/card-images.json</code>에 저장되어 함께 연동됩니다.</div></div><hr><div class="admin-status" id="admin-status">토큰으로 제작자 인증한 후 편집할 수 있습니다.</div>`;
  document.body.append(drawer);
  const overlay=document.createElement('div');overlay.id='photo-editor-bg';overlay.className='photo-editor-bg';overlay.hidden=true;
@@ -389,7 +393,7 @@ function initAdmin(){if(!EDIT_MODE)return;
  q('admin-connect').addEventListener('click',connect);q('admin-token').addEventListener('keydown',e=>{if(e.key==='Enter')connect()});
  q('admin-sync').addEventListener('click',()=>syncAll(true).catch(e=>setStatus('동기화 실패: '+e.message)));
  q('admin-image-sync').addEventListener('click',()=>syncAll(true).catch(e=>setStatus('이미지 동기화 실패: '+e.message)));
- q('admin-logout').addEventListener('click',()=>{token='';authorized=false;q('admin-login').hidden=false;q('admin-controls').hidden=true;setStatus('연결 해제 완료. 새로 로그인해야 편집할 수 있습니다.');refresh();window.dispatchEvent(new Event('rkbo-admin-disconnected'))});
+ q('admin-logout').addEventListener('click',async()=>{window.RKBOAdminBridge.disconnect();await window.RKBOAdminVault.forget().catch(e=>console.warn('[TRT admin vault]',e));setStatus('제작자 연결과 이 기기에 저장된 인증 정보가 해제되었습니다.')});
  q('upload-import').addEventListener('click',importFiles);
  q('season-register').addEventListener('click',registerSeasonCards);renderRegisteredSeasons();
  q('editor-close').addEventListener('click',closeEditor);
@@ -453,6 +457,7 @@ async function publishGitBatch(entries,message,onProgress){
 }
 window.RKBOAdminBridge={
  isAuthorized:()=>authorized&&!!token,
+ disconnect:()=>{token='';authorized=false;window.RKBOAdminVault?.unbind();if(q('admin-login'))q('admin-login').hidden=false;if(q('admin-controls'))q('admin-controls').hidden=true;refresh();window.dispatchEvent(new Event('rkbo-admin-disconnected'));},
  readJson:(path)=>{if(!authorized)throw Error('GitHub 인증 필요');return readJson(path)},
  readText:async(path)=>{if(!authorized)throw Error('GitHub 인증 필요');const file=await gh(path);return {sha:file?.sha||null,content:file?.content?decode64(file.content):null}},
  writeJson:(path,data,sha)=>{if(!authorized)throw Error('GitHub 인증 필요');return putJson(path,data,sha)},
