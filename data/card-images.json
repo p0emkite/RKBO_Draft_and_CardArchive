@@ -1580,6 +1580,16 @@
       "rev": "mvwk82u9",
       "commit": "ac27509bc3dc0cf07b736507dbc8f0f6d28b86fb",
       "blobSha": "4ed396d40cfbb8c3f26a2a96444b8eb2a5a92d99"
+    },
+    "60-LOT-투-013": {
+      "path": "assets/cards/60-LOT-투-013.webp",
+      "x": 4.615384615384616,
+      "y": 36.13138686131387,
+      "zoom": 1.4860592269366286,
+      "fit": "contain",
+      "rev": "mvwk8bet",
+      "commit": "2a3b52101f02b04e743923f25166c0333f400bc1",
+      "blobSha": "82413a3572930d001fc527954e240a8429dfb7b9"
     }
   }
 }
