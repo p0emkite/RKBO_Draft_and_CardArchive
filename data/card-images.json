@@ -950,6 +950,16 @@
       "rev": "mvwc9o43",
       "commit": "1ddecbcaa52bee1a8c3475a84d435fcacc93966a",
       "blobSha": "5920108fb4af99ac0bfabc02aaf2645a3d010fab"
+    },
+    "60-DOO-투-007": {
+      "path": "assets/cards/60-DOO-투-007.webp",
+      "x": -0.3076923076923077,
+      "y": 37.22627737226277,
+      "zoom": 1.4933767731249405,
+      "fit": "contain",
+      "rev": "mvwc9y7j",
+      "commit": "8ba00ab7be0fd7851b9c090871ccae042b69d729",
+      "blobSha": "bb306a57e38c3ddc03347aaf49552761e217ad0a"
     }
   }
 }
