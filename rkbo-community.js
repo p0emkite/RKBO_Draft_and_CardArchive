@@ -9,9 +9,9 @@ const artCache=new Map(),artBusy=new Map();
 const $=sel=>panel?.querySelector(sel);
 async function account(){
  const c=await root.RKBOOnline?.getClient?.();
- if(!c)throw Error("RKBO ONLINE 로그인이 필요해.");
+ if(!c)throw Error("RKBO ONLINE 로그인이 필요합니다.");
  const {data,error}=await c.auth.getUser();
- if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 이용할 수 있어.");
+ if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인 후 이용할 수 있습니다.");
  userId=data.user.id;return c;
 }
 async function call(name,args){
@@ -104,7 +104,7 @@ function collectionView(){
 }
 function membersView(){
  return '<section class="rkbo-cm-visibility"><label><input type="checkbox" data-cm-public '+(isPublic?'checked':'')+'> 내 도감 공개</label>'+
- '<small>도감은 기본 공개야. 체크를 해제하면 비공개가 되고 다른 회원이 보거나 교환할 수 없어.</small></section>'+
+ '<small>도감은 기본 공개 상태입니다. 체크를 해제하면 비공개로 전환되며 다른 회원이 조회하거나 교환할 수 없습니다.</small></section>'+
  '<form class="rkbo-cm-search" data-cm-member-search><input name="nickname" placeholder="회원 닉네임 검색" maxlength="50" value="'+esc(memberQuery)+'"><button>검색</button></form>'+
  '<div class="rkbo-cm-members">'+members.map(m=>'<button data-cm-member="'+esc(m.user_id)+'" class="rkbo-cm-member">'+
  '<strong>'+esc(m.nickname)+'</strong><small>'+((m.is_public||m.user_id===userId)?'📚 공개':'🔒 비공개')+(m.user_id===userId?' · 나':'')+'</small></button>').join("")+'</div>'+
@@ -133,7 +133,7 @@ function tradesView(){
   '<p>'+esc({pending:"⏳ 수락 대기",accepted:"✅ 교환 완료",declined:"거절됨",cancelled:"취소됨"}[t.status]||t.status)+'</p>'+
   (t.status==="pending"?(incoming?'<div><button data-cm-trade="accept" data-id="'+esc(t.id)+'">수락</button><button data-cm-trade="decline" data-id="'+esc(t.id)+'">거절</button></div>':
     '<button data-cm-trade="cancel" data-id="'+esc(t.id)+'">취소</button>'):'')+'</article>';
- }).join(""):'<p class="rkbo-cm-muted">아직 교환 내역이 없어. 공개 도감에서 다른 회원의 중복 카드를 골라 봐!</p>')+'</div>';
+ }).join(""):'<p class="rkbo-cm-muted">아직 교환 내역이 없습니다. 공개 도감에서 다른 회원의 중복 카드를 선택해 주시기 바랍니다.</p>')+'</div>';
 }
 function messagesView(){
  return messages.map(m=>'<div class="rkbo-cm-message'+(m.user_id===userId?' mine':'')+'"><div><strong>'+esc(who(m.user_id))+'</strong><small>'+when(m.created_at)+'</small></div>'+
@@ -196,13 +196,13 @@ async function act(button){
   if(!offered||!selected||!wanted)throw Error("교환 카드를 선택해 줘.");
   if(!root.confirm("서로 중복 카드 1장씩 교환을 제안할까?"))return;
   const request=root.crypto?.randomUUID?.();
-  if(!request)throw Error("보안 연결에서 요청 ID를 만들 수 없어.");
+  if(!request)throw Error("보안 연결에서 요청 ID를 생성할 수 없습니다.");
   await call("rkbo_community_trade",{p_action:"create",p_target:selected,p_offered:offered,
    p_requested:wanted,p_request:request});
-  await chooseTab("trades");root.dispatchEvent(new Event("rkbo-trade-updated"));inform("교환 요청을 보냈어. 상대가 수락하면 카드가 교환돼.");return;
+  await chooseTab("trades");root.dispatchEvent(new Event("rkbo-trade-updated"));inform("교환 요청을 보냈습니다. 상대방이 수락하면 카드가 교환됩니다.");return;
  }
  if(d.cmTrade){
-  if(d.cmTrade==="accept"&&!root.confirm("양쪽 중복 카드가 하나씩 교환돼. 수락할까?"))return;
+  if(d.cmTrade==="accept"&&!root.confirm("양쪽의 중복 카드가 한 장씩 교환됩니다. 수락하시겠습니까?"))return;
   await call("rkbo_community_trade",{p_action:d.cmTrade,p_trade:d.id});
   if(d.cmTrade==="accept"){await loadMine();root.dispatchEvent(new Event("rkbo-collection-updated"))}
   await loadTrades();root.dispatchEvent(new Event("rkbo-trade-updated"));inform(d.cmTrade==="accept"?"✅ 교환이 완료됐어!":"교환 상태가 변경됐어.");return;
@@ -253,7 +253,7 @@ function init(){
  panel.addEventListener("change",async e=>{
   if(!e.target.matches("[data-cm-public]"))return;
   try{isPublic=await call("rkbo_community_set_public",{p_public:e.target.checked});
-   await loadMembers();render();inform(isPublic?"내 카드 도감을 공개했어.":"내 카드 도감을 비공개로 바꿨어.");
+   await loadMembers();render();inform(isPublic?"내 카드 도감을 공개했습니다.":"내 카드 도감을 비공개로 전환했습니다.");
   }catch(ex){e.target.checked=isPublic;inform(ex.message)}
  });
  panel.addEventListener("submit",async e=>{
