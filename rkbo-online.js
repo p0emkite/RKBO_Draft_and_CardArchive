@@ -48,13 +48,13 @@ async function loadUser(){
  return authUser;
 }
 function buildHeader(){
- return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 TRT | Tsuki&#39;s RKBO Together <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
+ return '<header class="rkbo-online-head"><div><span class="rkbo-draft-kicker">RKBO · CONNECTED WORLD</span><h2>🌐 RTM | RKBO THE MOMENT <small>v1</small></h2><p>온라인 공동 랭킹 · Google 로그인 · 사용자별 기록</p></div><button type="button" class="rkbo-online-close" data-online="close" aria-label="닫기">×</button></header>';
 }
 function shell(inner){if(!panel)return;panel.innerHTML=buildHeader()+'<div class="rkbo-online-inner">'+inner+'</div>'}
 function notice(text){const el=q("#rkbo-online-message");if(el)el.textContent=text}
 function headerTabs(){return '<nav class="rkbo-online-tabs"><button data-online="tab-board" class="'+(screen==="leaderboard"?"active":"")+'">🏆 랭킹</button><button data-online="tab-account" class="'+(screen==="account"?"active":"")+'">👤 내 계정</button></nav>'}
 function disabledView(){
- shell(headerTabs()+'<section class="rkbo-online-empty"><div class="rkbo-online-big">🌐</div><h3>RKBO ONLINE 서버 연결 준비 중</h3>'+
+ shell(headerTabs()+'<section class="rkbo-online-empty"><div class="rkbo-online-big">🌐</div><h3>RTM 서버 연결 준비 중</h3>'+
  '<p>드래프트는 지금처럼 바로 플레이할 수 있어요. 전체 접속자 랭킹과 로그인은 제작자가 Supabase 프로젝트를 연결하면 활성화됩니다.</p>'+
  '<p>관리자: <code>supabase/schema.sql</code> 실행 → Edge Function 배포 → <code>rkbo-online-config.js</code>에 공개 URL/키 입력</p>'+
  '<div class="rkbo-online-hint">기존 드래프트의 기기별 스코어보드는 계속 이용할 수 있습니다.</div></section>');
@@ -280,7 +280,7 @@ function init(){
  const btn=document.createElement("button");btn.id="rkbo-online-open";btn.type="button";btn.className="rkbo-online-open";btn.textContent="🌐 ONLINE";
  nav?.prepend(btn);btn.addEventListener("click",()=>open("leaderboard"));
  overlay=document.createElement("div");overlay.id="rkbo-online-overlay";overlay.className="rkbo-online-overlay";overlay.hidden=true;
- overlay.innerHTML='<div class="rkbo-online-panel" role="dialog" aria-modal="true" aria-label="RKBO ONLINE"></div>';
+ overlay.innerHTML='<div class="rkbo-online-panel" role="dialog" aria-modal="true" aria-label="RKBO THE MOMENT 온라인"></div>';
  document.body.append(overlay);panel=overlay.querySelector(".rkbo-online-panel");
  overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
  panel.addEventListener("input",e=>{if(e.target?.id==="rkbo-online-nickname")nicknameTyping()});
