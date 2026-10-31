@@ -1582,3 +1582,27 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette{--combo-wheel-card-width:clamp(138px,23vh,198px)}
 }
 @media(prefers-reduced-motion:reduce){.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{transition:none!important}.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-card{animation:none!important}}
+
+/* TRT: maintain the real card image within a compact combination slot.
+   Archive cards have a large desktop/mobile min-height by default. */
+.rkbo-combo-candidate .rkbo-combo-card-art,
+.rkbo-combo-slots .rkbo-combo-card-art{position:relative;display:block;width:100%;max-width:100%;aspect-ratio:0.735;overflow:hidden}
+.rkbo-combo-card-art .player-card{
+ width:100%!important;min-height:0!important;max-height:100%!important;
+ height:100%!important;aspect-ratio:0.735!important;overflow:hidden
+}
+.rkbo-combo-card-art .player-card .card-inner{
+ min-height:0!important;height:100%!important;display:flex;flex-direction:column;overflow:hidden
+}
+.rkbo-combo-card-art .player-card .headshot{
+ min-height:0!important;max-height:45%!important;height:45%!important;
+ flex:0 1 45%!important;overflow:hidden
+}
+.rkbo-combo-card-art .player-card .card-top{min-height:0!important;flex:0 0 14%!important}
+.rkbo-combo-card-art .player-card .card-mid{min-height:0!important;flex:0 0 18%!important}
+.rkbo-combo-card-art .player-card .card-name{min-height:0!important;flex:1 1 auto!important}
+.rkbo-combo-slots button.filled{isolation:isolate}
+.rkbo-combo-slots .rkbo-combo-remove-mark{z-index:30;pointer-events:none;opacity:1!important}
+.rkbo-combo-overlay.is-combining .rkbo-combo-remove-mark{display:none!important}
+/* Opaque animation background prevents underlying input controls from bleeding through. */
+.rkbo-combo-overlay.is-combining .rkbo-combo-cinema{background:#040b13f9}
