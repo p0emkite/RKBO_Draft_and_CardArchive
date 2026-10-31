@@ -139,10 +139,10 @@ function gradeOptions(){
  return '<option value="all">전체 등급</option>'+grades.slice(0,5).map(g=>'<option value="'+g+'"'+(filterGrade===g?' selected':'')+'>'+g+'</option>').join("");
 }
 function percentMarkup(){
- if(selected.length<3)return '<div class="rkbo-combo-hint">3장 이상 선택하면 서버에서 정확한 결과 확률을 계산해 보여줘.</div>';
+ if(selected.length<3)return '<div class="rkbo-combo-hint">3장 이상 선택하면 서버에서 정확한 결과 확률을 계산하여 표시합니다.</div>';
  if(quoteLoading)return '<div class="rkbo-combo-hint">서버에서 실제 조합 확률을 계산하는 중…</div>';
  if(quoteError)return '<div class="rkbo-combo-error">'+esc(quoteError)+'</div>';
- if(!quote)return '<div class="rkbo-combo-hint">재료를 선택하면 확률이 표시돼.</div>';
+ if(!quote)return '<div class="rkbo-combo-hint">재료를 선택하면 확률이 표시됩니다.</div>';
  const odds=quote.odds||{};
  const highest=Math.max(...(quote.materials||[]).map(p=>grades.indexOf(p.grade)));
  const base=grades[highest];
@@ -157,10 +157,10 @@ function percentMarkup(){
    '<div class="rkbo-combo-meter"><i style="width:'+Math.max(0,Math.min(100,rate))+'%;background:'+hue[g]+'"></i></div></div>';
  }).join("")+'</div>'+
  '<p class="rkbo-combo-note">'+(quote.mode==="same"
- ?'🎯 '+esc(quote.season)+'차 시즌 카드만 나와.'
- :'🎲 서버에 등록된 '+(quote.eligibleSeasons||[]).map(n=>esc(n)+'차').join(" · ")+' 중 시즌이 균등 무작위로 결정돼.')+
- ' 등록되지 않은 등급의 확률은 가까운 하위 등급에 합산돼(하위가 없으면 최저 등록 등급). 특수카드가 없는 시즌은 다이아몬드에 합산돼.'+
- ' 보존은 같은 등급의 새 카드 1장 획득을 뜻해. 혼합 등급은 합산 점수로 계산하므로 최고 등급 보존율이 낮아질 수 있어.</p>';
+ ?'🎯 '+esc(quote.season)+'차 시즌 카드만 등장합니다.'
+ :'🎲 서버에 등록된 '+(quote.eligibleSeasons||[]).map(n=>esc(n)+'차').join(" · ")+' 중 시즌이 균등 무작위로 결정됩니다.')+
+ ' 등록되지 않은 등급의 확률은 가까운 하위 등급에 합산됩니다(하위가 없으면 최저 등록 등급). 특수카드가 없는 시즌은 다이아몬드에 합산됩니다.'+
+ ' 보존은 같은 등급의 새 카드 1장 획득을 의미합니다. 혼합 등급은 합산 점수로 계산하므로 최고 등급 보존율이 낮아질 수 있습니다.</p>';
 }
 
 /* Purely cosmetic 2.0 animations. The server response is the ONLY winner. */
@@ -197,7 +197,7 @@ function cinematicScreen(title,content,subtitle){
  cinema.hidden=false;
  cinema.className="rkbo-combo-cinema";
  cinema.innerHTML='<div class="rkbo-combo-cinema-panel">'+
-  '<header><small>RKBO ONLINE · CARD COMBINATION 2.0</small><h2>'+esc(title)+'</h2></header>'+
+  '<header><small>TRT | Tsuki's RKBO Together · CARD COMBINATION</small><h2>'+esc(title)+'</h2></header>'+
   '<div class="rkbo-combo-cinema-scene">'+content+'</div>'+
   '<p class="rkbo-combo-cinema-caption">'+esc(subtitle||"")+'</p>'+
   '<button type="button" class="rkbo-combo-cinema-skip" data-combo-fx-skip>연출 건너뛰기</button>'+
@@ -327,19 +327,20 @@ function render(){
  if(!dialog)return;
  const prevScroll=dialog.scrollTop;
  const listScroll=dialog.querySelector(".rkbo-combo-candidates")?.scrollTop||0;
- dialog.innerHTML='<header class="rkbo-combo-header"><div><small>RKBO · CARD COLLECTION</small>'+
+ overlay?.classList.toggle('is-combining',busy);
+  dialog.innerHTML='<header class="rkbo-combo-header"><div><small>TRT | Tsuki's RKBO Together</small>'+
  '<h2>🧬 카드 조합</h2><p>중복 카드 3~5장 → 새로운 선수 카드 1장</p></div>'+
  '<button type="button" data-combo-close aria-label="닫기">×</button></header>'+
  '<div class="rkbo-combo-content"><div class="rkbo-combo-rules">'+
- '<b>동일 차수는 그 차수 확정</b> · 혼합하면 등록된 시즌 랜덤 · 재료 점수가 높을수록 상위 등급 기대 상승.'+
- '<br>마지막 1장·MY TEAM 편성 카드·금테/프리즘·특수 등급 카드는 재료에서 제외해.</div>'+
+ '<b>동일 차수는 해당 차수 확정</b> · 혼합하면 등록된 시즌 랜덤 · 재료 점수가 높을수록 상위 등급 기대 상승.'+
+ '<br>마지막 1장·MY TEAM 편성 카드·금테/프리즘·특수 등급 카드는 재료에서 제외됩니다.</div>'+
  resultMarkup()+
  '<div class="rkbo-combo-layout"><section class="rkbo-combo-list"><h3>보유 카드 <small>'+inventory.length+'종</small></h3>'+
  '<div class="rkbo-combo-filters"><select data-combo-filter-season>'+options()+'</select>'+
  '<select data-combo-filter-grade>'+gradeOptions()+'</select></div>'+
  '<input type="search" id="rkbo-combo-search" placeholder="선수 이름 검색" value="'+esc(search)+'" autocomplete="off">'+
  '<div class="rkbo-combo-candidates">'+(activeCards().length?activeCards().map(wrapCard).join(""):
- '<p class="rkbo-combo-hint">조건에 맞는 중복 카드가 없어. 카드팩에서 중복 카드를 모아 봐!</p>')+'</div></section>'+
+ '<p class="rkbo-combo-hint">조건에 맞는 중복 카드가 없습니다. 카드팩에서 중복 카드를 모아 주시기 바랍니다.</p>')+'</div></section>'+
  '<section class="rkbo-combo-config"><h3>조합할 카드 <small>'+selected.length+' / 5</small></h3>'+
  '<div class="rkbo-combo-slots">'+Array.from({length:5},(_,i)=>{
  const id=selected[i],p=id?selectionCard(id):null;
@@ -356,7 +357,7 @@ function render(){
  '<h3>🎲 결과 등급 확률 <small>공개</small></h3>'+percentMarkup()+
  '<button type="button" class="rkbo-combo-submit" data-combo-submit'+(busy||quoteLoading||!quote||selected.length<3||selected.length>5?' disabled':'')+'>'+
  (busy?'서버에서 조합 중…':'⚾ 카드 '+selected.length+'장 조합하기')+'</button>'+
- '<p class="rkbo-combo-note">조합 시 재료 카드가 차감되고 결과 카드 1장을 획득해. 되돌릴 수 없어.</p>'+
+ '<p class="rkbo-combo-note">조합 시 재료 카드가 차감되고 결과 카드 1장을 획득합니다. 조합은 취소할 수 없습니다.</p>'+
  '</section></div>'+
  historyMarkup()+'</div>';
  dialog.scrollTop=prevScroll;
@@ -384,7 +385,7 @@ async function loadData(){
     names.forEach((p,i)=>{inventory[i].name=p.name});
    }catch(e){console.warn("[RKBO combo] Name lookup failed; original names retained",e)}
   }
-  msg("수집한 중복 카드만 재료 목록에 표시돼.");
+  msg("수집한 중복 카드만 재료 목록에 표시됩니다.");
  }catch(error){msg("카드 조합 불러오기 실패: "+error.message)}
  finally{loading=false;render()}
 }
@@ -448,15 +449,15 @@ async function combine(){
    console.warn("[RKBO combination] Cosmetic effect failed",animationError);
   }
   result=data;selected=[];quote=null;quoteLoading=false;pendingRequest=null;
-  msg(data.replayed?"저장된 조합 결과를 복구했어.":"✅ 조합 성공! 새 카드가 수집 도감에 지급됐어.");
+  msg(data.replayed?"저장된 조합 결과를 복구했습니다.":"✅ 조합에 성공했습니다. 새 카드가 수집 도감에 지급되었습니다.");
  }catch(e){
   if(awarded){
    result=awarded;selected=[];quote=null;pendingRequest=null;
-   msg("✅ 조합은 정상 지급됐어. 연출 중 문제가 발생했지만 카드는 수집 도감에서 확인할 수 있어.");
+   msg("✅ 카드가 정상 지급되었습니다. 연출 중 문제가 발생했지만 수집 도감에서 확인할 수 있습니다.");
   }else{
    // Preserve the same UUID so that a lost response cannot double-spend inventory.
    quote=rated;quoteLoading=false;
-   msg("조합 확인 실패: "+e.message+" · 동일 요청으로 다시 시도하면 중복 차감되지 않아.");
+   msg("조합 확인 실패: "+e.message+" · 동일 요청으로 다시 시도하면 중복 차감되지 않습니다.");
   }
  }finally{
   cinematicStop();busy=false;render();
@@ -471,7 +472,7 @@ async function loadWinningArt(cardId){
  if(!Number.isInteger(season)||season<1||season>60)return;
  const cards=await ensureSeasonArtwork(season);
  const player=cards.find(p=>p.id===cardId);
- if(!player){resultArtwork='<span>선수 카드 이미지는 상세보기에서 확인해 줘.</span>'}
+ if(!player){resultArtwork='<span>선수 카드 이미지는 상세보기에서 확인해 주시기 바랍니다.</span>'}
  else{
   resultDisplayName=player.name||"";
   try{resultArtwork=root.RKBOCardView?.render?.(player,true)||""}
