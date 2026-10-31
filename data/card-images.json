@@ -1430,6 +1430,16 @@
       "rev": "mvwjh6e1",
       "commit": "056c129112885ff0e29b2702fda646ab041d4a6a",
       "blobSha": "f9f640ddee20c767f1268b2594582e311eba664d"
+    },
+    "60-LG-타-009": {
+      "path": "assets/cards/60-LG-타-009.webp",
+      "x": -0.6153846153846154,
+      "y": 35.76642335766424,
+      "zoom": 1.5007303518490005,
+      "fit": "contain",
+      "rev": "mvwjhg85",
+      "commit": "6953210dfd044c62acac7e908d9307c7f6ed8e3d",
+      "blobSha": "91a530fc6c2af9771bb0c0eec4435ce188a36125"
     }
   }
 }
