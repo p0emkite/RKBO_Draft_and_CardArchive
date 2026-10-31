@@ -1606,3 +1606,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 .rkbo-combo-overlay.is-combining .rkbo-combo-remove-mark{display:none!important}
 /* Opaque animation background prevents underlying input controls from bleeding through. */
 .rkbo-combo-overlay.is-combining .rkbo-combo-cinema{background:#040b13f9}
+
+/* TRT site wordmark remains readable without disturbing archive navigation. */
+.brand .brand-sub{letter-spacing:.035em;font-size:clamp(9px,.88vw,13px);white-space:nowrap}
+@media(max-width:580px){.brand .brand-sub{font-size:9px;letter-spacing:0;white-space:normal;max-width:126px;line-height:1.25}}
