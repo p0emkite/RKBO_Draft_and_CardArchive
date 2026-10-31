@@ -48,7 +48,7 @@ function renderMessages(){
   (m.deleted?'':m.user_id===userId?
    '<button type="button" data-chat-delete="'+m.id+'">삭제</button>':
    '<button type="button" data-chat-report="'+m.id+'">신고</button>')+
-  '</article>').join("")||'<p class="rkbo-chat-empty">아직 메시지가 없어. 먼저 인사해 봐! ⚾</p>';
+  '</article>').join("")||'<p class="rkbo-chat-empty">아직 메시지가 없습니다. 먼저 인사를 남겨 주시기 바랍니다. ⚾</p>';
  if(sticky||expanded&&requestSeq===0)stream.scrollTop=stream.scrollHeight;
 }
 function showLogin(error){
@@ -57,7 +57,7 @@ function showLogin(error){
  if(form)form.hidden=true;
  if(hint){
   hint.hidden=false;
-  hint.innerHTML='<p>Google 로그인 후 커뮤니티 채팅을 이용할 수 있어.</p>'+
+  hint.innerHTML='<p>Google 로그인 후 커뮤니티 채팅을 이용할 수 있습니다.</p>'+
   '<button type="button" data-chat-login>Google 로그인</button>'+
   '<button type="button" data-chat-retry>연결 다시 시도</button>';
  }
@@ -72,7 +72,7 @@ async function getAccount(){
  const c=await root.RKBOOnline?.getClient?.();
  if(!c)throw Error("RKBO ONLINE 연결 상태를 확인해 주세요.");
  const {data,error}=await c.auth.getUser();
- if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인이 필요해.");
+ if(error||!data?.user||data.user.is_anonymous)throw Error("Google 로그인이 필요합니다.");
  client=c;userId=data.user.id;
  return c;
 }
@@ -171,7 +171,7 @@ async function messageAction(button){
   if(!root.confirm("내 메시지를 삭제할까?"))return;
   const {error}=await client.rpc("rkbo_community_chat_delete",{p_id:Number(deleteId)});
   if(error)throw Error(error.message);
-  feedback("메시지를 삭제했어.");
+  feedback("메시지를 삭제했습니다.");
  }else if(reportId){
   if(!root.confirm("이 메시지를 신고할까?"))return;
   const {error}=await client.rpc("rkbo_community_chat_report",{p_id:Number(reportId)});
