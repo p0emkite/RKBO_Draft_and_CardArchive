@@ -37,6 +37,7 @@
   const board=phase>=2?'<div class="rkbo-cine-board-content"><strong>'+h(tier[0])+'</strong></div>':'';
   return '<div class="rkbo-cine-world" style="--world-w:'+w+'px;--world-h:'+height+'px">'+
     '<div class="rkbo-cine-photo" aria-hidden="true"></div>'+
+    '<div class="rkbo-cine-turf-tint" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-grass" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-grass-pulse" aria-hidden="true"></div>'+
     '<div class="rkbo-cine-led" aria-label="'+h(tier[0])+' 등급 전광판">'+board+'</div></div>';
@@ -92,7 +93,7 @@
  function init(){
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-selected-v11";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-fence-overlay-v12";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
   ["baseball-qhd.svg","stadium-selected-qhd.webp"].forEach(f=>{

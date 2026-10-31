@@ -245,3 +245,29 @@
 .rkbo-cine-ball-photo{image-rendering:auto;filter:drop-shadow(0 12px 23px #06101abb) drop-shadow(0 0 15px var(--cine-tone))}
 .rkbo-cine-ball-mark{image-rendering:auto;backface-visibility:hidden;filter:contrast(1.16) drop-shadow(1px 2px 1px #000a)}
 @media(max-width:540px){.rkbo-cine-board-content strong{font-size:clamp(14px,3.3vw,26px)}}
+
+/* v12: flat 50% rarity-color tint over ONLY the turf, clipped at the real
+   outfield-fence/grass boundary in the selected 2560x1440 stadium image.
+   No gradient, additive blend or color bleed onto the fence or scoreboard. */
+.rkbo-cine-grass,
+.rkbo-cine-grass-pulse{display:none!important}
+.rkbo-cine-turf-tint{
+ position:absolute;
+ z-index:1;
+ inset:63.8% 0 0;
+ background:var(--cine-tone);
+ opacity:0;
+ pointer-events:none;
+}
+.rkbo-cine-phase-run .rkbo-cine-turf-tint{
+ animation:rkbo-cine-turf-tint-in 1.45s ease-out both;
+}
+.rkbo-cine-phase-board .rkbo-cine-turf-tint,
+.rkbo-cine-phase-ball .rkbo-cine-turf-tint{opacity:.5}
+@keyframes rkbo-cine-turf-tint-in{
+ 0%{opacity:0}
+ 100%{opacity:.5}
+}
+@media(prefers-reduced-motion:reduce){
+ .rkbo-cine-phase-run .rkbo-cine-turf-tint{animation:none;opacity:.5}
+}
