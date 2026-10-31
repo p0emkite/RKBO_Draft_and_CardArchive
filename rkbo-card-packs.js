@@ -88,7 +88,7 @@ function loginView(error){
  '<button type="button" data-pack="login">Google 로그인</button></div>';
 }
 function frame(){
- dialog.innerHTML='<header class="rkbo-pack-header"><div><small>TRT | Tsuki's RKBO Together</small><h2>🎫 RKBO CARD PACK</h2><p>5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
+ dialog.innerHTML='<header class="rkbo-pack-header"><div><small>TRT | Tsuki&#39;s RKBO Together</small><h2>🎫 RKBO CARD PACK</h2><p>5장 개봉 · 50팩 천장</p></div><button type="button" data-pack="close" aria-label="닫기">×</button></header>'+
  '<nav class="rkbo-pack-tabs"><button data-pack-tab="pack">🎁 카드팩</button><button data-pack-tab="collection">📚 내 수집 도감</button><button data-pack-tab="history">📜 개봉 기록</button>'+ (adminAuthorized?'<button data-pack-tab="admin">⚙️ 제작자 팩 관리</button>':'')+'</nav>'+
  '<div class="rkbo-pack-body" id="rkbo-pack-body"></div><p class="rkbo-pack-status" id="rkbo-pack-status" role="status"></p>';
  dialog.querySelectorAll("[data-pack-tab]").forEach(b=>b.classList.toggle("active",b.dataset.packTab===tab));
