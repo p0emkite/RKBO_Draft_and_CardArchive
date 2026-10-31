@@ -1810,6 +1810,16 @@
       "rev": "mvwlwql6",
       "commit": "79db72002c7c3801e5cca09728defc207c69b6a7",
       "blobSha": "bff03167a9302208a98afde38071c8f013669281"
+    },
+    "60-NC-타-009": {
+      "path": "assets/cards/60-NC-타-009.webp",
+      "x": 3.6923076923076925,
+      "y": 22.62773722627737,
+      "zoom": 1.225043,
+      "fit": "contain",
+      "rev": "mvwlx00o",
+      "commit": "47df0aeb5c035e3d22876d5db74706fbc9299ae8",
+      "blobSha": "8196737ef30a0a08c2040343ab481824f1da5a2f"
     }
   }
 }
