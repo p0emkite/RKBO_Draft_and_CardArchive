@@ -1070,6 +1070,16 @@
       "rev": "mvwgr97m",
       "commit": "5c1ef01383d05848205ab8d8b8e9bae68695812a",
       "blobSha": "2e99265faf1d6bb855077fb510c80ba8339f4c6b"
+    },
+    "60-HAN-투-003": {
+      "path": "assets/cards/60-HAN-투-003.webp",
+      "x": 2.4615384615384617,
+      "y": 13.13868613138686,
+      "zoom": 1.03,
+      "fit": "contain",
+      "rev": "mvwgruio",
+      "commit": "a57df258a82d0c2f5af58d439e8753440d9274d3",
+      "blobSha": "7fe13d4826ba527c90651a419a7bf194bf66bb4e"
     }
   }
 }
