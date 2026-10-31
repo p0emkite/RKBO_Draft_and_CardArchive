@@ -183,7 +183,7 @@ function showCurrentReveal(){
  const p=cache.get(Number(draw.cardId.split("-")[0]))?.get(draw.cardId);
  const special=PRIORITIES[draw.grade]>=3;
  const card=renderPlayer(p),front=special?'<div class="rkbo-pack-flip">'+
-  '<div class="rkbo-pack-flip-inner"><div class="rkbo-pack-flip-back"><span>RKBO</span><strong>LEGENDARY CARD</strong><small>✨ CLICK TO REVEAL ✨</small></div>'+
+  '<div class="rkbo-pack-flip-inner"><div class="rkbo-pack-flip-back" aria-label="선수 카드 뒷면"><img src="./assets/card-back.webp?v=rtm-20261031" alt="" draggable="false"></div>'+
   '<div class="rkbo-pack-flip-front">'+card+'</div></div></div>':card;
  target.innerHTML='<div class="rkbo-pack-reveal-heading rarity-'+esc(draw.grade)+'"><span>'+(cursor)+'/5</span><strong>'+esc(displayGrade(draw.grade))+'</strong>'+
  '<span>'+(draw.isNew?'✨ NEW':'중복 카드 ×'+draw.quantity)+'</span></div>'+
