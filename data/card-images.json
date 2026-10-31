@@ -1990,6 +1990,16 @@
       "rev": "mvwoc9g7",
       "commit": "c176e1183f76d63d252f55e5821d0ba1cbf74332",
       "blobSha": "2d9fd899c0c0232e6686d3a6b32256a83dc5c2ce"
+    },
+    "60-SSG-타-002": {
+      "path": "assets/cards/60-SSG-타-002.webp",
+      "x": -3.076923076923077,
+      "y": 24.817518248175183,
+      "zoom": 1.3043731095510005,
+      "fit": "contain",
+      "rev": "mvwocky6",
+      "commit": "759a45df3e60823d2c2eef4d7189408ba7562d0b",
+      "blobSha": "530f79021407ca767ac8aa8d54b8b9ff924d2eae"
     }
   }
 }
