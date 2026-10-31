@@ -76,7 +76,7 @@
   if(!stage)return false;
   const tier=TYPES[grade]||TYPES["코랄"];
   const rect=stage.getBoundingClientRect(),width=Math.max(200,rect.width),height=Math.max(220,rect.height);
-  const ratio=830/335;
+  const ratio=1248/526;
   const w=Math.ceil(Math.max(width,height*ratio)),sh=Math.ceil(Math.max(height,width/ratio));
   const reduced=root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   // Team artwork arrives from the uploaded separate-logo archive; never substitute
@@ -95,7 +95,7 @@
    link.href="./rkbo-pack-cinematic.css?v=20261031-sharp-v4";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
-  ["atlas.avif","atlas.webp","baseball.webp","club-logos.webp"].forEach(f=>{
+  ["baseball.webp"].forEach(f=>{
    const image=new Image();image.decoding="async";image.src=ASSETS+f;
   });
  }
