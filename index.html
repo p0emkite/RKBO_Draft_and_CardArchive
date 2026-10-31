@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark" />
-<title>TRT | Tsuki's RKBO Together</title>
+<title>RKBO THE MOMENT</title>
 <style>
 :root{--bg:#080e1a;--panel:#111c2b;--panel2:#142237;--border:#26384b;--text:#eef3fa;--muted:#8ea2ba;--gold:#f7cd72;--blue:#80bff3}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 85% 25% at 50% 0%,#18314a 0%,transparent 85%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Pretendard","Malgun Gothic",sans-serif;letter-spacing:-.02em;line-height:1.55}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #91d2ff;outline-offset:2px}.site{max-width:1480px;margin:auto;padding:0 32px}.nav{display:flex;justify-content:space-between;align-items:center;height:84px;border-bottom:1px solid #ffffff16}.brand{display:flex;align-items:center;gap:13px;font-weight:900;font-size:25px;letter-spacing:.01em}.logo{background:linear-gradient(140deg,#e6c271,#b88e42);color:#081522;padding:4px 10px;transform:skew(-9deg);border-radius:4px;box-shadow:0 2px 15px #a77c342f}.brand-sub{font-size:11px;color:#95a6b9;font-weight:800;letter-spacing:.23em}.nav-right{display:flex;align-items:center;gap:16px;color:#9bb0c6;font-size:12px;font-weight:700}.vtag{border:1px solid #49617b;border-radius:22px;padding:6px 12px;color:#e0ebf4}
@@ -53,7 +53,7 @@
 </head>
 <body>
 <div class="site">
-<header class="nav"><a href="#" class="brand" aria-label="TRT | Tsuki&#39;s RKBO Together 첫 화면"><img class="archive-brand-logo" src="./assets/rkbo-archive-logo.webp" alt="RKBO 리그 로고"><span class="brand-sub">TRT | Tsuki&#39;s RKBO Together</span></a><div class="nav-right"></div></header>
+<header class="nav"><a href="#" class="brand" aria-label="RTM | RKBO THE MOMENT 첫 화면"><img class="archive-brand-logo" src="./assets/rkbo-archive-logo.webp" alt="RKBO 리그 로고"><span class="brand-sub">RTM | RKBO THE MOMENT</span></a><div class="nav-right"></div></header>
 <section class="hero"><div><div class="season-picker-row"><label for="season-select" class="season-select-label">시즌 선택</label><select id="season-select" class="season-select" aria-label="시즌 선택"><option value="60">60차 시즌</option></select><span id="season-loading" class="season-loading" aria-live="polite"></span></div><h1><span id="hero-season-number">60</span>차 시즌,<br><em>기록이 카드가 되다.</em></h1></div><div class="hero-right"><div class="giant60" id="hero-background-season">60</div><div class="hero-emblem" data-season="60"></div></div></section>
 <section class="stats-head" aria-label="시즌 개요"><div class="kpi"><div class="number" id="all-count">211</div><div class="label">시즌 선수 카드</div></div><div class="kpi"><div class="number" id="bat-count">105</div><div class="label">타자 카드</div></div><div class="kpi"><div class="number" id="pit-count">106</div><div class="label">투수 카드</div></div><div class="kpi"><div class="number" id="fav-count">0</div><div class="label">내 관심 카드 ★</div></div></section>
 <hr class="divider">
@@ -188,7 +188,7 @@ function paintActiveSeason(){
  }
  q('season-select').value=String(activeSeason);
  document.querySelector('.hero-emblem')?.setAttribute('data-season',String(activeSeason));
- document.title='RKBO '+activeSeason+'차 시즌 | 선수 카드 도감';
+ document.title='RKBO THE MOMENT';
 }
 async function loadSeasonManifest(){
  const resp=await fetch('./data/seasons.json?t='+Date.now(),{cache:'no-store'});
