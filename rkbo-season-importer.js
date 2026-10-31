@@ -121,7 +121,7 @@ async function publish(){if(locked)return;if(!evaluated){notify('먼저 파일 �
   q('rkbo-auto-publish').hidden=true;
   q('rkbo-auto-success').hidden=false;
   const next=[...seasons.keys()].filter(x=>x!==60).sort((a,b)=>b-a)[0];
-  notify(`✓ ${past.length}개 시즌의 선수 카드와 원본 기록 ${archives.length}개 파일을 GitHub에 저장했어.\n커밋: ${commit.slice(0,12)}\n상단 시즌 선택 목록을 새로고침했어. ${next}차 시즌을 선택해서 확인해 봐.`);
+  notify(`✓ ${past.length}개 시즌의 선수 카드와 원본 기록 ${archives.length}개 파일을 GitHub에 저장했습니다.\n커밋: ${commit.slice(0,12)}\n상단 시즌 선택 목록을 새로고침했습니다. ${next}차 시즌을 선택하여 확인해 주시기 바랍니다.`);
   window.dispatchEvent(new Event('rkbo-season-ready'));
  }catch(error){console.error(error);notify('GitHub 등록 실패: '+error.message+'\n토큰의 Contents: Read and write 권한, 저장소 선택 범위, GitHub API 할당량을 확인해 주세요. 원자적 커밋이 실패했다면 기존 시즌 목록은 변경되지 않습니다.')}
  finally{setDisabled(false)}
