@@ -14,7 +14,7 @@ function safeText(target,value){if(target)target.textContent=value}
 function renderBar(){
  if(!bar)return;
  const cur=feed.length?feed[feedIndex%feed.length]:null;
- bar.innerHTML='<div class="rkbo-activity-brand"><span aria-hidden="true">📣</span><strong>TRT | Tsuki's RKBO Together · 획득 전광판</strong>'+
+ bar.innerHTML='<div class="rkbo-activity-brand"><span aria-hidden="true">📣</span><strong>TRT | Tsuki&#39;s RKBO Together · 획득 전광판</strong>'+
   '<span class="rkbo-activity-live">LIVE</span></div>'+
  '<div class="rkbo-activity-current" data-activity-current aria-live="polite">'+
   (cur?esc(brief(cur)):'고등급 카드를 획득하면 이곳에 표시됩니다.')+'</div>'+
