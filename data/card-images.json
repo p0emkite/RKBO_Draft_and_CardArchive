@@ -1530,6 +1530,16 @@
       "rev": "mvwk6k5f",
       "commit": "5464be0bc3e6064e249b4a54dc639abf539954fe",
       "blobSha": "012c9e636799adde761e8776e350238750a90356"
+    },
+    "60-LOT-타-003": {
+      "path": "assets/cards/60-LOT-타-003.webp",
+      "x": -3.076923076923077,
+      "y": 7.2992700729927,
+      "zoom": 1.3107960100000002,
+      "fit": "contain",
+      "rev": "mvwk703v",
+      "commit": "514f14f9ac064e87a404ff2cc1204f87b43c0d86",
+      "blobSha": "6a58a3edc3fb7291847bd77c35e78eb815dc43d8"
     }
   }
 }
