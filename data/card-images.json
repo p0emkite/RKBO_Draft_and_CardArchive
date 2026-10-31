@@ -1090,6 +1090,16 @@
       "rev": "mvwgshob",
       "commit": "bde12b742f7bce968177315a67a6f4cc13617761",
       "blobSha": "174ab2f56d1ec3a6d1c0c0709ed1582a9c5b3a01"
+    },
+    "60-HAN-타-010": {
+      "path": "assets/cards/60-HAN-타-010.webp",
+      "x": 1.2307692307692308,
+      "y": 17.153284671532848,
+      "zoom": 1.1392899900000002,
+      "fit": "contain",
+      "rev": "mvwgsrrb",
+      "commit": "201de50c318633a7ec377c257b5706807f5ac4a5",
+      "blobSha": "2075eb6f33d3244f87108ae82b4c7b79212ba4d3"
     }
   }
 }
