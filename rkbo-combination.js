@@ -321,7 +321,7 @@ function historyMarkup(){
  new Date(x.created_at).toLocaleString("ko-KR")+'</span>'+
  '<strong>'+esc(x.result_season)+'차 · '+esc(x.result_grade)+'</strong>'+
  '<button type="button" data-combo-history-detail="'+esc(x.result_card_id)+'">카드 보기</button></div>').join(""):
- '<p>아직 조합 기록이 없어.</p>')+'</section>';
+ '<p>아직 조합 기록이 없습니다.</p>')+'</section>';
 }
 function render(){
  if(!dialog)return;
