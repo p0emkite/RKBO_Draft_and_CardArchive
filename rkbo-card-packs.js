@@ -11,7 +11,6 @@ let overlay=null,dialog=null,tab="pack",season=60,opening=false,draws=[],cursor=
 let owned=new Map(),catalog=[],packsState=null,history=[],cache=new Map(),collectionFilter="all",collectionGrade="all",collectionLimit=36;
 let packChoices=[],adminAuthorized=false,adminSeason=60,adminBusy=false;
 const PACK_COOLDOWN_MS=5500;
-const CINEMATIC_TEST=new URLSearchParams(root.location.search).get("packTest")==="1";
 let cooldownUntil=0,cooldownTimer=null;
 function remainingCooldownMs(){return Math.max(0,cooldownUntil-Date.now())}
 function beginCooldown(ms=PACK_COOLDOWN_MS){cooldownUntil=Math.max(cooldownUntil,Date.now()+ms)}
@@ -114,7 +113,7 @@ function renderPack(){
   '<span>터치해서 카드팩 개봉</span></button>')+'</div>'+
  '<div class="rkbo-pack-controls"><button type="button" data-pack="'+(draws.length?"next":"open")+'" class="rkbo-pack-primary" '+(opening||!draws.length&&remainingCooldownMs()>0?'disabled':'')+'>'+
  (draws.length?(cursor<draws.length?"다음 카드 공개 ("+(cursor+1)+"/5)":"결과 확인"):"⚾ 카드팩 5장 개봉")+'</button>'+
- '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+ (CINEMATIC_TEST&&!draws.length?'<div class="rkbo-cine-test-controls"><small>🧪 연출 테스트 · 카드 지급 없음 · 기존 확률·천장 유지</small>'+ '<button data-pack="preview" data-grade="코랄">🪸 코랄</button><button data-pack="preview" data-grade="다이아몬드">💎 다이아몬드</button>'+ '<button data-pack="preview" data-grade="특수">🏆 특수등급</button><button data-pack="preview-reset">다시 보기</button></div>':'')+
+ '<p class="rkbo-pack-cooldown-note" id="rkbo-pack-cooldown-note" role="status" aria-live="off"></p></div>'+
  '';
  if(draws.length)showCurrentReveal();
  else updateCooldownUi();
@@ -220,33 +219,6 @@ async function showNext(){
  const btn=body?.querySelector(".rkbo-pack-controls button");
  if(btn){btn.disabled=false;btn.textContent=cursor<5?"다음 카드 공개 ("+(cursor+1)+"/5)":"5장 결과 확인"}
  opening=false;
-}
-/* TEST ONLY. No RPC, collection changes, history changes or pity counter changes. */
-async function previewCinematic(grade){
- if(!CINEMATIC_TEST||opening||draws.length)return;
- opening=true;
- const token=++revealToken,stage=$("#rkbo-pack-stage");
- const buttons=dialog?.querySelectorAll(".rkbo-cine-test-controls button")||[];
- buttons.forEach(b=>b.disabled=true);
- try{
-  if(!stage||!root.RKBOPackCinematic?.play)throw Error("시네마틱 파일을 불러오지 못했어요.");
-  const roster=await playersFor(season);
-  const candidates=Array.from(roster.values()).filter(p=>grade==="특수"?SPECIAL_RARITIES.includes(p.grade):p.grade===grade);
-  if(!candidates.length)throw Error(season+"차 시즌에 "+grade+" 카드가 없어요.");
-  const player=candidates[Math.floor(Math.random()*candidates.length)];
-  message("🧪 "+grade+" 연출 확인 중 · 서버 추첨 없음");
-  const ok=await root.RKBOPackCinematic.play(stage,player.grade,()=>token===revealToken&&!overlay.hidden,player);
-  if(!ok)return;
-  const tone=SPECIAL_RARITIES.includes(player.grade)?"special":player.grade==="코랄"?"coral":"diamond";
-  stage.innerHTML='<div id="rkbo-pack-reveal"><div class="rkbo-pack-reveal-heading rarity-'+esc(player.grade)+'"><span>🧪 TEST</span><strong>'+esc(player.grade)+'</strong><span>미지급</span></div>'+
-  '<div class="rkbo-pack-hover-shell is-floating"><div class="rkbo-pack-revealed-card is-'+tone+'"><div class="rkbo-pack-flip"><div class="rkbo-pack-flip-inner">'+
-  '<div class="rkbo-pack-flip-back"><span>RKBO</span><strong>LEGENDARY CARD</strong><small>REVEAL</small></div>'+
-  '<div class="rkbo-pack-flip-front">'+renderPlayer(player)+'</div></div></div></div></div>'+
-  '<div class="rkbo-cine-preview-label">🧪 '+esc(player.name)+' · 실제 획득 아님</div></div>';
-  await wait(1650);
-  if(token===revealToken&&!overlay.hidden)message("✅ 미리보기 완료 · 기존 카드팩 확률 및 기록 유지");
- }catch(e){if(token===revealToken){renderPack();message("미리보기 오류: "+e.message)}}
- finally{opening=false;buttons.forEach(b=>b.disabled=false)}
 }
 async function openPack(){
  if(opening||draws.length)return;
@@ -487,8 +459,6 @@ function init(){
   const action=target.dataset.pack;
   if(action==="close"){close();return}
   if(action==="login"){close();root.RKBOOnline?.open?.("account");return}
-  if(action==="preview"){await previewCinematic(target.dataset.grade);return}
-  if(action==="preview-reset"){if(!opening)renderPack();return}
   if(action==="open"){await openPack();return}
   if(action==="next"){await showNext();return}
   if(action==="share"){await savePackSharePNG(target);return}

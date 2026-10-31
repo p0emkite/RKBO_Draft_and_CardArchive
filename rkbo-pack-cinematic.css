@@ -102,10 +102,6 @@
  border-radius:50%;transform:rotate(-9deg) perspective(240px) rotateY(-7deg);
  filter:drop-shadow(1px 2px 2px #0006);
 }
-.rkbo-cine-test-controls{display:flex;gap:7px;align-items:center;justify-content:center;flex-wrap:wrap;margin:11px auto;max-width:640px}
-.rkbo-cine-test-controls button{padding:9px 13px;color:#fff;border:1px solid #9ca5d0;border-radius:8px;background:#25314e;font-weight:800;font-size:12px;cursor:pointer}
-.rkbo-cine-test-controls small{width:100%;color:#bdd2e5;font-size:11px;text-align:center}
-.rkbo-cine-preview-label{position:relative;z-index:5;color:#ffe8aa;border-radius:8px;background:#141729;padding:8px;text-align:center;font-size:12px;font-weight:800}
 @keyframes rkbo-cine-door-part{
  0%,12%{transform:translateX(0)}
  65%{transform:translateX(var(--door-middle))}
