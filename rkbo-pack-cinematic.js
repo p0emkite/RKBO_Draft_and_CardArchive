@@ -39,7 +39,7 @@
  // Always render the same scene and screen coordinates. The camera alone changes
  // during the next cut; the scoreboard is anchored to the real photograph.
  function frame(phase,tier,w,h){
-  return '<div class="rkbo-cine-scene rkbo-cine-phase-'+sceneName[phase]+' rkbo-cine-tone-'+tier[2]+'" style="--cine-tone:'+tier[1]+'">'+
+  return '<div class="rkbo-cine-scene rkbo-cine-phase-'+sceneName[phase]+' rkbo-cine-tone-'+tier[2]+'" style="--cine-tone:'+tier[1]+';--backdrop-w:'+w+'px;--backdrop-h:'+h+'px">'+
    stadiumWorld(tier,phase,w,h)+
    '<div class="rkbo-cine-vignette"></div>'+
    '<div class="rkbo-cine-atmosphere" aria-hidden="true"></div>'+
