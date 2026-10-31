@@ -23,13 +23,13 @@
     },
     "60-SAM-타-011": {
       "path": "assets/cards/60-SAM-타-011.webp",
-      "x": -3.6923076923076934,
-      "y": 47.70790703356442,
-      "zoom": 2.197551003036269,
+      "x": 3.6923076923076916,
+      "y": 90.87591240875913,
+      "zoom": 2.5785341502012487,
       "fit": "contain",
-      "rev": "mvm4l7ta",
-      "commit": "aed0ef0afa051e254532d1ab502b2a84b4c30d9c",
-      "blobSha": "08986b6f78026e610a3f31ad68a2a98baeaed5ed"
+      "rev": "mvwhgs6w",
+      "commit": "7ff74171ab8bf6c2fa4452d720f1eb77e1dfe578",
+      "blobSha": "fa9a5378e5574f0e759be52a16eb1e6cba5f2602"
     },
     "60-SAM-투-001": {
       "path": "assets/cards/60-SAM-투-001.webp",
