@@ -9,7 +9,7 @@
  transform:translate(-50%,-50%) scale(1);transform-origin:50% 60%;will-change:transform
 }
 .rkbo-cine-photo{
- position:absolute;inset:0;background-image:url("./assets/cinematic/stadium-qhd.webp");
+ position:absolute;inset:0;background-image:url("./assets/cinematic/stadium-selected-qhd.webp");
  background-position:center center;background-size:100% 100%;filter:contrast(1.025) saturate(1.02)
 }
 .rkbo-cine-grass{
@@ -188,9 +188,9 @@
 
 @keyframes rkbo-cine-seam-fade{0%,18%{opacity:1}36%,100%{opacity:0}}
 
-/* v9 high-resolution scene. Intentionally does NOT alter approved gate/door assets. */
+/* v11: use user-supplied exact third stadium image; door remains unchanged. */
 .rkbo-cine-photo{
- background-image:url("./assets/cinematic/stadium-qhd.svg")!important;
+ background-image:url("./assets/cinematic/stadium-selected-qhd.webp")!important;
  background-size:100% 100%;background-position:center center;
  filter:contrast(1.025) saturate(1.07)
 }
@@ -213,8 +213,8 @@
 .rkbo-cine-phase-ball .rkbo-cine-grass{opacity:.62}
 .rkbo-cine-phase-ball .rkbo-cine-grass-pulse{opacity:.46}
 .rkbo-cine-led{
- left:50%!important;top:32.25%!important;
- width:17.7%!important;height:16.4%!important;
+ left:50%!important;top:26.6%!important;
+ width:29.6%!important;height:18.8%!important;
  border:0;background:#02070b0d;box-shadow:none;
 }
 .rkbo-cine-board-content{position:absolute;inset:0;display:grid;place-items:center;}

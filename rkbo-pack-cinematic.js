@@ -92,10 +92,10 @@
  function init(){
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-qhd-photo-v10";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-selected-v11";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
-  ["baseball-qhd.svg"].forEach(f=>{
+  ["baseball-qhd.svg","stadium-selected-qhd.webp"].forEach(f=>{
    const image=new Image();image.decoding="async";image.src=ASSETS+f;
   });
  }
