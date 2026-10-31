@@ -55,7 +55,7 @@
    const x=emblem.index%5,y=Math.floor(emblem.index/5);
    // Uploaded team-specific artwork sprite; fallback only for browsers missing WebP.
    const atlas=root.RKBOTeamLogoAtlas?.url;
-   logo='<span class="rkbo-cine-ball-mark rkbo-cine-team-mark'+(atlas?' rkbo-cine-sprite-loaded':'')+'" style="--team-x:'+x+';--team-y:'+y+';'+
+   logo='<span class="rkbo-cine-ball-mark rkbo-cine-team-mark'+(atlas?' rkbo-cine-sprite-loaded':'')+'" style="--team-x:'+x+';--team-y:'+y+';background-position:'+(x*25)+'% '+(y*100)+'%;'+
         (atlas?'background-image:url('+atlas+');':'')+'">'+
         (atlas?'':'<img class="rkbo-cine-team-fallback" src="'+h(emblem.url)+'" alt="" draggable="false">')+'</span>';
   }
