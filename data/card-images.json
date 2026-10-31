@@ -1050,6 +1050,16 @@
       "rev": "mvwgqnhh",
       "commit": "e16874b0479476333fe8b0cf70b1cb6353eca65b",
       "blobSha": "d6fd46fd120f3bcb33a37e5b5cce8d69591a9ea8"
+    },
+    "60-HAN-투-001": {
+      "path": "assets/cards/60-HAN-투-001.webp",
+      "x": -4.3076923076923075,
+      "y": 48.175182481751825,
+      "zoom": 1.8384592124201555,
+      "fit": "contain",
+      "rev": "mvwgqygh",
+      "commit": "606147869a45ba15857244c866ab21a18727a8d8",
+      "blobSha": "bde6df3e79d393fb179fa75e7992d445b4c1ba8d"
     }
   }
 }
