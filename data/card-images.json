@@ -2000,6 +2000,16 @@
       "rev": "mvwocky6",
       "commit": "759a45df3e60823d2c2eef4d7189408ba7562d0b",
       "blobSha": "530f79021407ca767ac8aa8d54b8b9ff924d2eae"
+    },
+    "60-SSG-타-012": {
+      "path": "assets/cards/60-SSG-타-012.webp",
+      "x": 0,
+      "y": 29.56204379562044,
+      "zoom": 1.3956792272195706,
+      "fit": "contain",
+      "rev": "mvwocvd8",
+      "commit": "995d293e002a98f886ba752304af679925613ea3",
+      "blobSha": "3de0a3edaabc788fb59e127e02c0d92415a2cbe8"
     }
   }
 }
