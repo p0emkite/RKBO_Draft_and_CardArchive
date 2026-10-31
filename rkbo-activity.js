@@ -3,25 +3,27 @@
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const when=x=>{try{return new Date(x).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}catch{return ""}};
 const special=new Set(["신인왕","드림","나눔","MVP","베스트릴리프"]);
+const HIGHLIGHT_LIFETIME_MS=24*60*60*1000;
+const isFresh=row=>Number.isFinite(Date.parse(row?.obtained_at))&&Date.parse(row.obtained_at)>Date.now()-HIGHLIGHT_LIFETIME_MS;
 let bar=null,bell=null,popup=null,toast=null,client=null,user=null,connected=false;
 let feed=[],alerts=[],feedIndex=0,listExpanded=false,noticesExpanded=false;
 let feedChannel=null,alertChannel=null,starting=null,seenIds=new Set(),initialized=false;
 const marks={다이아몬드:"💎",MVP:"🏆",신인왕:"🏅",드림:"✨",나눔:"✨",베스트릴리프:"🏆"};
-function brief(row){return (marks[row.grade]||"✨")+" "+row.nickname+"님이 "+row.season+"차 "+row.card_name+" ("+row.grade+") 카드를 획득했어!"}
+function brief(row){return (marks[row.grade]||"✨")+" "+row.nickname+"님이 "+row.season+"차 "+row.card_name+" ("+row.grade+") 카드를 획득했습니다!"}
 function safeText(target,value){if(target)target.textContent=value}
 function renderBar(){
  if(!bar)return;
  const cur=feed.length?feed[feedIndex%feed.length]:null;
- bar.innerHTML='<div class="rkbo-activity-brand"><span aria-hidden="true">📣</span><strong>RKBO 획득 전광판</strong>'+
+ bar.innerHTML='<div class="rkbo-activity-brand"><span aria-hidden="true">📣</span><strong>TRT | Tsuki's RKBO Together · 획득 전광판</strong>'+
   '<span class="rkbo-activity-live">LIVE</span></div>'+
  '<div class="rkbo-activity-current" data-activity-current aria-live="polite">'+
-  (cur?esc(brief(cur)):'고등급 카드를 획득하면 이곳에 표시돼!')+'</div>'+
+  (cur?esc(brief(cur)):'고등급 카드를 획득하면 이곳에 표시됩니다.')+'</div>'+
  '<button type="button" class="rkbo-activity-list-button" data-activity-list aria-expanded="'+listExpanded+'">최근 기록 '+(listExpanded?"접기":"보기")+'</button>'+
  (listExpanded?'<div class="rkbo-activity-history">'+
   (feed.length?feed.map(item=>'<article><span>'+esc(marks[item.grade]||"✨")+'</span><strong>'+
    esc(item.nickname)+'</strong> · '+esc(item.season)+'차 '+esc(item.card_name)+' <b>'+esc(item.grade)+'</b>'+
    '<time>'+esc(when(item.obtained_at))+'</time></article>').join(""):
-   '<p>아직 고등급 획득 기록이 없어.</p>')+'</div>':'');
+   '<p>아직 고등급 획득 기록이 없습니다.</p>')+'</div>':'');
 }
 function renderAlerts(){
  if(!bell||!popup)return;
@@ -45,7 +47,7 @@ function renderAlerts(){
   '<div class="rkbo-activity-alert-list">'+(alerts.length?alerts.map(a=>
    '<button type="button" class="rkbo-activity-alert-item'+(a.read_at?'':' unread')+
    '" data-activity-alert="'+a.id+'"><small>'+esc(when(a.created_at))+'</small><span>'+
-   esc(a.body)+'</span></button>').join(""):'<p>새 교환 알림이 없어.</p>')+'</div>'+
+   esc(a.body)+'</span></button>').join(""):'<p>새 교환 알림이 없습니다.</p>')+'</div>'+
   '<button type="button" class="rkbo-activity-open-trades" data-activity-trades>내 교환 내역으로 이동</button>';
 }
 function toastMessage(content,openTrades=false){
@@ -58,17 +60,18 @@ function toastMessage(content,openTrades=false){
 }
 async function getUser(){
  const c=await root.RKBOOnline?.getClient?.();
- if(!c)throw Error("로그인이 필요해.");
+ if(!c)throw Error("로그인이 필요합니다.");
  const {data,error}=await c.auth.getUser();
- if(error||!data?.user||data.user.is_anonymous)throw Error("로그인이 필요해.");
+ if(error||!data?.user||data.user.is_anonymous)throw Error("로그인이 필요합니다.");
  client=c;user=data.user.id;return c;
 }
 async function refreshFeed(){
  if(!client||!user)return;
  const {data,error}=await client.from("rkbo_community_highlights").select("id,nickname,season,card_name,grade,obtained_at")
-  .order("obtained_at",{ascending:false}).limit(20);
+  .gte("obtained_at",new Date(Date.now()-HIGHLIGHT_LIFETIME_MS).toISOString())
+   .order("obtained_at",{ascending:false}).limit(20);
  if(error)throw Error(error.message);
- feed=data||[];
+ feed=(data||[]).filter(isFresh);
  if(feedIndex>=feed.length)feedIndex=0;
  renderBar();
 }
@@ -88,7 +91,7 @@ async function markRead(ids){
 }
 async function onHighlight(evt){
  const row=evt.new||{};
- if(!row.id)return;
+ if(!row.id||!isFresh(row))return;
  if(seenIds.has("h"+row.id))return;
  seenIds.add("h"+row.id);
  if(seenIds.size>100)seenIds.clear();
@@ -171,7 +174,9 @@ function init(){
  root.addEventListener?.("focus",()=>{if(!connected)void connect().catch(()=>{});
   else void Promise.all([refreshFeed(),refreshAlerts()]).catch(()=>{})});
  root.setInterval(()=>{
-  if(feed.length){feedIndex=(feedIndex+1)%feed.length;if(!listExpanded)renderBar()}
+  feed=feed.filter(isFresh);if(feedIndex>=feed.length)feedIndex=0;
+   if(feed.length)feedIndex=(feedIndex+1)%feed.length;
+   renderBar()
  },6500);
  root.setInterval(()=>{if(!connected)void connect().catch(()=>{})},22000);
  root.setInterval(()=>{if(connected)void Promise.all([refreshFeed(),refreshAlerts()]).catch(()=>{})},60000);
