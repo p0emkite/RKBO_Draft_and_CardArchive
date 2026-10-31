@@ -1583,7 +1583,7 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 }
 @media(prefers-reduced-motion:reduce){.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-large-roulette-track{transition:none!important}.rkbo-combo-cinema.is-roulette-mode .rkbo-combo-roulette-card{animation:none!important}}
 
-/* TRT: maintain the real card image within a compact combination slot.
+/* RTM: maintain the real card image within a compact combination slot.
    Archive cards have a large desktop/mobile min-height by default. */
 .rkbo-combo-candidate .rkbo-combo-card-art,
 .rkbo-combo-slots .rkbo-combo-card-art{position:relative;display:block;width:100%;max-width:100%;aspect-ratio:0.735;overflow:hidden}
@@ -1607,6 +1607,6 @@ body.rkbo-combo-open .dialog-bg:not([hidden]){z-index:2700}
 /* Opaque animation background prevents underlying input controls from bleeding through. */
 .rkbo-combo-overlay.is-combining .rkbo-combo-cinema{background:#040b13f9}
 
-/* TRT site wordmark remains readable without disturbing archive navigation. */
+/* RTM site wordmark remains readable without disturbing archive navigation. */
 .brand .brand-sub{letter-spacing:.035em;font-size:clamp(9px,.88vw,13px);white-space:nowrap}
 @media(max-width:580px){.brand .brand-sub{font-size:9px;letter-spacing:0;white-space:normal;max-width:126px;line-height:1.25}}
