@@ -1100,6 +1100,16 @@
       "rev": "mvwgsrrb",
       "commit": "201de50c318633a7ec377c257b5706807f5ac4a5",
       "blobSha": "2075eb6f33d3244f87108ae82b4c7b79212ba4d3"
+    },
+    "60-HAN-투-004-SPECIAL-NANUM": {
+      "path": "assets/cards/60-HAN-투-004-SPECIAL-NANUM.webp",
+      "x": -0.9287925696594432,
+      "y": 25.274725274725274,
+      "zoom": 1.3107960100000002,
+      "fit": "contain",
+      "rev": "mvwgt3os",
+      "commit": "666ff649b3c677a80c5cf833ea7e27a545c42e13",
+      "blobSha": "8286257eaf1c19e5ff4cd9083d0fa6e4ba645430"
     }
   }
 }
