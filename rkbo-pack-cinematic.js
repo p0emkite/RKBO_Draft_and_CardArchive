@@ -92,7 +92,7 @@
  function init(){
   if(!document.querySelector("link[data-rkbo-cine]")){
    const link=document.createElement("link");link.rel="stylesheet";
-   link.href="./rkbo-pack-cinematic.css?v=20261031-sharp-v4";
+   link.href="./rkbo-pack-cinematic.css?v=20261031-sharp-v8";
    link.dataset.rkboCine="1";document.head.appendChild(link);
   }
   ["baseball.webp"].forEach(f=>{
