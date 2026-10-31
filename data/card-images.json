@@ -650,6 +650,16 @@
       "rev": "mvwa1l5g",
       "commit": "205476863b39eabc6be95c8505612368c0ebd37e",
       "blobSha": "1e7c0148fba580a1e21032eb5dbfe88b69877e0d"
+    },
+    "60-KIA-타-007": {
+      "path": "assets/cards/60-KIA-타-007.webp",
+      "x": 2.1538461538461537,
+      "y": 3.64963503649635,
+      "zoom": 0.93,
+      "fit": "contain",
+      "rev": "mvwa2987",
+      "commit": "beec4635f91f05ed63a35546e2e16ecf1dd6fa9e",
+      "blobSha": "265e5b01efab61fde2b8fdcdbb48310596b444ec"
     }
   }
 }
