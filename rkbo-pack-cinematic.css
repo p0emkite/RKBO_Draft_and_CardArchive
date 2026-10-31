@@ -46,14 +46,14 @@
 .rkbo-cine-photo-door{
  position:absolute;top:-1%;height:102%;width:50.3%;z-index:10;opacity:1!important;
  background-image:url("./assets/cinematic/atlas.webp");
- background-repeat:no-repeat;background-size:235% 200%;
+ background-repeat:no-repeat;background-size:var(--backdrop-w) calc(var(--backdrop-h) * 2);
  border:0;box-shadow:0 0 23px #020408b0;
  will-change:transform;
  animation:rkbo-cine-door-part 1.18s cubic-bezier(.3,.08,.2,1) forwards;
 }
-.rkbo-cine-photo-door.left{left:0;background-position:left bottom;--door-destination:-111%;--door-middle:-73%}
-.rkbo-cine-photo-door.right{right:0;background-position:right bottom;--door-destination:111%;--door-middle:73%}
-.rkbo-cine-door-seam{position:absolute;z-index:12;left:calc(50% - 1px);width:2px;top:0;bottom:0;background:#05060b}
+.rkbo-cine-photo-door.left{left:0;background-position:30% bottom;--door-destination:-111%;--door-middle:-73%}
+.rkbo-cine-photo-door.right{right:0;background-position:70% bottom;--door-destination:111%;--door-middle:73%}
+.rkbo-cine-door-seam{position:absolute;z-index:12;left:calc(50% - 1px);width:2px;top:0;bottom:0;background:#05060b;animation:rkbo-cine-seam-fade 1.18s ease both}
 .rkbo-cine-phase-gate .rkbo-cine-world{transform:translate(-50%,-50%) scale(1)}
 .rkbo-cine-phase-run .rkbo-cine-world{animation:rkbo-cine-camera-run 1.45s cubic-bezier(.38,0,.29,1) both}
 .rkbo-cine-phase-run .rkbo-cine-grass{animation:rkbo-cine-grass-arrive 1.45s ease-out both}
@@ -145,3 +145,5 @@
  .rkbo-cine-photo-door.right{transform:translateX(111%)}
  .rkbo-cine-board-content{opacity:1}
 }
+
+@keyframes rkbo-cine-seam-fade{0%,18%{opacity:1}36%,100%{opacity:0}}
